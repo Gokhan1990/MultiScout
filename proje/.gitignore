@@ -1,0 +1,33 @@
+# Node
+node_modules/
+.next/
+out/
+build/
+.env
+.env.local
+npm-debug.log
+yarn-error.log
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+ENV/
+.pytest_cache/
+
+# Docker/OS/IDE
+.DS_Store
+.idea/
+.vscode/
+
+# Proje özel test ve data dosyaları (istersen silebilirsin)
+backend/deals*.json
+a.txt
+b.txt
+c.txt
+hb_test*.py
+backend/hb_debug.py
+*dump.html
