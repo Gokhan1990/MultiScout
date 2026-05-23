@@ -1,12 +1,15 @@
 import json
 import asyncio
-from fastapi import BackgroundTasks, FastAPI, Query
+from fastapi import BackgroundTasks, FastAPI, Query, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.orm import Session
 from scraper import scrape_amazon_deals, CATEGORY_URLS
 from trendyol_scraper import compare_prices, scrape_trendyol_deals
 from hepsiburada_scraper import scrape_hepsiburada_prices, scrape_hepsiburada_deals
 from n11_scraper import scrape_n11_prices, scrape_n11_deals
 from category_mapping import TRENDYOL_CATEGORY_URLS, HEPSIBURADA_CATEGORY_URLS, N11_CATEGORY_URLS
+from database import init_db, get_db, Deal
+from scraper_db import sync_json_to_db, get_platform_file, PLATFORM_FILES
 from pathlib import Path
 from datetime import datetime
 
@@ -20,13 +23,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.on_event("startup")
+def startup():
+    init_db()
+
 # Veritabanı dosyaları
-PLATFORM_FILES = {
-    "amazon": "deals.json",
-    "trendyol": "deals_trendyol.json",
-    "hepsiburada": "deals_hepsiburada.json",
-    "n11": "deals_n11.json",
-}
 CONCURRENT_SCRAPES = 2
 SCRAPE_STATUS = {}
 SCRAPE_ALL_STATUS = {
@@ -39,7 +40,6 @@ SCRAPE_ALL_STATUS = {
 def calculate_deal_score(deal: dict) -> float:
     """Ürünün gerçek indirim skorunu hesapla (0-100)"""
     score = 0
-    # ... (kod aynı kalıyor)
     discount = deal.get("discount_percentage", 0)
     score += min(discount / 2.5, 40)
     price_history = deal.get("price_history", [])
@@ -60,6 +60,34 @@ def calculate_deal_score(deal: dict) -> float:
     score += min(len(price_history) * 2, 20)
     return min(score, 100)
 
+def save_deal_to_db(deal: dict, platform: str, db: Session):
+    """Ürünü veritabanına kaydet veya güncelle"""
+    existing = db.query(Deal).filter(Deal.link == deal.get("link")).first()
+    deal_score = calculate_deal_score(deal)
+    if existing:
+        existing.price = deal.get("price")
+        existing.discount_percentage = deal.get("discount_percentage", 0)
+        existing.image = deal.get("image")
+        existing.last_updated = datetime.utcnow()
+        existing.price_history = deal.get("price_history", [])
+        existing.deal_score = deal_score
+    else:
+        new_deal = Deal(
+            title=deal.get("title"),
+            price=deal.get("price"),
+            discount_percentage=deal.get("discount_percentage", 0),
+            link=deal.get("link"),
+            image=deal.get("image"),
+            category=deal.get("category", "").lower(),
+            platform=platform,
+            source=deal.get("source", platform),
+            last_updated=datetime.utcnow(),
+            price_history=deal.get("price_history", []),
+            deal_score=deal_score
+        )
+        db.add(new_deal)
+    db.commit()
+
 @app.get("/")
 def read_root(): return {"message": "Deal Finder API çalışıyor!"}
 
@@ -67,59 +95,41 @@ def read_root(): return {"message": "Deal Finder API çalışıyor!"}
 def get_categories(): return {"status": "success", "categories": list(CATEGORY_URLS.keys())}
 
 @app.get("/api/deals")
-def get_deals(platform: str = Query("amazon"), category: str = Query(None), skip: int = Query(0), limit: int = Query(30)):
+def get_deals(platform: str = Query("amazon"), category: str = Query(None), skip: int = Query(0), limit: int = Query(30), db: Session = Depends(get_db)):
     try:
-        deals = []
-        if platform == "hepsi":
-            for filename in PLATFORM_FILES.values():
-                try:
-                    with open(filename, "r", encoding="utf-8") as f:
-                        deals.extend(json.load(f))
-                except FileNotFoundError:
-                    pass
-        else:
-            filename = PLATFORM_FILES.get(platform, "deals.json")
-            with open(filename, "r", encoding="utf-8") as f:
-                deals = json.load(f)
-
+        query = db.query(Deal)
+        if platform != "hepsi":
+            query = query.filter(Deal.platform == platform)
         if category:
-            deals = [d for d in deals if d.get("category", "").lower() == category.lower()]
-        for deal in deals:
-            deal["deal_score"] = calculate_deal_score(deal)
-        deals.sort(key=lambda x: x.get("last_updated") or "", reverse=True)
-        total = len(deals)
-        return {"status": "success", "data": deals[skip:skip + limit], "total": total}
-    except FileNotFoundError:
-        return {"status": "success", "data": [], "total": 0}
-
-async def run_scrape_job(category: str, min_discount: int):
-    SCRAPE_STATUS[category] = {
-        "status": "running",
-        "message": f"{category.capitalize()} kategorisi arka planda taranıyor...",
-        "updated_at": datetime.now().isoformat(),
-    }
-    try:
-        await scrape_amazon_deals(DEALS_FILE, DEALS_HISTORY_FILE, category, min_discount)
-        SCRAPE_STATUS[category] = {
-            "status": "completed",
-            "message": f"{category.capitalize()} kategorisi tarandı.",
-            "updated_at": datetime.now().isoformat(),
-        }
+            query = query.filter(Deal.category == category.lower())
+        query = query.order_by(Deal.last_updated.desc())
+        total = query.count()
+        deals = query.offset(skip).limit(limit).all()
+        deals_list = [
+            {
+                "title": d.title,
+                "price": d.price,
+                "discount_percentage": d.discount_percentage,
+                "link": d.link,
+                "image": d.image,
+                "category": d.category,
+                "platform": d.platform,
+                "source": d.source,
+                "last_updated": d.last_updated.isoformat() if d.last_updated else None,
+                "price_history": d.price_history or [],
+                "deal_score": d.deal_score
+            }
+            for d in deals
+        ]
+        return {"status": "success", "data": deals_list, "total": total}
     except Exception as e:
-        SCRAPE_STATUS[category] = {
-            "status": "error",
-            "message": str(e),
-            "updated_at": datetime.now().isoformat(),
-        }
-
+        return {"status": "error", "message": str(e)}
 
 @app.post("/api/deals-clear")
-def clear_deals():
+def clear_deals(db: Session = Depends(get_db)):
     try:
-        for filename in PLATFORM_FILES.values():
-            if Path(filename).exists():
-                with open(filename, "w", encoding="utf-8") as f:
-                    json.dump([], f)
+        db.query(Deal).delete()
+        db.commit()
         return {"status": "success", "message": "Tüm veriler temizlendi."}
     except Exception as e:
         return {"status": "error", "message": str(e)}
@@ -177,6 +187,15 @@ async def run_platform_scrape(platform: str, min_discount: int):
             "current_category": None,
             "updated_at": datetime.now().isoformat()
         }
+
+        # Veritabanına senkronize et
+        db_gen = get_db()
+        db = next(db_gen)
+        try:
+            sync_json_to_db(platform, db)
+        finally:
+            db.close()
+
     except Exception as e:
         SCRAPE_ALL_STATUS[platform] = {
             "status": "error",
@@ -229,23 +248,16 @@ def get_scrape_status(category: str = Query("gida")):
 
 
 @app.get("/api/compare-prices")
-async def compare_product_prices(product_id: str = Query(...)):
+async def compare_product_prices(product_id: str = Query(...), db: Session = Depends(get_db)):
     try:
-        with open(DEALS_FILE, "r", encoding="utf-8") as f:
-            deals = json.load(f)
-
-        product = None
-        for deal in deals:
-            if deal.get("link") and product_id in deal.get("link", ""):
-                product = deal
-                break
+        product = db.query(Deal).filter(Deal.link.contains(product_id)).first()
 
         if not product:
             return {"status": "error", "message": "Ürün bulunamadı"}
 
-        search_query = product.get("title", "")[:50]
+        search_query = product.title[:50]
         trendyol_comparison, hepsiburada_prices, n11_prices = await asyncio.gather(
-            compare_prices(product),
+            compare_prices({"title": product.title, "link": product.link}),
             scrape_hepsiburada_prices(search_query),
             scrape_n11_prices(search_query)
         )
@@ -253,7 +265,13 @@ async def compare_product_prices(product_id: str = Query(...)):
         return {
             "status": "success",
             "data": {
-                "amazon": product,
+                "amazon": {
+                    "title": product.title,
+                    "price": product.price,
+                    "discount_percentage": product.discount_percentage,
+                    "link": product.link,
+                    "image": product.image,
+                },
                 "trendyol": (trendyol_comparison or {}).get("trendyol", []),
                 "hepsiburada": hepsiburada_prices,
                 "n11": n11_prices,

@@ -26,6 +26,12 @@ Süreç boyunca yapılan temel geliştirmeler:
 ### Gereksinimler
 - Docker
 - Docker Compose
+- PostgreSQL (Neon.tech önerilir)
+
+### Veritabanı Kurulumu
+1. Backend klasöründe `.env.example` dosyasını kopyalayıp `.env` dosyasını oluşturun.
+2. `DATABASE_URL` değerini kendi veritabanı bağlantı bilginizle güncelleyin.
+3. Uygulama otomatik olarak veritabanı tablolarını oluşturacaktır.
 
 ### Adımlar
 1. Projeyi klonlayın:
