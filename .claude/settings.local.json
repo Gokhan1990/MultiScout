@@ -103,7 +103,12 @@
       "Bash(python /tmp/analyze_trendyol.py)",
       "Bash(python -m json.tool)",
       "Bash(python -c \"import json; print\\(len\\(json.load\\(open\\('deals_trendyol.json'\\)\\)\\)\\)\")",
-      "WebFetch(domain:www.n11.com)"
+      "WebFetch(domain:www.n11.com)",
+      "Bash(mv proje/* .)",
+      "Bash(rmdir proje *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git config *)"
     ]
   }
 }
