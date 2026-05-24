@@ -21,6 +21,18 @@ async def run_other_platforms_scrape():
     )
     print(f"[SCHEDULER] Other platforms scraping completed at {datetime.now()}", flush=True)
 
+def run_cleanup_duplicates():
+    from app.models.database import cleanup_duplicates, SessionLocal
+    db = SessionLocal()
+    try:
+        print(f"[SCHEDULER] Cleanup duplicates started at {datetime.now()}", flush=True)
+        cleanup_duplicates(db)
+        print(f"[SCHEDULER] Cleanup duplicates completed at {datetime.now()}", flush=True)
+    except Exception as e:
+        print(f"[SCHEDULER] Cleanup duplicates error: {e}", flush=True)
+    finally:
+        db.close()
+
 def start_scheduler():
     if not scheduler.running:
         scheduler.add_job(
@@ -35,6 +47,13 @@ def start_scheduler():
             trigger=IntervalTrigger(minutes=3),
             id="other_platforms_scraper",
             name="Other Platforms Scraper (3 min)",
+            replace_existing=True
+        )
+        scheduler.add_job(
+            run_cleanup_duplicates,
+            trigger=IntervalTrigger(hours=3),
+            id="cleanup_duplicates",
+            name="Cleanup Duplicates (3 hours)",
             replace_existing=True
         )
         scheduler.start()
