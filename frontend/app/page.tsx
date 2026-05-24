@@ -14,6 +14,7 @@ interface Deal {
   deal_score?: number;
   price_history?: Array<{date: string; price: string; discount_percentage: number}>;
   last_updated?: string;
+  platform?: string;
 }
 
 interface PriceComparison {
