@@ -246,10 +246,10 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 p-8">
+    <main className="min-h-screen bg-gray-50 p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-6">Amazon Deal Finder</h1>
+        <div className="mb-6 md:mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4 md:mb-6">Amazon Deal Finder</h1>
 
           <div className="flex gap-2 flex-wrap mb-4">
             {categories.map((cat) => (
@@ -257,7 +257,7 @@ export default function Home() {
                 key={cat}
                 onClick={() => selectCategory(cat)}
                 disabled={loading}
-                className={`px-4 py-2 rounded-lg font-medium transition ${
+                className={`px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-sm md:text-base font-medium transition ${
                   selectedCategory === cat
                     ? "bg-orange-600 text-white"
                     : "bg-white text-gray-800 border border-gray-300 hover:border-orange-500"
@@ -268,14 +268,14 @@ export default function Home() {
             ))}
           </div>
 
-          <div className="flex items-center justify-between gap-4 border-t pt-4">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-t pt-4">
             <div className="flex gap-2 flex-wrap">
               {['Hepsi', 'Amazon', 'Trendyol', 'Hepsiburada', 'N11'].map((p) => (
                 <button
                   key={p}
                   onClick={() => p !== 'Hepsiburada' && selectPlatform(p)}
                   disabled={p === 'Hepsiburada'}
-                  className={`px-4 py-2 rounded-lg font-medium transition ${
+                  className={`px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-sm md:text-base font-medium transition ${
                     selectedPlatform === p
                       ? "bg-blue-600 text-white"
                       : p === 'Hepsiburada'
@@ -290,7 +290,7 @@ export default function Home() {
             <button
               onClick={scrapeAllCategories}
               disabled={manualScraping}
-              className="px-5 py-2 rounded-lg font-semibold text-white bg-green-600 hover:bg-green-700 disabled:opacity-50"
+              className="w-full md:w-auto px-5 py-2 rounded-lg font-semibold text-white bg-green-600 hover:bg-green-700 disabled:opacity-50"
             >
               {manualScraping ? "Taranıyor..." : `${selectedPlatform === 'Hepsi' ? 'Tüm platformları' : selectedPlatform + "'i"} tara`}
             </button>
@@ -302,11 +302,11 @@ export default function Home() {
           )}
 
           <div className="mt-4 border-t pt-4">
-            <div className="text-sm font-semibold text-gray-700 mb-2">Sıralama:</div>
+            <div className="text-xs md:text-sm font-semibold text-gray-700 mb-2">Sıralama:</div>
             <div className="flex gap-2 flex-wrap">
               <button
                 onClick={() => selectSort("last_updated")}
-                className={`px-4 py-2 rounded-lg font-medium transition ${
+                className={`px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-sm md:text-base font-medium transition ${
                   selectedSort === "last_updated"
                     ? "bg-purple-600 text-white"
                     : "bg-white text-gray-800 border border-gray-300 hover:border-purple-500"
@@ -316,7 +316,7 @@ export default function Home() {
               </button>
               <button
                 onClick={() => selectSort("price")}
-                className={`px-4 py-2 rounded-lg font-medium transition ${
+                className={`px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-sm md:text-base font-medium transition ${
                   selectedSort === "price"
                     ? "bg-purple-600 text-white"
                     : "bg-white text-gray-800 border border-gray-300 hover:border-purple-500"
@@ -326,7 +326,7 @@ export default function Home() {
               </button>
               <button
                 onClick={() => selectSort("discount")}
-                className={`px-4 py-2 rounded-lg font-medium transition ${
+                className={`px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-sm md:text-base font-medium transition ${
                   selectedSort === "discount"
                     ? "bg-purple-600 text-white"
                     : "bg-white text-gray-800 border border-gray-300 hover:border-purple-500"
