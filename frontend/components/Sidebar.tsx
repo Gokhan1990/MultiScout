@@ -1,6 +1,5 @@
 
 import { useState } from "react";
-import { ChevronDown, ChevronRight } from "lucide-react";
 
 const SidebarItem = ({ name, data, onSelect, selected }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -30,7 +29,7 @@ const SidebarItem = ({ name, data, onSelect, selected }) => {
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center w-full text-left font-semibold text-gray-800 py-1"
       >
-        {isOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+        <span className="mr-2">{isOpen ? "▼" : "▶"}</span>
         {name}
       </button>
       {isOpen && (
