@@ -1,0 +1,5 @@
+{"ts":"2026-05-24T07:41:30.681Z","cmd":"goto","args":"http://localhost:3000","origin":"http://localhost:3000/","durationMs":198,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-05-24T07:41:31.012Z","cmd":"console","args":"","origin":"http://localhost:3000/","durationMs":1,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-05-24T07:41:31.215Z","cmd":"network","args":"","origin":"http://localhost:3000/","durationMs":0,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-05-24T07:41:50.136Z","cmd":"goto","args":"http://localhost:3000","origin":"http://localhost:3000/","durationMs":55,"status":"error","hasCookies":false,"mode":"launched","error":"page.goto: Page crashed\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/\", waiting until \"domcontentloaded\"\u001b[22m\n"}
+{"ts":"2026-05-24T07:41:55.635Z","cmd":"snapshot","args":"-i","origin":"about:blank","durationMs":63,"status":"ok","hasCookies":false,"mode":"launched"}

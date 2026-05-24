@@ -11,7 +11,7 @@ async def scrape_n11_deals(
     min_discount: int = 20,
     max_pages: int = 1
 ):
-    url = f"https://www.n11.com/{category}"
+    url = f"https://www.n11.com/arama?q={quote_plus(category)}"
     deals = []
     print(f"[N11] Basliyor: {url}", flush=True)
 

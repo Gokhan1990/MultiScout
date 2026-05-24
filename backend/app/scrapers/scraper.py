@@ -9,22 +9,16 @@ from playwright.async_api import async_playwright
 FILE_WRITE_LOCK = asyncio.Lock()
 
 CATEGORY_URLS = {
-    "gida": "https://www.amazon.com.tr/s?i=grocery&s=grocery&pct-off=20-",
-    "giyim": "https://www.amazon.com.tr/s?i=fashion&s=fashion&pct-off=20-",
     "elektronik": "https://www.amazon.com.tr/s?i=electronics&s=electronics&pct-off=20-",
-    "ev": "https://www.amazon.com.tr/s?i=kitchen&s=kitchen&pct-off=20-",
+    "gida": "https://www.amazon.com.tr/s?i=grocery&s=grocery&pct-off=20-",
     "kitap": "https://www.amazon.com.tr/s?i=stripbooks&s=stripbooks&pct-off=20-",
-    "spor": "https://www.amazon.com.tr/s?i=sports&s=sports&pct-off=20-",
-    "kozmetik": "https://www.amazon.com.tr/s?i=beauty&s=beauty&pct-off=20-",
     "oyuncak": "https://www.amazon.com.tr/s?i=toys&s=toys&pct-off=20-",
-    "anne-bebek": "https://www.amazon.com.tr/s?i=baby&s=baby&pct-off=20-",
-    "petshop": "https://www.amazon.com.tr/s?i=pets&s=pets&pct-off=20-",
+    "spor": "https://www.amazon.com.tr/s?i=sports&s=sports&pct-off=20-",
+    "moda": "https://www.amazon.com.tr/s?i=fashion&s=fashion&pct-off=20-",
+    "ev": "https://www.amazon.com.tr/s?i=home&s=home&pct-off=20-",
+    "kisisel-bakim": "https://www.amazon.com.tr/s?i=beauty&s=beauty&pct-off=20-",
+    "bebek": "https://www.amazon.com.tr/s?i=baby&s=baby&pct-off=20-",
     "ofis": "https://www.amazon.com.tr/s?i=office-products&s=office-products&pct-off=20-",
-    "oto": "https://www.amazon.com.tr/s?i=automotive&s=automotive&pct-off=20-",
-    "bahce": "https://www.amazon.com.tr/s?i=lawn-garden&s=lawn-garden&pct-off=20-",
-    "yapi": "https://www.amazon.com.tr/s?i=tools&s=tools&pct-off=20-",
-    "saglik": "https://www.amazon.com.tr/s?i=hpc&s=hpc&pct-off=20-",
-    "ayakkabi": "https://www.amazon.com.tr/s?i=shoes&s=shoes&pct-off=20-",
 }
 
 def load_deals_history(history_file: str):
@@ -150,16 +144,16 @@ async def scrape_amazon_deals(output_file: str, history_file: str = "deals_histo
                                     title = text
                                     break
 
+                        # Ürünün kendi fiyatını almak için daha spesifik bir seçici kullanıyoruz
+                        # Ana fiyatı al (sadece kartın içindeki .a-price öğesi)
                         price_el = await card.query_selector('.a-price .a-offscreen')
                         if not price_el:
                             price_el = await card.query_selector('.a-price-whole')
 
                         price_text = await price_el.inner_text() if price_el else ""
 
-                        if not price_text:
-                            price_text = "Fiyat Görülmüyor"
-
-                        old_price_elements = await card.query_selector_all('.a-text-price .a-offscreen, .a-price.a-text-price .a-offscreen')
+                        # Sadece bu kartın içindeki eski fiyatları al
+                        old_price_elements = await card.query_selector_all(':scope .a-text-price .a-offscreen, :scope .a-price.a-text-price .a-offscreen')
                         old_price_texts = []
                         for old_price_el in old_price_elements:
                             old_price_text = (await old_price_el.inner_text()).strip()

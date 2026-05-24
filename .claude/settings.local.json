@@ -108,7 +108,31 @@
       "Bash(rmdir proje *)",
       "Bash(git add *)",
       "Bash(git commit *)",
-      "Bash(git config *)"
+      "Bash(git config *)",
+      "Bash(pip *)",
+      "PowerShell(python --version)",
+      "PowerShell(docker compose ps *)",
+      "PowerShell(Get-Process *)",
+      "PowerShell(Stop-Process *)",
+      "PowerShell(docker compose logs *)",
+      "PowerShell(grep backend *)",
+      "Bash(/c/Users/User/.claude/skills/gstack/browse/dist/browse goto *)",
+      "Bash(/c/Users/User/.claude/skills/gstack/browse/dist/browse console *)",
+      "Bash(/c/Users/User/.claude/skills/gstack/browse/dist/browse network *)",
+      "Bash(/c/Users/User/.claude/skills/gstack/browse/dist/browse snapshot *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\User\\\\Desktop\\\\OPENAI\\\\gStack\" -Depth 1 -Force)",
+      "Bash(Select-Object FullName, Mode, Length)",
+      "Skill(qa)",
+      "Bash(echo \"API Yanıtı: $\\(curl -s http://localhost:8000/api/\\)\")",
+      "Bash(docker exec multiscout-backend *)",
+      "Bash(docker cp *)",
+      "PowerShell(docker exec multiscout-backend *)",
+      "PowerShell(docker cp C:\\\\Users\\\\User\\\\Desktop\\\\OPENAI\\\\gStack\\\\backend\\\\test_selectors.py multiscout-backend:/app/test_selectors.py; docker exec multiscout-backend python3 /app/test_selectors.py)",
+      "PowerShell(docker cp *)",
+      "Bash(limit=1 2>&1)",
+      "PowerShell($response = Invoke-WebRequest -Uri \"http://localhost:8000/api/deals?platform=hepsi&category=gida&limit=1\" -UseBasicParsing; $response.Content | ConvertFrom-Json | Select-Object -Property status, total)",
+      "PowerShell($res = Invoke-WebRequest -Uri \"http://localhost:8000/api/deals?platform=amazon&limit=1\" -UseBasicParsing; $res.Content | ConvertFrom-Json | Select-Object -ExpandProperty data | Select-Object -First 1 | Select-Object -Property platform, title)",
+      "Bash(git push *)"
     ]
   }
 }

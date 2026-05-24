@@ -1,7 +1,31 @@
 FROM python:3.12-slim
+
 WORKDIR /app
-COPY . .
-RUN pip install fastapi uvicorn playwright beautifulsoup4 httpx
+
+# Playwright için sistem bağımlılıklarını kur (Debian trixie/trixie paket isimleri)
+RUN apt-get update && apt-get install -y \
+    libnss3 \
+    libnspr4 \
+    libatk1.0-0 \
+    libatk-bridge2.0-0 \
+    libcups2 \
+    libdrm2 \
+    libdbus-1-3 \
+    libxkbcommon0 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxfixes3 \
+    libxrandr2 \
+    libgbm1 \
+    libpango-1.0-0 \
+    libcairo2 \
+    libasound2 \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY backend/requirements.txt .
+RUN pip install -r requirements.txt
 RUN playwright install chromium
-RUN playwright install-deps chromium
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+COPY backend/ .
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

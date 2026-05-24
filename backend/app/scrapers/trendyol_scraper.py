@@ -11,7 +11,7 @@ async def scrape_trendyol_deals(
     max_pages: int = 1
 ):
     deals = []
-    url = f"https://www.trendyol.com/{category}?discount=1"
+    url = f"https://www.trendyol.com/sr?q={category}&discount=1"
     print(f"[Trendyol] Başlıyor: {url}", flush=True)
 
     try:

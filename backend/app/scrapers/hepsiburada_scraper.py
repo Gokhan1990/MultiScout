@@ -27,19 +27,64 @@ async def scrape_hepsiburada_deals(
 
     try:
         async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=True)
-            page = await browser.new_page()
+            browser = await p.chromium.launch(
+                headless=True,
+                args=[
+                    "--disable-blink-features=AutomationControlled",
+                    "--disable-dev-shm-usage",
+                    "--no-first-run",
+                    "--no-default-browser-check",
+                    "--disable-popup-blocking",
+                    "--disable-translate",
+                    "--disable-background-networking",
+                    "--disable-client-side-phishing-detection",
+                    "--disable-component-extensions-with-background-pages",
+                    "--disable-default-apps",
+                    "--disable-extensions",
+                    "--disable-sync"
+                ]
+            )
+            page = await browser.new_page(
+                viewport={"width": 1920, "height": 1080},
+                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            )
             await page.set_extra_http_headers({
-                "Accept-Language": "tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7"
+                "Accept-Language": "tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7",
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+                "Accept-Encoding": "gzip, deflate, br",
+                "DNT": "1",
+                "Connection": "keep-alive",
+                "Upgrade-Insecure-Requests": "1",
+                "Sec-Fetch-Dest": "document",
+                "Sec-Fetch-Mode": "navigate",
+                "Sec-Fetch-Site": "none",
+                "Cache-Control": "max-age=0"
             })
+            await page.add_init_script("""
+                Object.defineProperty(navigator, 'webdriver', {get: () => false});
+                Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3, 4, 5]});
+                Object.defineProperty(navigator, 'languages', {get: () => ['tr-TR', 'tr', 'en-US', 'en']});
+                window.chrome = {runtime: {}};
+            """)
 
             print("[Hepsiburada] Sayfa aciliyor...", flush=True)
-            await page.goto(url, timeout=60000, wait_until="networkidle")
+            await page.goto(url, timeout=60000, wait_until="domcontentloaded")
+            print("[Hepsiburada] Sayfa yuklendi, baslik:", await page.title(), flush=True)
+
+            # Check if we got security page
+            title = await page.title()
+            if "Güvenlik" in title or "Security" in title:
+                print("[Hepsiburada] UYARI: Güvenlik sayfasina yonlendirildi!", flush=True)
+                # Try to wait and see if page loads
+                await page.wait_for_timeout(3000)
+
             await page.wait_for_timeout(3000)
 
-            # Scroll
-            await page.evaluate("window.scrollBy(0, 2000)")
-            await page.wait_for_timeout(2000)
+            # Scroll with realistic behavior
+            for i in range(3):
+                await page.evaluate("window.scrollBy(0, 500)")
+                await page.wait_for_timeout(1000)
 
             products_data = await page.evaluate("""(minDiscount) => {
                 const products = [];
