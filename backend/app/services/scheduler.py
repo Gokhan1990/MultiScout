@@ -16,7 +16,6 @@ async def run_other_platforms_scrape():
     print(f"[SCHEDULER] Other platforms scraping started at {datetime.now()}", flush=True)
     await asyncio.gather(
         run_scrape_all_job(min_discount=20, platform="trendyol"),
-        run_scrape_all_job(min_discount=20, platform="hepsiburada"),
         run_scrape_all_job(min_discount=5, platform="n11"),
         return_exceptions=True
     )
