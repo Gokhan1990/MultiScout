@@ -98,3 +98,12 @@ def reset_database(db: Session = Depends(get_db)):
         db.rollback()
         return {"status": "error", "message": str(e)}
 
+@router.post("/deals-cleanup-duplicates")
+def cleanup_db_duplicates(db: Session = Depends(get_db)):
+    try:
+        from app.models.database import cleanup_duplicates
+        removed = cleanup_duplicates(db)
+        return {"status": "success", "message": f"{removed} duplicate ürün silindi."}
+    except Exception as e:
+        db.rollback()
+        return {"status": "error", "message": str(e)}
