@@ -35,82 +35,55 @@ async def scrape_trendyol_deals(
             # DOM'u incele
             products_data = await page.evaluate("""(minDiscount) => {
                 const products = [];
-                const items = document.querySelectorAll('.p-card-wrppr, .product-card');
+                // Trendyol yeni yapıda a[href*="/p-"] kullanıyor
+                const items = document.querySelectorAll('a[href*="/p-"], .p-card-wrppr, .product-card');
 
                 items.forEach((item, idx) => {
-                    if (idx < 15) {
-                        // Title
-                        const brandEl = item.querySelector('.prdct-desc-cntnr-ttl');
-                        const nameEl = item.querySelector('.prdct-desc-cntnr-name');
-                        let title = '';
-                        if (brandEl && nameEl) {
-                            title = brandEl.innerText + ' ' + nameEl.innerText;
-                        } else if (nameEl) {
-                            title = nameEl.innerText;
-                        } else {
-                            const altTitleEl = item.querySelector('.product-name, [title], .title');
-                            title = altTitleEl ? (altTitleEl.innerText || altTitleEl.getAttribute('title')) : '';
-                        }
+                    if (idx >= 20) return;
 
-                        // Price - sadece geçerli fiyat alanlarını al
-                        const priceSelectors = ['.prc-box-dscntd', '.product-price', '.discounted-price'];
-                        let price = 'Fiyat Görülmüyor';
-                        let discount = 0;
-                        for (const sel of priceSelectors) {
-                            const el = item.querySelector(sel);
-                            if (el && el.innerText.trim()) {
-                                // Fiyat içindeki kargo, puan gibi gereksiz metinleri temizle
-                                const text = el.innerText.replace(/Sepette|\\n/gi, ' ').replace(/\\s+/g, ' ').trim();
-                                const prices = text.match(/[\\d,.]+/g);
+                    // Title
+                    const titleEl = item.querySelector('.prdct-desc-cntnr-ttl, .prdct-desc-cntnr-name, h3, .product-card__detail-title');
+                    const title = titleEl ? titleEl.innerText.trim() : (item.getAttribute('title') || '');
 
-                                if (prices && prices.length >= 2) {
-                                    // İndirimli ve orijinal fiyat ayrımı
-                                    const discounted = parseFloat(prices[0].replace('.', '').replace(',', '.'));
-                                    const original = parseFloat(prices[1].replace('.', '').replace(',', '.'));
+                    // Price - robust seçim
+                    const priceSelectors = ['.prc-box-dscntd', '.product-price', '.discounted-price', '.price'];
+                    let price = 'Fiyat Görülmüyor';
+                    let discount = 0;
 
-                                    // Mantıksız indirimleri engelle (örn. > %90)
-                                    const calcDiscount = Math.round(((original - discounted) / original) * 100);
-                                    if (calcDiscount > 0 && calcDiscount < 90) {
-                                        price = `${discounted} TL`;
-                                        discount = calcDiscount;
-                                        break;
+                    for (const sel of priceSelectors) {
+                        const el = item.querySelector(sel);
+                        if (el) {
+                            const text = el.innerText.replace(/Sepette|\\n|TL/gi, ' ').trim();
+                            const prices = text.match(/[\\d,.]+/g);
+                            if (prices && prices.length >= 1) {
+                                price = `${prices[0].replace(',', '.')} TL`;
+                                // Eğer eski fiyat da varsa (del etiketi) indirim hesapla
+                                const oldPriceEl = item.querySelector('.prc-box-srp, del');
+                                if (oldPriceEl) {
+                                    const oldText = oldPriceEl.innerText.replace(/TL/gi, '').trim();
+                                    const oldPriceMatch = oldText.match(/[\\d,.]+/);
+                                    if (oldPriceMatch) {
+                                        const discounted = parseFloat(prices[0].replace('.', '').replace(',', '.'));
+                                        const original = parseFloat(oldPriceMatch[0].replace('.', '').replace(',', '.'));
+                                        if (original > discounted) {
+                                            discount = Math.round(((original - discounted) / original) * 100);
+                                        }
                                     }
-                                } else if (prices && prices.length === 1) {
-                                    price = `${prices[0]} TL`;
-                                    break;
                                 }
+                                break;
                             }
                         }
+                    }
 
-                        // İndirim yoksa
-                        if (discount === 0) discount = 0;
+                    // Link
+                    const link = item.tagName === 'A' ? item.href : (item.querySelector('a')?.href || '');
 
-                        // Link - Check multiple places
-                        let link = '';
-                        const aTag = item.tagName.toLowerCase() === 'a' ? item : item.querySelector('a');
-                        if (aTag && aTag.href) {
-                            link = aTag.href;
-                        } else {
-                            const linkEl = item.querySelector('[href]');
-                            if (linkEl) link = linkEl.href;
-                        }
+                    // Image
+                    const img = item.querySelector('img');
+                    const image = img ? (img.getAttribute('data-src') || img.src) : '';
 
-                        // Image - Handling Lazy Loading
-                        let image = '';
-                        const imgTag = item.querySelector('img');
-                        if (imgTag) {
-                            image = imgTag.getAttribute('src') || imgTag.getAttribute('data-src') || imgTag.getAttribute('data-original') || '';
-                        }
-
-                        if (title && title.length > 3) {
-                            products.push({
-                                title: title.substring(0, 100),
-                                price: price,
-                                discount: discount,
-                                link: link,
-                                image: image
-                            });
-                        }
+                    if (title && link) {
+                        products.push({ title, price, discount, link, image });
                     }
                 });
                 return products;

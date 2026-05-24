@@ -30,8 +30,16 @@ def sync_json_to_db(platform: str, db: Session):
             print(f"[SYNC] {platform} JSON formatı geçersiz", flush=True)
             return
 
-        synced_count = 0
+        # Link'e göre unique deal'leri tut (son gelen veriyi baz al)
+        unique_deals = {}
         for deal in deals:
+            link = deal.get('link')
+            if link:
+                # Aynı link varsa son gelen bilgiyi (price, discount vb.) güncelle
+                unique_deals[link] = deal
+
+        synced_count = 0
+        for link, deal in unique_deals.items():
             try:
                 save_deal_to_db(deal, platform, db)
                 synced_count += 1

@@ -28,4 +28,9 @@ N11_CATEGORY_URLS = {
     "kitap": "https://www.n11.com/arama?q=kitap",
     "oyuncak": "https://www.n11.com/arama?q=oyuncak",
     "spor": "https://www.n11.com/arama?q=spor",
+    "moda": "https://www.n11.com/arama?q=moda",
+    "ev": "https://www.n11.com/arama?q=ev",
+    "kisisel-bakim": "https://www.n11.com/arama?q=kisisel-bakim",
+    "bebek": "https://www.n11.com/arama?q=bebek",
+    "ofis": "https://www.n11.com/arama?q=ofis",
 }

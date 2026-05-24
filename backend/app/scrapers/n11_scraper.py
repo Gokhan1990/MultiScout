@@ -33,35 +33,63 @@ async def scrape_n11_deals(
 
             products_data = await page.evaluate("""(minDiscount) => {
                 const products = [];
-                const items = document.querySelectorAll('.pro, .product, .product-card, div.column, li.column');
+
+                // Try multiple selector strategies to find product cards
+                let items = document.querySelectorAll('a[href*="/p/"]');
+
+                // If no items found, try alternative selectors
+                if (items.length === 0) {
+                    items = document.querySelectorAll('[data-test-id*="product"], .productCard, .product-item');
+                }
+
+                // If still no items, try generic container approach
+                if (items.length === 0) {
+                    items = document.querySelectorAll('div[class*="column"]');
+                }
 
                 items.forEach((item, idx) => {
-                    const titleEl = item.querySelector('.productName, .product-card__detail-title, h3');
-                    if (!titleEl) return;
-                    let title = titleEl.innerText.trim();
+                    if (idx >= 15) return;
 
-                    let price = 'Fiyat Gorulmuyor';
-                    let discount = 0;
+                    // Get the actual product link container
+                    let productLink = item;
+                    if (item.tagName !== 'A') {
+                        productLink = item.querySelector('a[href*="/p/"]') || item.querySelector('a');
+                    }
+                    if (!productLink || !productLink.href) return;
 
-                    const priceEl = item.querySelector('.newPrice, .product-card__detail-prices-price, ins');
-                    const oldPriceEl = item.querySelector('.oldPrice, .product-card__detail-prices-old-price, del');
+                    // Extract title - try multiple selectors
+                    let title = '';
+                    const titleSelectors = [
+                        'h3, h2, [class*="title"], [class*="name"], .productName'
+                    ];
 
-                    if (priceEl) {
-                        const priceText = priceEl.innerText.trim().replace(/\\s+/g, ' ');
-                        const priceMatch = priceText.match(/([\\d.,]+)/);
-                        if (priceMatch) {
-                            price = priceMatch[1] + ' TL';
+                    for (const sel of titleSelectors) {
+                        const titleEl = item.querySelector(sel);
+                        if (titleEl) {
+                            title = titleEl.innerText.trim();
+                            if (title.length > 5) break;
                         }
                     }
 
-                    if (oldPriceEl && priceEl) {
-                        const oldText = oldPriceEl.innerText.trim().replace(/\\s+/g, ' ');
-                        const oldMatch = oldText.match(/([\\d.,]+)/);
-                        const newMatch = priceEl.innerText.trim().match(/([\\d.,]+)/);
+                    if (!title || title.length < 5) {
+                        title = productLink.innerText.trim().split('\\n')[0];
+                    }
+                    if (!title || title.length < 5) return;
 
-                        if (oldMatch && newMatch) {
-                            const oldPrice = parseFloat(oldMatch[1].replace('.', '').replace(',', '.'));
-                            const newPrice = parseFloat(newMatch[1].replace('.', '').replace(',', '.'));
+                    // Extract price - look for price patterns
+                    let price = 'Fiyat Gorulmuyor';
+                    let discount = 0;
+
+                    const priceText = item.innerText;
+                    const priceMatches = priceText.match(/([\\d.]+,\\d{2})\\s*TL/g);
+
+                    if (priceMatches && priceMatches.length >= 1) {
+                        price = priceMatches[0].replace(/\\s+/g, ' ').trim();
+
+                        // If we have two prices, calculate discount
+                        if (priceMatches.length >= 2) {
+                            const oldPrice = parseFloat(priceMatches[1].replace(/[^\\d,]/g, '').replace(',', '.'));
+                            const newPrice = parseFloat(priceMatches[0].replace(/[^\\d,]/g, '').replace(',', '.'));
                             if (oldPrice > newPrice) {
                                 discount = Math.round(((oldPrice - newPrice) / oldPrice) * 100);
                             }
@@ -70,19 +98,19 @@ async def scrape_n11_deals(
 
                     if (discount < minDiscount) return;
 
-                    const aTag = item.tagName.toLowerCase() === 'a' ? item : item.querySelector('a');
-                    const link = aTag ? aTag.href : '';
+                    // Extract image
+                    const img = item.querySelector('img');
+                    const image = img?.getAttribute('src') || img?.getAttribute('data-src') || img?.getAttribute('data-original') || '';
 
-                    const image = item.querySelector('img.lazy, .img-content img, img')?.getAttribute('data-original') || item.querySelector('img')?.getAttribute('src') || '';
                     products.push({
                         title: title.substring(0, 100),
                         price: price,
                         discount: discount,
-                        link: link,
+                        link: productLink.href,
                         image: image
                     });
                 });
-                return products.slice(0, 15);
+                return products;
             }""", min_discount)
 
             for prod in products_data:

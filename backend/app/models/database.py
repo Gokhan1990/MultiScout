@@ -70,13 +70,16 @@ def save_deal_to_db(deal: dict, platform: str, db: Session):
         existing = db.query(Deal).filter(Deal.link == deal.get("link")).first()
 
         if existing:
-            # Update existing deal with new price and history
-            old_price = existing.price
-            new_price = deal.get("price", "")
+            # Fiyat değişikliği var mı kontrol et
+            if existing.price == deal.get("price"):
+                # Fiyat aynı, sadece varsa indirim yüzdesini güncelle ve çık
+                existing.discount_percentage = deal.get("discount_percentage", existing.discount_percentage)
+                db.commit()
+                return existing
 
-            # Update fields
+            # Fiyat değişmiş, güncelleme yap
             existing.title = deal.get("title", existing.title)
-            existing.price = new_price
+            existing.price = deal.get("price", existing.price)
             existing.discount_percentage = deal.get("discount_percentage", existing.discount_percentage)
             existing.image = deal.get("image", existing.image)
             existing.category = deal.get("category", existing.category)
@@ -87,8 +90,8 @@ def save_deal_to_db(deal: dict, platform: str, db: Session):
             price_history = existing.price_history or []
             price_history.append({
                 "date": datetime.utcnow().isoformat(),
-                "price": new_price,
-                "discount_percentage": deal.get("discount_percentage", 0)
+                "price": existing.price,
+                "discount_percentage": existing.discount_percentage
             })
             existing.price_history = price_history
 
