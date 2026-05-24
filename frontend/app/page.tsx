@@ -19,6 +19,7 @@ interface Deal {
 interface PriceComparison {
   trendyol?: Array<{title: string; price: string; source: string}>;
   hepsiburada?: Array<{title: string; price: string; source: string}>;
+  n11?: Array<{title: string; price: string; source: string}>;
 }
 
 const formatTimestamp = (value: string) => {
