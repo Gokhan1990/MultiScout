@@ -7,11 +7,16 @@ CATEGORY_URLS = {
 }
 
 TRENDYOL_CATEGORY_URLS = {
-    "gida": "https://www.trendyol.com/sr?q=gida",
     "elektronik": "https://www.trendyol.com/sr?q=elektronik",
-    "kitap": "https://www.trendyol.com/sr?q=kitap",
-    "oyuncak": "https://www.trendyol.com/sr?q=oyuncak",
     "spor": "https://www.trendyol.com/sr?q=spor",
+    "kadin-spor-ayakkabi": "https://www.trendyol.com/sr?q=kadin+spor+ayakkabi",
+    "erkek-spor-ayakkabi": "https://www.trendyol.com/sr?q=erkek+spor+ayakkabi",
+    "elbise": "https://www.trendyol.com/sr?q=elbise",
+    "tencere-seti": "https://www.trendyol.com/sr?q=tencere+seti",
+    "kahve-makinesi": "https://www.trendyol.com/sr?q=kahve+makinesi",
+    "parfum": "https://www.trendyol.com/sr?q=parfum",
+    "bebek-bezi": "https://www.trendyol.com/sr?q=bebek+bezi",
+    "yazici": "https://www.trendyol.com/sr?q=yazici",
 }
 
 HEPSIBURADA_CATEGORY_URLS = {
@@ -28,9 +33,9 @@ N11_CATEGORY_URLS = {
     "kitap": "https://www.n11.com/arama?q=kitap",
     "oyuncak": "https://www.n11.com/arama?q=oyuncak",
     "spor": "https://www.n11.com/arama?q=spor",
-    "moda": "https://www.n11.com/arama?q=moda",
-    "ev": "https://www.n11.com/arama?q=ev",
-    "kisisel-bakim": "https://www.n11.com/arama?q=kisisel-bakim",
-    "bebek": "https://www.n11.com/arama?q=bebek",
-    "ofis": "https://www.n11.com/arama?q=ofis",
+    "kadin-spor-ayakkabi": "https://www.n11.com/arama?q=kadin+spor+ayakkabi",
+    "erkek-spor-ayakkabi": "https://www.n11.com/arama?q=erkek+spor+ayakkabi",
+    "tencere-seti": "https://www.n11.com/arama?q=tencere+seti",
+    "kahve-makinesi": "https://www.n11.com/arama?q=kahve+makinesi",
+    "parfum": "https://www.n11.com/arama?q=parfum",
 }
