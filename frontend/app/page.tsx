@@ -76,7 +76,7 @@ export default function Home() {
   const [message, setMessage] = useState("");
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("gida");
-  const [selectedPlatform, setSelectedPlatform] = useState("Hepsi");
+  const [selectedPlatform, setSelectedPlatform] = useState("hepsi");
   const [selectedSort, setSelectedSort] = useState("last_updated");
   const [hydrated, setHydrated] = useState(false);
   const [comparisons, setComparisons] = useState<Record<string, PriceComparison>>({});
@@ -124,10 +124,6 @@ export default function Home() {
   };
 
   const selectPlatform = (platform: string) => {
-    setSelectedPlatform(platform);
-    setMessage("");
-    setDeals([]);
-    setTotalDeals(0);
     const platformMap: Record<string, string> = {
       'Hepsi': 'hepsi',
       'Amazon': 'amazon',
@@ -135,7 +131,12 @@ export default function Home() {
       'Hepsiburada': 'hepsiburada',
       'N11': 'n11',
     };
-    fetchDeals(selectedCategory, platformMap[platform] || 'amazon', true, selectedSort);
+    const mappedPlatform = platformMap[platform] || 'hepsi';
+    setSelectedPlatform(mappedPlatform);
+    setMessage("");
+    setDeals([]);
+    setTotalDeals(0);
+    fetchDeals(selectedCategory, mappedPlatform, true, selectedSort);
   };
 
   const selectSort = (sort: string) => {
@@ -143,14 +144,7 @@ export default function Home() {
     setMessage("");
     setDeals([]);
     setTotalDeals(0);
-    const platformMap: Record<string, string> = {
-      'Hepsi': 'hepsi',
-      'Amazon': 'amazon',
-      'Trendyol': 'trendyol',
-      'Hepsiburada': 'hepsiburada',
-      'N11': 'n11',
-    };
-    fetchDeals(selectedCategory, platformMap[selectedPlatform] || 'amazon', true, sort);
+    fetchDeals(selectedCategory, selectedPlatform, true, sort);
   };
 
   const fetchComparison = (deal: Deal) => {
@@ -175,14 +169,7 @@ export default function Home() {
     const handleScroll = () => {
       if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) {
         if (!loadingMore && deals.length < totalDeals) {
-          const platformMap: Record<string, string> = {
-            'Hepsi': 'hepsi',
-            'Amazon': 'amazon',
-            'Trendyol': 'trendyol',
-            'Hepsiburada': 'hepsiburada',
-            'N11': 'n11',
-          };
-          fetchDeals(selectedCategory, platformMap[selectedPlatform] || 'amazon', false, selectedSort);
+          fetchDeals(selectedCategory, selectedPlatform, false, selectedSort);
         }
       }
     };
@@ -452,7 +439,8 @@ export default function Home() {
                       {deal.platform === 'trendyol' ? "Trendyol'da Gör" :
                        deal.platform === 'n11' ? "N11'de Gör" :
                        deal.platform === 'hepsiburada' ? "Hepsiburada'da Gör" :
-                       "Amazon'da Gör"}
+                       deal.platform === 'amazon' ? "Amazon'da Gör" :
+                       "Ürünü Gör"}
                     </span>
                     <span className="text-orange-600 bg-orange-50 border border-orange-100 px-2 py-1 rounded text-xs font-bold">FIRSAT</span>
                   </div>
