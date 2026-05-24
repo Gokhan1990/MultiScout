@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import SidebarItem from "../components/Sidebar";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -42,27 +43,22 @@ const extractAsin = (link: string) => {
 };
 
 const extractProductId = (link: string, platform?: string) => {
-  // Amazon ASIN
   if (link.includes("amazon")) {
     const match = link.match(/\/dp\/([A-Z0-9]{10})/);
     return match ? `amazon_${match[1]}` : "";
   }
-  // Trendyol
   if (link.includes("trendyol")) {
     const match = link.match(/\/p\/(\d+)/);
     return match ? `trendyol_${match[1]}` : "";
   }
-  // N11
   if (link.includes("n11")) {
     const match = link.match(/\/p\/(\d+)/);
     return match ? `n11_${match[1]}` : "";
   }
-  // Hepsiburada
   if (link.includes("hepsiburada")) {
     const match = link.match(/\/p\/(\d+)/);
     return match ? `hepsiburada_${match[1]}` : "";
   }
-  // Fallback to ASIN for unknown platforms
   const match = link.match(/\/dp\/([A-Z0-9]{10})/);
   return match ? match[1] : "";
 };
@@ -74,7 +70,7 @@ export default function Home() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [manualScraping, setManualScraping] = useState(false);
   const [message, setMessage] = useState("");
-  const [categories, setCategories] = useState<string[]>([]);
+  const [categoryTree, setCategoryTree] = useState<any>(null);
   const [selectedCategory, setSelectedCategory] = useState("gida");
   const [selectedPlatform, setSelectedPlatform] = useState("hepsi");
   const [selectedSort, setSelectedSort] = useState("last_updated");
@@ -93,7 +89,6 @@ export default function Home() {
     fetch(`${API_URL}/api/deals?platform=${platform}&category=${category}&skip=${skip}&limit=30&sort_by=${sortBy}`)
       .then(res => res.json())
       .then(data => {
-        console.log("API'den gelen veri:", data);
         if (data.status === "success") {
           setDeals(isNewCategory ? data.data : prev => [...prev, ...data.data]);
           setTotalDeals(data.total);
@@ -181,11 +176,11 @@ export default function Home() {
   useEffect(() => {
     setHydrated(true);
 
-    fetch(`${API_URL}/api/categories`)
+    fetch(`${API_URL}/api/category-tree`)
       .then(res => res.json())
       .then(data => {
         if (data.status === "success") {
-          setCategories(data.categories);
+          setCategoryTree(data.data);
         }
       })
       .catch(err => console.error(err));
@@ -199,7 +194,6 @@ export default function Home() {
     };
     fetchDeals(selectedCategory, platformMap[selectedPlatform] || 'amazon', true, selectedSort);
   }, []);
-
 
   const scrapeAllCategories = async () => {
     try {
@@ -246,27 +240,16 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 p-4 md:p-8">
-      <div className="max-w-6xl mx-auto">
+    <main className="min-h-screen bg-gray-50 p-4 md:p-8 flex flex-col md:flex-row gap-8">
+      <aside className="w-full md:w-64 bg-white p-4 rounded-xl shadow-sm border border-gray-100 h-fit">
+        <h2 className="font-bold text-lg mb-4">Kategoriler</h2>
+        {categoryTree && Object.entries(categoryTree).map(([key, value]) => (
+            <SidebarItem key={key} name={key} data={value} onSelect={selectCategory} selected={selectedCategory} />
+        ))}
+      </aside>
+      <div className="flex-1 max-w-5xl">
         <div className="mb-6 md:mb-8">
           <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4 md:mb-6">Amazon Deal Finder</h1>
-
-          <div className="flex gap-2 flex-wrap mb-4">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => selectCategory(cat)}
-                disabled={loading}
-                className={`px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-sm md:text-base font-medium transition ${
-                  selectedCategory === cat
-                    ? "bg-orange-600 text-white"
-                    : "bg-white text-gray-800 border border-gray-300 hover:border-orange-500"
-                } disabled:opacity-50`}
-              >
-                {cat.charAt(0).toUpperCase() + cat.slice(1)}
-              </button>
-            ))}
-          </div>
 
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-t pt-4">
             <div className="flex gap-2 flex-wrap">
@@ -295,6 +278,7 @@ export default function Home() {
               {manualScraping ? "Taranıyor..." : `${selectedPlatform === 'Hepsi' ? 'Tüm platformları' : selectedPlatform + "'i"} tara`}
             </button>
           </div>
+
           {totalDeals > 0 && (
             <div className="mt-4 text-right text-base text-orange-700 font-bold">
               Toplam {totalDeals} fırsat bulundu
@@ -352,7 +336,7 @@ export default function Home() {
             <p className="text-gray-400">Veritabanı boş. Yeni fırsatları bulmak için &quot;Fırsatları Tarat&quot; butonuna tıklayın.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {deals.map((deal, idx) => {
               const productId = extractProductId(deal.link || "");
               const comparison = comparisons[productId];
