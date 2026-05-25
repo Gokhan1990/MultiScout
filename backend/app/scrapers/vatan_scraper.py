@@ -14,14 +14,25 @@ window.chrome = {runtime: {}};
 """
 
 
+CATEGORY_PATHS = {
+    "notebook": "/notebook/",
+    "telefon": "/cep-telefonu/",
+    "tv": "/televizyon/",
+    "kulaklik": "/kulaklik/",
+    "tablet": "/tablet/",
+    "beyaz-esya": "/buyuk-ev-aletleri/",
+}
+
+
 async def scrape_vatan_deals(
     output_file: str,
-    category: str = "elektronik",
+    category: str = "notebook",
     min_discount: int = 5,
     max_pages: int = 1
 ):
     deals: list[dict] = []
-    url = f"https://www.vatanbilgisayar.com/arama/?q={quote_plus(category)}"
+    path = CATEGORY_PATHS.get(category, f"/{quote_plus(category)}/")
+    url = f"https://www.vatanbilgisayar.com{path}"
     print(f"[Vatan] Başlıyor: {url}", flush=True)
 
     try:
@@ -62,33 +73,47 @@ async def scrape_vatan_deals(
             products_data = await page.evaluate("""() => {
               const turkishToFloat = (s) => {
                 if (!s) return null;
-                const m = s.match(/\\d{1,3}(?:\\.\\d{3})*,\\d{2}|\\d+,\\d{2}|\\d+/);
+                const m = s.match(/\\d{1,3}(?:\\.\\d{3})+(?:,\\d{2})?|\\d{1,3}(?:\\.\\d{3})*,\\d{2}|\\d+(?:,\\d{2})?/);
                 return m ? parseFloat(m[0].replace(/\\./g, '').replace(',', '.')) : null;
               };
               const formatTL = (n) => n.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' TL';
               const seen = new Set();
               const out = [];
-              let items = document.querySelectorAll('.product-list .product-list__item, .product-card, a[href*="/urun/"]');
-              if (items.length < 3) items = document.querySelectorAll('[class*="product"]');
+              let items = document.querySelectorAll('div.product-list.product-list--fourth');
+              if (items.length < 3) items = document.querySelectorAll('div.product-list');
               items.forEach((item) => {
-                const linkEl = (item.tagName === 'A' && item.href && item.href.includes('/urun/'))
-                  ? item
-                  : item.querySelector('a[href*="/urun/"]');
-                if (!linkEl || !linkEl.href) return;
-                if (seen.has(linkEl.href)) return;
-                seen.add(linkEl.href);
+                const linkEl = item.querySelector('a[href$=".html"]');
+                if (!linkEl) return;
+                const href = linkEl.getAttribute('href') || '';
+                if (!href.endsWith('.html')) return;
+                const absHref = href.startsWith('http') ? href : 'https://www.vatanbilgisayar.com' + href;
+                if (seen.has(absHref)) return;
+                seen.add(absHref);
                 let title = '';
-                const titleEl = item.querySelector('.product-list__product-name, h3, h2, [class*="productName"], [class*="title"]');
+                const titleEl = item.querySelector('.product-list__product-name, .product-list__name, h3, h2, [class*="title"]');
                 if (titleEl) title = titleEl.innerText.trim();
-                if (!title || title.length < 5) title = linkEl.getAttribute('title') || (linkEl.innerText || '').split('\\n').find(l => l.trim().length > 5) || '';
+                if (!title || title.length < 5) title = linkEl.getAttribute('title') || (linkEl.innerText || '').split('\\n').find(l => l.trim().length > 5) || (item.innerText || '').split('\\n').find(l => l.trim().length > 5) || '';
                 title = title.replace(/\\s+/g, ' ').trim();
                 if (title.length < 5) return;
+                // Vatan'da fiyat .product-list__price class'ında, "13.999" gibi
+                const priceEl = item.querySelector('.product-list__price, [class*="product-list__price"]');
+                const priceText = priceEl ? priceEl.innerText.replace(/\\s+/g, ' ').trim() : '';
                 const txt = item.innerText || '';
-                const tlMatches = txt.match(/\\d{1,3}(?:\\.\\d{3})*,\\d{2}\\s*TL|\\d+,\\d{2}\\s*TL/g) || [];
-                const prices = tlMatches.map(turkishToFloat).filter(Boolean);
+                let prices = [];
+                if (priceText) {
+                  const pm = priceText.match(/\\d{1,3}(?:\\.\\d{3})+|\\d+/);
+                  if (pm) {
+                    const v = turkishToFloat(pm[0]);
+                    if (v && v > 0) prices.push(v);
+                  }
+                }
+                if (prices.length === 0) {
+                  const tlMatches = txt.match(/\\d{1,3}(?:\\.\\d{3})+(?:,\\d{2})?\\s*TL|\\d+,\\d{2}\\s*TL/g) || [];
+                  prices = tlMatches.map(turkishToFloat).filter(v => v && v > 0);
+                }
                 if (prices.length === 0) return;
-                const current = Math.min(...prices);
-                const original = prices.length > 1 ? Math.max(...prices) : null;
+                const current = Math.max(...prices);
+                const original = null;
                 let discount = 0;
                 if (original && original > current) discount = Math.round(((original - current) / original) * 100);
                 const badge = txt.match(/%\\s*(\\d{1,2})/);
@@ -97,9 +122,9 @@ async def scrape_vatan_deals(
                   if (b >= 1 && b <= 90 && b > discount) discount = b;
                 }
                 const img = item.querySelector('img');
-                let image = img?.getAttribute('src') || img?.getAttribute('data-src') || '';
+                let image = img?.getAttribute('src') || img?.getAttribute('data-src') || img?.getAttribute('data-original') || '';
                 if (image && image.startsWith('//')) image = 'https:' + image;
-                out.push({title: title.substring(0,150), price: formatTL(current), discount, link: linkEl.href, image});
+                out.push({title: title.substring(0,150), price: formatTL(current), discount, link: absHref, image});
               });
               return out;
             }""")

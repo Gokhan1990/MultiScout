@@ -86,7 +86,7 @@ async def scrape_hepsiburada_deals(
             products_data = await page.evaluate("""() => {
                 const turkishToFloat = (s) => {
                     if (!s) return null;
-                    const m = s.match(/\\d{1,3}(?:\\.\\d{3})*,\\d{2}|\\d+,\\d{2}|\\d+/);
+                    const m = s.match(/\\d{1,3}(?:\\.\\d{3})+(?:,\\d{2})?|\\d{1,3}(?:\\.\\d{3})*,\\d{2}|\\d+(?:,\\d{2})?/);
                     if (!m) return null;
                     return parseFloat(m[0].replace(/\\./g, '').replace(',', '.'));
                 };

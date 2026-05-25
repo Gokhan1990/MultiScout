@@ -211,11 +211,13 @@ export default function Home() {
   const selectPlatform = (platform: PlatformKey) => {
     setSelectedPlatform(platform);
     setDeals([]); setTotalDeals(0);
+    setFilterOpen(false);
     fetchDeals(selectedCategory, platform, true, selectedSort);
   };
   const selectSort = (sort: string) => {
     setSelectedSort(sort);
     setDeals([]); setTotalDeals(0);
+    setFilterOpen(false);
     fetchDeals(selectedCategory, selectedPlatform, true, sort);
   };
 

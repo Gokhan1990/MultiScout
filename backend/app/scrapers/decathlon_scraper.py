@@ -36,71 +36,90 @@ async def scrape_decathlon_deals(
             context = await browser.new_context(
                 locale="tr-TR",
                 timezone_id="Europe/Istanbul",
-                viewport={"width": 1920, "height": 1080},
+                viewport={"width": 390, "height": 844},
                 user_agent=(
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                    "AppleWebKit/537.36 (KHTML, like Gecko) "
-                    "Chrome/121.0.0.0 Safari/537.36"
+                    "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) "
+                    "AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1"
                 ),
                 extra_http_headers={
                     "Accept-Language": "tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7",
-                    "sec-ch-ua": '"Not A(Brand";v="99", "Google Chrome";v="121", "Chromium";v="121"',
-                    "sec-ch-ua-mobile": "?0",
-                    "sec-ch-ua-platform": '"Windows"',
                 },
             )
             await context.add_init_script(STEALTH)
             page = await context.new_page()
 
             await page.goto(url, timeout=60000, wait_until="domcontentloaded")
-            await asyncio.sleep(random.uniform(2.5, 4.5))
+            await asyncio.sleep(random.uniform(6, 9))
+            title = await page.title()
+            if "dakika lütfen" in title or "Bir dakika" in title:
+                await asyncio.sleep(8)
+                title = await page.title()
+                if "dakika lütfen" in title or "Bir dakika" in title:
+                    print(f"[Decathlon] Cloudflare aşılamadı ({category})", flush=True)
+                    await browser.close()
+                    async with get_file_lock(output_file):
+                        existing = load_deals(output_file)
+                        save_deals(output_file, existing)
+                    return
 
-            for _ in range(4):
+            # Ürün kartı yüklenene kadar bekle
+            try:
+                await page.wait_for_selector('a.dpb-product-model-link, a[href*="/p/"]', timeout=15000)
+            except Exception:
+                print(f"[Decathlon] Ürün selector yüklenmedi ({category})", flush=True)
+
+            for _ in range(5):
                 await page.mouse.wheel(0, random.randint(1000, 1500))
-                await page.wait_for_timeout(random.randint(600, 1000))
+                await page.wait_for_timeout(random.randint(700, 1100))
 
             products_data = await page.evaluate("""() => {
               const turkishToFloat = (s) => {
                 if (!s) return null;
-                const m = s.match(/\\d{1,3}(?:\\.\\d{3})*,\\d{2}|\\d+,\\d{2}|\\d+/);
+                const m = s.match(/\\d{1,3}(?:\\.\\d{3})+(?:,\\d{2})?|\\d{1,3}(?:\\.\\d{3})*,\\d{2}|\\d+(?:,\\d{2})?/);
                 return m ? parseFloat(m[0].replace(/\\./g, '').replace(',', '.')) : null;
               };
               const formatTL = (n) => n.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' TL';
               const seen = new Set();
               const out = [];
-              let items = document.querySelectorAll('[class*="product-tile"], [class*="ProductTile"], a[href*="/p/"]');
-              if (items.length < 3) items = document.querySelectorAll('article, [class*="product"]');
-              items.forEach((item) => {
-                const linkEl = (item.tagName === 'A' && item.href && item.href.includes('/p/'))
-                  ? item
-                  : item.querySelector('a[href*="/p/"]');
-                if (!linkEl || !linkEl.href) return;
-                if (seen.has(linkEl.href)) return;
-                seen.add(linkEl.href);
-                let title = '';
-                const titleEl = item.querySelector('[class*="product-tile__name"], h3, h2, [class*="title"]');
-                if (titleEl) title = titleEl.innerText.trim();
-                if (!title || title.length < 5) title = linkEl.getAttribute('title') || (linkEl.innerText || '').split('\\n').find(l => l.trim().length > 5) || '';
+              // Decathlon: sadece ana ürün model linkleri
+              const links = Array.from(document.querySelectorAll('a.dpb-product-model-link'));
+              const linksByHref = new Map();
+              for (const a of links) {
+                const href = a.getAttribute('href') || '';
+                if (!href.includes('/p/')) continue;
+                if (!linksByHref.has(href)) linksByHref.set(href, a);
+              }
+              for (const [href, linkEl] of linksByHref) {
+                const absHref = href.startsWith('http') ? href : 'https://www.decathlon.com.tr' + href;
+                if (seen.has(absHref)) continue;
+                seen.add(absHref);
+                let title = (linkEl.querySelector('.vh, [class*="product-title"]')?.innerText || '').trim();
+                if (!title) title = linkEl.getAttribute('aria-label') || (linkEl.innerText || '').trim();
                 title = title.replace(/\\s+/g, ' ').trim();
-                if (title.length < 5) return;
-                const txt = item.innerText || '';
-                const tlMatches = txt.match(/\\d{1,3}(?:\\.\\d{3})*,\\d{2}\\s*TL|\\d+,\\d{2}\\s*TL/g) || [];
-                const prices = tlMatches.map(turkishToFloat).filter(Boolean);
-                if (prices.length === 0) return;
+                if (title.length < 5) continue;
+                const container = linkEl.closest('article, [class*="product"], [class*="Product"], li, div[class*="dpb"]') || linkEl.parentElement?.parentElement || linkEl;
+                const txt = container.innerText || '';
+                // ₺X veya X TL formatları
+                const tryMatches = (txt.match(/₺\\s*\\d{1,3}(?:[\\.,]\\d{3})*(?:[,\\.]\\d{2})?|\\d{1,3}(?:\\.\\d{3})*,\\d{2}\\s*TL|\\d+,\\d{2}\\s*TL/g) || [])
+                    .map(s => s.replace('₺', '').replace(/\\s/g, '').trim());
+                const prices = tryMatches.map(turkishToFloat).filter(v => v && v > 0);
+                if (prices.length === 0) continue;
                 const current = Math.min(...prices);
                 const original = prices.length > 1 ? Math.max(...prices) : null;
                 let discount = 0;
-                if (original && original > current) discount = Math.round(((original - current) / original) * 100);
-                const badge = txt.match(/%\\s*(\\d{1,2})/);
+                if (original && original > current && (original - current) / original > 0.01) {
+                  discount = Math.round(((original - current) / original) * 100);
+                }
+                const badge = txt.match(/%\\s*(\\d{1,2})|-\\s*%(\\d{1,2})/);
                 if (badge) {
-                  const b = parseInt(badge[1]);
+                  const b = parseInt(badge[1] || badge[2]);
                   if (b >= 1 && b <= 90 && b > discount) discount = b;
                 }
-                const img = item.querySelector('img');
-                let image = img?.getAttribute('src') || img?.getAttribute('data-src') || '';
+                const imgEl = container.querySelector('img') || linkEl.querySelector('img');
+                let image = imgEl?.getAttribute('src') || imgEl?.getAttribute('data-src') || imgEl?.getAttribute('data-original') || '';
                 if (image && image.startsWith('//')) image = 'https:' + image;
-                out.push({title: title.substring(0,150), price: formatTL(current), discount, link: linkEl.href, image});
-              });
+                out.push({title: title.substring(0,150), price: formatTL(current), discount, link: absHref, image});
+              }
               return out;
             }""")
 
