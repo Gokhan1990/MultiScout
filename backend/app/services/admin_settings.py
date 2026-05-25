@@ -1,0 +1,107 @@
+"""Admin settings: stores enable/disable, theme, social media config."""
+import json
+import os
+import threading
+from pathlib import Path
+from typing import Any
+
+_PATH = Path(__file__).parent.parent.parent / "data" / "admin_settings.json"
+_LOCK = threading.Lock()
+
+DEFAULTS: dict[str, Any] = {
+    "stores": {
+        "amazon": True, "trendyol": True, "n11": True, "hepsiburada": True,
+        "pazarama": True, "ciceksepeti": True, "vatan": True, "teknosa": True,
+        "decathlon": False, "steam": True,
+    },
+    "theme": {
+        "primary": "#f97316",
+        "accent": "#ef4444",
+        "logo_text": "MultiScout",
+        "tagline": "Akıllı Fırsat Takipçisi",
+    },
+    "social": {
+        "telegram": {"enabled": False, "bot_token": "", "chat_id": ""},
+        "instagram": {"enabled": False, "access_token": "", "business_account_id": ""},
+        "facebook": {"enabled": False, "page_access_token": "", "page_id": ""},
+    },
+    "auto_share": {
+        "enabled": False,
+        "min_discount": 50,
+        "max_per_day": 10,
+        "platforms": ["telegram"],
+    },
+    "scheduler": {
+        "enabled": True,
+        "amazon_interval_min": 60,
+        "other_interval_min": 45,
+    },
+    "maintenance": {
+        "enabled": False,
+        "message": "Şu an bakım modundayız, kısa süre sonra döneceğiz.",
+    },
+}
+
+
+def _merge(base: dict, overrides: dict) -> dict:
+    out = dict(base)
+    for k, v in overrides.items():
+        if isinstance(v, dict) and isinstance(out.get(k), dict):
+            out[k] = _merge(out[k], v)
+        else:
+            out[k] = v
+    return out
+
+
+def load_settings() -> dict[str, Any]:
+    with _LOCK:
+        if not _PATH.exists():
+            save_settings_unlocked(DEFAULTS)
+            return dict(DEFAULTS)
+        try:
+            with open(_PATH, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            return _merge(DEFAULTS, data) if isinstance(data, dict) else dict(DEFAULTS)
+        except (json.JSONDecodeError, OSError):
+            return dict(DEFAULTS)
+
+
+def save_settings_unlocked(settings: dict[str, Any]) -> None:
+    _PATH.parent.mkdir(parents=True, exist_ok=True)
+    with open(_PATH, "w", encoding="utf-8") as f:
+        json.dump(settings, f, ensure_ascii=False, indent=2)
+
+
+def save_settings(settings: dict[str, Any]) -> None:
+    with _LOCK:
+        save_settings_unlocked(settings)
+
+
+def update_section(section: str, payload: dict[str, Any]) -> dict[str, Any]:
+    current = load_settings()
+    if section not in current:
+        current[section] = {}
+    current[section] = _merge(current[section] if isinstance(current[section], dict) else {}, payload)
+    save_settings(current)
+    return current
+
+
+def is_store_enabled(platform: str) -> bool:
+    settings = load_settings()
+    stores = settings.get("stores", {})
+    return bool(stores.get(platform.lower(), True))
+
+
+def enabled_stores() -> list[str]:
+    settings = load_settings()
+    stores = settings.get("stores", {})
+    return [k for k, v in stores.items() if v]
+
+
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "123456")
+
+
+def verify_admin(password: str | None) -> bool:
+    if not password:
+        return False
+    return password == ADMIN_PASSWORD

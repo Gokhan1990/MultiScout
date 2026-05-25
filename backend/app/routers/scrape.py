@@ -169,20 +169,17 @@ async def run_platform_scrape(platform: str, min_discount: int):
 
 
 async def run_scrape_all_job(min_discount: int, platform: str = "all"):
+    from app.services.admin_settings import enabled_stores
     if platform == "all":
-        await asyncio.gather(
-            run_platform_scrape("amazon", min_discount),
-            run_platform_scrape("trendyol", min_discount),
-            run_platform_scrape("n11", min_discount),
-            run_platform_scrape("hepsiburada", min_discount),
-            run_platform_scrape("pazarama", min_discount),
-            run_platform_scrape("ciceksepeti", min_discount),
-            run_platform_scrape("vatan", min_discount),
-            run_platform_scrape("teknosa", min_discount),
-            run_platform_scrape("decathlon", min_discount),
-            run_platform_scrape("steam", max(min_discount, 10)),
-            return_exceptions=True
-        )
+        enabled = set(enabled_stores())
+        all_platforms = ["amazon","trendyol","n11","hepsiburada","pazarama","ciceksepeti","vatan","teknosa","decathlon","steam"]
+        tasks = []
+        for p in all_platforms:
+            if p in enabled:
+                md = max(min_discount, 10) if p == "steam" else min_discount
+                tasks.append(run_platform_scrape(p, md))
+        if tasks:
+            await asyncio.gather(*tasks, return_exceptions=True)
     else:
         await run_platform_scrape(platform, min_discount)
 
