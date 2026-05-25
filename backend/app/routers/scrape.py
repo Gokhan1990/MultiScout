@@ -134,13 +134,15 @@ async def run_platform_scrape(platform: str, min_discount: int):
                     for cat in batch
                 ], return_exceptions=True)
         elif platform == "decathlon":
+            # Cloudflare rate limit — kategorileri seri tara, aralarda bekle
             categories = list(DECATHLON_CATEGORY_URLS.keys())
-            for index in range(0, len(categories), CONCURRENT_SCRAPES):
-                batch = categories[index:index + CONCURRENT_SCRAPES]
-                await asyncio.gather(*[
-                    scrape_decathlon_deals(PLATFORM_FILES["decathlon"], cat, min_discount)
-                    for cat in batch
-                ], return_exceptions=True)
+            for i, cat in enumerate(categories):
+                try:
+                    await scrape_decathlon_deals(PLATFORM_FILES["decathlon"], cat, min_discount)
+                except Exception as e:
+                    print(f"[Decathlon] {cat} error: {e}", flush=True)
+                if i < len(categories) - 1:
+                    await asyncio.sleep(20)
         elif platform == "steam":
             await scrape_steam_deals(PLATFORM_FILES["steam"], "oyun", min_discount)
 

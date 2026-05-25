@@ -8,8 +8,10 @@ from app.scrapers.io import get_file_lock, load_deals, save_deals, merge_deals_b
 
 STEALTH = """
 Object.defineProperty(navigator, 'webdriver', {get: () => undefined});
-Object.defineProperty(navigator, 'plugins', {get: () => [1,2,3,4,5]});
-Object.defineProperty(navigator, 'languages', {get: () => ['tr-TR','tr','en-US','en']});
+Object.defineProperty(navigator, 'plugins', {get: () => [{name:'X'}]});
+Object.defineProperty(navigator, 'languages', {get: () => ['tr-TR','tr']});
+Object.defineProperty(navigator, 'platform', {get: () => 'iPhone'});
+Object.defineProperty(navigator, 'maxTouchPoints', {get: () => 5});
 window.chrome = {runtime: {}};
 """
 
@@ -24,6 +26,40 @@ async def scrape_decathlon_deals(
     url = f"https://www.decathlon.com.tr/search?Ntt={quote_plus(category)}"
     print(f"[Decathlon] Başlıyor: {url}", flush=True)
 
+    # 3 deneme, her deneme arasında uzun bekleme (rate limit için)
+    for attempt in range(3):
+        if attempt > 0:
+            wait = random.uniform(15, 30)
+            print(f"[Decathlon] {category} retry {attempt+1}/3, {wait:.0f}s bekliyor...", flush=True)
+            await asyncio.sleep(wait)
+        ok, products = await _try_scrape(url, category)
+        if ok:
+            deals = [d for d in products if d.get("discount", 0) >= min_discount]
+            print(f"[Decathlon] {category}: {len(products)} ham, {len(deals)} kept", flush=True)
+            break
+    else:
+        print(f"[Decathlon] {category}: tüm denemeler başarısız", flush=True)
+
+    async with get_file_lock(output_file):
+        existing = load_deals(output_file)
+        normalized = []
+        for d in deals:
+            normalized.append({
+                "title": (d.get("title") or "")[:150],
+                "price": d.get("price", "N/A"),
+                "discount_percentage": d.get("discount", 0),
+                "link": d.get("link", ""),
+                "image": d.get("image", ""),
+                "source": "decathlon",
+                "category": category,
+                "last_updated": datetime.now().isoformat()
+            })
+        merged = merge_deals_by_link(existing, normalized)
+        print(f"[Decathlon] Toplam {len(merged)} ürün kaydediliyor (yeni: {len(normalized)})...", flush=True)
+        save_deals(output_file, merged)
+
+
+async def _try_scrape(url: str, category: str) -> tuple[bool, list]:
     try:
         async with async_playwright() as p:
             browser = await p.chromium.launch(
@@ -31,18 +67,23 @@ async def scrape_decathlon_deals(
                 args=[
                     "--disable-blink-features=AutomationControlled",
                     "--disable-dev-shm-usage",
+                    "--no-sandbox",
                 ],
             )
             context = await browser.new_context(
                 locale="tr-TR",
                 timezone_id="Europe/Istanbul",
                 viewport={"width": 390, "height": 844},
+                device_scale_factor=3,
+                is_mobile=True,
+                has_touch=True,
                 user_agent=(
                     "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) "
                     "AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1"
                 ),
                 extra_http_headers={
                     "Accept-Language": "tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7",
+                    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
                 },
             )
             await context.add_init_script(STEALTH)
@@ -57,20 +98,22 @@ async def scrape_decathlon_deals(
                 if "dakika lütfen" in title or "Bir dakika" in title:
                     print(f"[Decathlon] Cloudflare aşılamadı ({category})", flush=True)
                     await browser.close()
-                    async with get_file_lock(output_file):
-                        existing = load_deals(output_file)
-                        save_deals(output_file, existing)
-                    return
+                    return False, []
 
-            # Ürün kartı yüklenene kadar bekle
-            try:
-                await page.wait_for_selector('a.dpb-product-model-link, a[href*="/p/"]', timeout=15000)
-            except Exception:
-                print(f"[Decathlon] Ürün selector yüklenmedi ({category})", flush=True)
-
+            # Önce scroll, sonra attached durumda selector bekle (visible değil)
             for _ in range(5):
                 await page.mouse.wheel(0, random.randint(1000, 1500))
                 await page.wait_for_timeout(random.randint(700, 1100))
+            try:
+                await page.wait_for_selector('a.dpb-product-model-link', state="attached", timeout=10000)
+            except Exception:
+                # Yine de dene — belki başka class kullanılıyor
+                product_count = await page.evaluate("document.querySelectorAll('a[href*=\"/p/\"]').length")
+                if product_count < 5:
+                    t2 = await page.title()
+                    print(f"[Decathlon] {category} ürün yok — title='{t2[:50]}' all-p={product_count}", flush=True)
+                    await browser.close()
+                    return False, []
 
             products_data = await page.evaluate("""() => {
               const turkishToFloat = (s) => {
@@ -123,35 +166,9 @@ async def scrape_decathlon_deals(
               return out;
             }""")
 
-            raw_count = len(products_data)
-            kept = 0
-            for prod in products_data:
-                link = prod.get("link") or ""
-                if not link.startswith("http"):
-                    continue
-                discount = prod.get("discount", 0)
-                if discount < min_discount:
-                    continue
-                deals.append({
-                    "title": prod.get("title", "")[:150],
-                    "price": prod.get("price", "N/A"),
-                    "discount_percentage": discount,
-                    "link": link,
-                    "image": prod.get("image", ""),
-                    "source": "decathlon",
-                    "category": category,
-                    "last_updated": datetime.now().isoformat()
-                })
-                kept += 1
-
-            print(f"[Decathlon] {category}: {raw_count} ham, {kept} kept", flush=True)
             await browser.close()
+            return True, products_data
 
     except Exception as e:
         print(f"[Decathlon] HATA ({category}): {e}", flush=True)
-
-    async with get_file_lock(output_file):
-        existing = load_deals(output_file)
-        merged = merge_deals_by_link(existing, deals)
-        print(f"[Decathlon] Toplam {len(merged)} ürün kaydediliyor (yeni: {len(deals)})...", flush=True)
-        save_deals(output_file, merged)
+        return False, []
