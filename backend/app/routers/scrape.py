@@ -16,6 +16,8 @@ SCRAPE_ALL_STATUS = {
     "teknosa": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
     "decathlon": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
     "steam": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "defacto": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "mediamarkt": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
 }
 
 CONCURRENT_SCRAPES = 2
@@ -50,10 +52,13 @@ async def run_platform_scrape(platform: str, min_discount: int):
     from app.scrapers.teknosa_scraper import scrape_teknosa_deals
     from app.scrapers.decathlon_scraper import scrape_decathlon_deals
     from app.scrapers.steam_scraper import scrape_steam_deals
+    from app.scrapers.defacto_scraper import scrape_defacto_deals
+    from app.scrapers.mediamarkt_scraper import scrape_mediamarkt_deals
     from app.core.category_mapping import (
         TRENDYOL_CATEGORY_URLS, HEPSIBURADA_CATEGORY_URLS, N11_CATEGORY_URLS,
         PAZARAMA_CATEGORY_URLS, CICEKSEPETI_CATEGORY_URLS,
         VATAN_CATEGORY_URLS, TEKNOSA_CATEGORY_URLS, DECATHLON_CATEGORY_URLS, STEAM_CATEGORY_URLS,
+        DEFACTO_CATEGORY_URLS, MEDIAMARKT_CATEGORY_URLS,
     )
     from app.services.sync_service import sync_json_to_db, PLATFORM_FILES
     from app.models.database import get_db
@@ -145,6 +150,22 @@ async def run_platform_scrape(platform: str, min_discount: int):
                     await asyncio.sleep(20)
         elif platform == "steam":
             await scrape_steam_deals(PLATFORM_FILES["steam"], "oyun", min_discount)
+        elif platform == "defacto":
+            categories = list(DEFACTO_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_defacto_deals(PLATFORM_FILES["defacto"], cat, min_discount)
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "mediamarkt":
+            categories = list(MEDIAMARKT_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_mediamarkt_deals(PLATFORM_FILES["mediamarkt"], cat, min_discount)
+                    for cat in batch
+                ], return_exceptions=True)
 
         SCRAPE_ALL_STATUS[platform] = {
             "status": "completed",
@@ -174,7 +195,7 @@ async def run_scrape_all_job(min_discount: int, platform: str = "all"):
     from app.services.admin_settings import enabled_stores
     if platform == "all":
         enabled = set(enabled_stores())
-        all_platforms = ["amazon","trendyol","n11","hepsiburada","pazarama","ciceksepeti","vatan","teknosa","decathlon","steam"]
+        all_platforms = ["amazon","trendyol","n11","hepsiburada","pazarama","ciceksepeti","vatan","teknosa","decathlon","steam","defacto","mediamarkt"]
         tasks = []
         for p in all_platforms:
             if p in enabled:

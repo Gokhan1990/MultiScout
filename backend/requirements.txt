@@ -5,3 +5,4 @@ python-dotenv==1.0.0
 sqlalchemy==2.0.23
 psycopg2-binary==2.9.9
 apscheduler==3.10.4
+anthropic==0.40.0

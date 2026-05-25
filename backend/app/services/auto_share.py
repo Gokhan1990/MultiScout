@@ -52,7 +52,59 @@ def _post_telegram(bot_token: str, chat_id: str, text: str) -> bool:
         return False
 
 
+def _post_facebook_page(page_id: str, page_access_token: str, message: str, link: str = "") -> bool:
+    if not page_id or not page_access_token:
+        return False
+    try:
+        url = f"https://graph.facebook.com/v18.0/{page_id}/feed"
+        params = {"message": message, "access_token": page_access_token}
+        if link:
+            params["link"] = link
+        body = urllib.parse.urlencode(params).encode("utf-8")
+        req = urllib.request.Request(url, data=body, method="POST")
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            return resp.status in (200, 201)
+    except Exception as e:
+        print(f"[AUTO_SHARE] Facebook error: {e}", flush=True)
+        return False
+
+
+def _post_instagram(business_account_id: str, access_token: str, image_url: str, caption: str) -> bool:
+    """Instagram Graph API: 2-step — create media container, then publish."""
+    if not business_account_id or not access_token or not image_url:
+        return False
+    try:
+        # Step 1: create media container
+        create_url = f"https://graph.facebook.com/v18.0/{business_account_id}/media"
+        create_body = urllib.parse.urlencode({
+            "image_url": image_url,
+            "caption": caption,
+            "access_token": access_token,
+        }).encode("utf-8")
+        req = urllib.request.Request(create_url, data=create_body, method="POST")
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            if resp.status != 200:
+                return False
+            data = json.loads(resp.read().decode("utf-8"))
+            creation_id = data.get("id")
+        if not creation_id:
+            return False
+        # Step 2: publish
+        publish_url = f"https://graph.facebook.com/v18.0/{business_account_id}/media_publish"
+        publish_body = urllib.parse.urlencode({
+            "creation_id": creation_id,
+            "access_token": access_token,
+        }).encode("utf-8")
+        req = urllib.request.Request(publish_url, data=publish_body, method="POST")
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            return resp.status == 200
+    except Exception as e:
+        print(f"[AUTO_SHARE] Instagram error: {e}", flush=True)
+        return False
+
+
 def _format_deal_text(deal: dict[str, Any]) -> str:
+    """HTML format (Telegram için)."""
     title = (deal.get("title") or "").strip()
     price = (deal.get("price") or "").strip()
     discount = int(deal.get("discount_percentage") or 0)
@@ -67,6 +119,22 @@ def _format_deal_text(deal: dict[str, Any]) -> str:
         f"🏪 {platform}\n"
         f"\n"
         f"{link}"
+    )
+
+
+def _format_deal_text_plain(deal: dict[str, Any]) -> str:
+    """Plain text (Facebook/Instagram için)."""
+    title = (deal.get("title") or "").strip()
+    price = (deal.get("price") or "").strip()
+    discount = int(deal.get("discount_percentage") or 0)
+    platform = (deal.get("platform") or "").capitalize()
+    badge = "🔥" if discount >= 70 else "💸"
+    return (
+        f"{badge} %{discount} İNDİRİM\n\n"
+        f"{title[:200]}\n\n"
+        f"💰 {price}\n"
+        f"🏪 {platform}\n\n"
+        f"#firsat #indirim #{platform.lower()}"
     )
 
 
@@ -90,6 +158,8 @@ def share_new_deals(deals: list[dict[str, Any]]) -> int:
 
     social = settings.get("social", {})
     telegram_cfg = social.get("telegram", {}) if "telegram" in platforms else None
+    facebook_cfg = social.get("facebook", {}) if "facebook" in platforms else None
+    instagram_cfg = social.get("instagram", {}) if "instagram" in platforms else None
 
     candidates = []
     for d in deals:
@@ -108,8 +178,27 @@ def share_new_deals(deals: list[dict[str, Any]]) -> int:
     for d in to_share:
         success = False
         text = _format_deal_text(d)
+        plain_text = _format_deal_text_plain(d)
         if telegram_cfg and telegram_cfg.get("enabled"):
             ok = _post_telegram(telegram_cfg.get("bot_token", ""), telegram_cfg.get("chat_id", ""), text)
+            if ok:
+                success = True
+        if facebook_cfg and facebook_cfg.get("enabled"):
+            ok = _post_facebook_page(
+                facebook_cfg.get("page_id", ""),
+                facebook_cfg.get("page_access_token", ""),
+                plain_text,
+                d.get("link") or "",
+            )
+            if ok:
+                success = True
+        if instagram_cfg and instagram_cfg.get("enabled") and d.get("image"):
+            ok = _post_instagram(
+                instagram_cfg.get("business_account_id", ""),
+                instagram_cfg.get("access_token", ""),
+                d.get("image"),
+                plain_text,
+            )
             if ok:
                 success = True
 
@@ -174,3 +263,25 @@ def test_telegram() -> dict[str, Any]:
     text = "🧪 <b>MultiScout test mesajı</b>\n\nOtomatik paylaşım çalışıyor."
     ok = _post_telegram(tg["bot_token"], tg["chat_id"], text)
     return {"ok": ok, "error": "" if ok else "Telegram API hata döndü (token/chat_id kontrol et)"}
+
+
+def test_facebook() -> dict[str, Any]:
+    settings = load_settings()
+    fb = settings.get("social", {}).get("facebook", {})
+    if not fb.get("page_id") or not fb.get("page_access_token"):
+        return {"ok": False, "error": "Page ID veya access token eksik"}
+    msg = "🧪 MultiScout test gönderisi — otomatik paylaşım çalışıyor."
+    ok = _post_facebook_page(fb["page_id"], fb["page_access_token"], msg)
+    return {"ok": ok, "error": "" if ok else "Facebook Graph API hatası — token/page_id kontrol et"}
+
+
+def test_instagram() -> dict[str, Any]:
+    settings = load_settings()
+    ig = settings.get("social", {}).get("instagram", {})
+    if not ig.get("business_account_id") or not ig.get("access_token"):
+        return {"ok": False, "error": "Business Account ID veya access token eksik"}
+    # IG için bir image_url gerekli — test placeholder
+    test_image = "https://via.placeholder.com/1080x1080.png?text=MultiScout+Test"
+    caption = "🧪 MultiScout test paylaşımı"
+    ok = _post_instagram(ig["business_account_id"], ig["access_token"], test_image, caption)
+    return {"ok": ok, "error": "" if ok else "Instagram Graph API hatası (image_url, token, account_id kontrol et)"}

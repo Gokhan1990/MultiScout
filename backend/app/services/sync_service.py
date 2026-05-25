@@ -15,6 +15,8 @@ PLATFORM_FILES = {
     "teknosa": "data/deals_teknosa.json",
     "decathlon": "data/deals_decathlon.json",
     "steam": "data/deals_steam.json",
+    "defacto": "data/deals_defacto.json",
+    "mediamarkt": "data/deals_mediamarkt.json",
 }
 
 

@@ -74,6 +74,24 @@ STEAM_CATEGORY_URLS = {
     "oyun": "https://store.steampowered.com/api/featuredcategories?cc=tr&l=turkish",
 }
 
+MEDIAMARKT_CATEGORY_URLS = {
+    "elektronik": "https://www.mediamarkt.com.tr/tr/search.html?query=elektronik",
+    "beyaz-esya": "https://www.mediamarkt.com.tr/tr/search.html?query=beyaz+esya",
+    "tv": "https://www.mediamarkt.com.tr/tr/search.html?query=televizyon",
+    "telefon": "https://www.mediamarkt.com.tr/tr/search.html?query=telefon",
+    "bilgisayar": "https://www.mediamarkt.com.tr/tr/search.html?query=bilgisayar",
+    "oyun-konsol": "https://www.mediamarkt.com.tr/tr/search.html?query=oyun+konsol",
+}
+
+DEFACTO_CATEGORY_URLS = {
+    "kadin": "https://www.defacto.com.tr/arama?q=kadin",
+    "erkek": "https://www.defacto.com.tr/arama?q=erkek",
+    "cocuk": "https://www.defacto.com.tr/arama?q=cocuk",
+    "ic-giyim": "https://www.defacto.com.tr/arama?q=ic+giyim",
+    "pantolon": "https://www.defacto.com.tr/arama?q=pantolon",
+    "elbise": "https://www.defacto.com.tr/arama?q=elbise",
+}
+
 N11_CATEGORY_URLS = {
     "gida": "https://www.n11.com/arama?q=gida",
     "elektronik": "https://www.n11.com/arama?q=elektronik",

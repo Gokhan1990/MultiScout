@@ -15,6 +15,10 @@ import { getFavorites, toggleFavorite } from "../lib/favorites";
 import { parsePrice, computeTrend, extractBrand, toCsv, downloadCsv } from "../lib/helpers";
 import { useI18n } from "../lib/i18n";
 import { getPublicStoresStatus } from "../lib/admin";
+import { checkAlarms } from "../lib/alarms";
+import AlarmButton from "../components/AlarmButton";
+import AiSummary from "../components/AiSummary";
+import VoiceSearch from "../components/VoiceSearch";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -41,7 +45,7 @@ interface Deal {
 
 type PlatformKey =
   | "hepsi" | "amazon" | "trendyol" | "hepsiburada" | "n11"
-  | "pazarama" | "ciceksepeti" | "vatan" | "teknosa" | "decathlon" | "steam";
+  | "pazarama" | "ciceksepeti" | "vatan" | "teknosa" | "decathlon" | "steam" | "mediamarkt" | "defacto";
 type BoycottMode = "highlight" | "hide" | "show";
 
 const PLATFORM_LABELS: Record<PlatformKey, string> = {
@@ -56,11 +60,13 @@ const PLATFORM_LABELS: Record<PlatformKey, string> = {
   teknosa: "Teknosa",
   decathlon: "Decathlon",
   steam: "Steam",
+  mediamarkt: "MediaMarkt",
+  defacto: "Defacto",
 };
 
 const ALL_PLATFORM_KEYS: PlatformKey[] = [
   "hepsi", "amazon", "trendyol", "hepsiburada", "n11",
-  "pazarama", "ciceksepeti", "vatan", "teknosa", "decathlon", "steam",
+  "pazarama", "ciceksepeti", "vatan", "teknosa", "decathlon", "steam", "mediamarkt", "defacto",
 ];
 
 const BOYCOTT_MODES: { key: BoycottMode; tKey: string; icon: string }[] = [
@@ -193,6 +199,11 @@ export default function Home() {
         if (data.status === "success") {
           setDeals((prev) => (isNew ? data.data : [...prev, ...data.data]));
           setTotalDeals(data.total);
+          // Fiyat alarmlarını kontrol et
+          const triggered = checkAlarms(data.data || []);
+          if (triggered.length > 0) {
+            toast.success(`🔔 ${triggered.length} fiyat alarmı tetiklendi!`);
+          }
         } else if (data.message) {
           toast.error(data.message);
         }
@@ -503,9 +514,10 @@ export default function Home() {
             {brandText.logo}
           </h1>
 
-          <div className="flex-1 hidden md:block max-w-md mx-2">
+          <div className="flex-1 hidden md:flex max-w-md mx-2 gap-2">
             <input type="search" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder={t("filter.search")}
-              className="w-full px-4 py-1.5 rounded-full bg-white/80 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 text-sm placeholder:text-gray-400 focus:outline-none focus:border-blue-500" />
+              className="flex-1 px-4 py-1.5 rounded-full bg-white/80 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 text-sm placeholder:text-gray-400 focus:outline-none focus:border-blue-500" />
+            <VoiceSearch onResult={(text) => setSearchQuery(text)} locale={locale === "en" ? "en-US" : "tr-TR"} />
           </div>
 
           <button onClick={() => setFilterOpen(true)} className="md:hidden flex items-center gap-1.5 ml-1 px-2.5 py-1 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-xs text-gray-700 dark:text-gray-200 max-w-[140px] relative">
@@ -540,9 +552,10 @@ export default function Home() {
           <ThemeToggle />
         </div>
 
-        <div className="md:hidden max-w-[1400px] mx-auto px-3 pb-2">
+        <div className="md:hidden max-w-[1400px] mx-auto px-3 pb-2 flex gap-2">
           <input type="search" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder={t("filter.search")}
-            className="w-full px-4 py-1.5 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm placeholder:text-gray-400 focus:outline-none focus:border-blue-500" />
+            className="flex-1 px-4 py-1.5 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm placeholder:text-gray-400 focus:outline-none focus:border-blue-500" />
+          <VoiceSearch onResult={(text) => setSearchQuery(text)} locale={locale === "en" ? "en-US" : "tr-TR"} />
         </div>
 
         <div className="hidden md:block max-w-[1400px] mx-auto px-6 pb-3">
@@ -596,11 +609,15 @@ export default function Home() {
                           🚫 <span className="capitalize hidden sm:inline">{boycottBrand}</span>
                         </div>
                       )}
-                      <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleToggleFavorite(deal.link || ""); }}
-                        className="absolute top-2 right-2 z-20 w-7 h-7 md:w-8 md:h-8 rounded-full bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm flex items-center justify-center hover:scale-110 transition-transform shadow-sm"
-                        title={isFav ? t("favorites.remove") : t("favorites.add")} style={{ marginTop: discount > 0 ? "2rem" : 0 }}>
-                        <span className={isFav ? "text-rose-500" : "text-gray-400 dark:text-gray-500"}>{isFav ? "♥" : "♡"}</span>
-                      </button>
+                      <div className="absolute top-2 right-2 z-20 flex flex-col gap-1.5" style={{ marginTop: discount > 0 ? "2rem" : 0 }}>
+                        <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleToggleFavorite(deal.link || ""); }}
+                          className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm flex items-center justify-center hover:scale-110 transition-transform shadow-sm"
+                          title={isFav ? t("favorites.remove") : t("favorites.add")}>
+                          <span className={isFav ? "text-rose-500" : "text-gray-400 dark:text-gray-500"}>{isFav ? "♥" : "♡"}</span>
+                        </button>
+                        <AlarmButton link={deal.link || ""} title={deal.title} currentPriceText={deal.price} />
+                        <AiSummary deal={deal} />
+                      </div>
                       <a href={deal.link || "#"} target="_blank" rel="noreferrer" className="flex-grow flex flex-col">
                         <div className="aspect-square md:h-48 md:aspect-auto bg-white dark:bg-gray-800/40 relative p-2 md:p-4 flex items-center justify-center border-b border-gray-100 dark:border-gray-800 overflow-hidden">
                           {discount > 0 && (
