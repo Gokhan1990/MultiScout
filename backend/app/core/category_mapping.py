@@ -46,11 +46,12 @@ CICEKSEPETI_CATEGORY_URLS = {
 }
 
 VATAN_CATEGORY_URLS = {
-    "elektronik": "https://www.vatanbilgisayar.com/arama/?q=elektronik",
-    "bilgisayar": "https://www.vatanbilgisayar.com/arama/?q=bilgisayar",
-    "telefon": "https://www.vatanbilgisayar.com/arama/?q=telefon",
-    "tv": "https://www.vatanbilgisayar.com/arama/?q=televizyon",
-    "kulaklik": "https://www.vatanbilgisayar.com/arama/?q=kulaklik",
+    "notebook": "https://www.vatanbilgisayar.com/notebook/",
+    "telefon": "https://www.vatanbilgisayar.com/cep-telefonu/",
+    "tv": "https://www.vatanbilgisayar.com/televizyon/",
+    "kulaklik": "https://www.vatanbilgisayar.com/kulaklik/",
+    "tablet": "https://www.vatanbilgisayar.com/tablet/",
+    "beyaz-esya": "https://www.vatanbilgisayar.com/buyuk-ev-aletleri/",
 }
 
 TEKNOSA_CATEGORY_URLS = {

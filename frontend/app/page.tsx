@@ -14,6 +14,7 @@ import { isBoycotted, refreshBoycottList, getBoycottMeta } from "../lib/boycott"
 import { getFavorites, toggleFavorite } from "../lib/favorites";
 import { parsePrice, computeTrend, extractBrand, toCsv, downloadCsv } from "../lib/helpers";
 import { useI18n } from "../lib/i18n";
+import { getPublicStoresStatus } from "../lib/admin";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -57,7 +58,7 @@ const PLATFORM_LABELS: Record<PlatformKey, string> = {
   steam: "Steam",
 };
 
-const PLATFORM_KEYS: PlatformKey[] = [
+const ALL_PLATFORM_KEYS: PlatformKey[] = [
   "hepsi", "amazon", "trendyol", "hepsiburada", "n11",
   "pazarama", "ciceksepeti", "vatan", "teknosa", "decathlon", "steam",
 ];
@@ -80,10 +81,10 @@ const formatTimestamp = (value: string, locale: string) => {
   });
 };
 
-function PlatformPills({ selected, onSelect, layoutId }: { selected: PlatformKey; onSelect: (p: PlatformKey) => void; layoutId: string }) {
+function PlatformPills({ selected, onSelect, layoutId, platforms }: { selected: PlatformKey; onSelect: (p: PlatformKey) => void; layoutId: string; platforms: PlatformKey[] }) {
   return (
     <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 snap-x snap-mandatory scroll-smooth">
-      {PLATFORM_KEYS.map((p) => (
+      {platforms.map((p) => (
         <motion.button
           key={p}
           onClick={() => onSelect(p)}
@@ -124,6 +125,9 @@ export default function Home() {
   const [filterOpen, setFilterOpen] = useState(false);
   const [categoryOpen, setCategoryOpen] = useState(false);
   const [boycottMeta, setBoycottMeta] = useState(() => getBoycottMeta());
+  const [enabledStores, setEnabledStores] = useState<Set<string>>(new Set(ALL_PLATFORM_KEYS));
+  const [maintenanceMsg, setMaintenanceMsg] = useState<string | null>(null);
+  const [brandText, setBrandText] = useState<{ logo: string; tagline: string }>({ logo: "MultiScout", tagline: "Fırsat Takipçisi" });
 
   // Paket 3 state
   const [searchQuery, setSearchQuery] = useState("");
@@ -139,7 +143,7 @@ export default function Home() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
-    const p = params.get("platform"); if (p && PLATFORM_KEYS.includes(p as PlatformKey)) setSelectedPlatform(p as PlatformKey);
+    const p = params.get("platform"); if (p && ALL_PLATFORM_KEYS.includes(p as PlatformKey)) setSelectedPlatform(p as PlatformKey);
     const c = params.get("category"); if (c) setSelectedCategory(c);
     const s = params.get("sort"); if (s) setSelectedSort(s);
     const q = params.get("q"); if (q) setSearchQuery(q);
@@ -211,11 +215,13 @@ export default function Home() {
   const selectPlatform = (platform: PlatformKey) => {
     setSelectedPlatform(platform);
     setDeals([]); setTotalDeals(0);
+    setFilterOpen(false);
     fetchDeals(selectedCategory, platform, true, selectedSort);
   };
   const selectSort = (sort: string) => {
     setSelectedSort(sort);
     setDeals([]); setTotalDeals(0);
+    setFilterOpen(false);
     fetchDeals(selectedCategory, selectedPlatform, true, sort);
   };
 
@@ -247,6 +253,18 @@ export default function Home() {
       .catch(() => {});
 
     refreshBoycottList(false).then(() => setBoycottMeta(getBoycottMeta()));
+
+    getPublicStoresStatus().then((s) => {
+      if (!s) return;
+      const en = new Set<string>(["hepsi", ...s.enabled]);
+      setEnabledStores(en);
+      if (s.maintenance?.enabled) setMaintenanceMsg(s.maintenance.message || "Bakım modundayız.");
+      if (s.theme) setBrandText({ logo: s.theme.logo_text || "MultiScout", tagline: s.theme.tagline || "Fırsat Takipçisi" });
+      if (s.theme?.primary && typeof document !== "undefined") {
+        document.documentElement.style.setProperty("--brand-primary", s.theme.primary);
+        document.documentElement.style.setProperty("--brand-accent", s.theme.accent || s.theme.primary);
+      }
+    });
 
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchDeals(selectedCategory, selectedPlatform, true, selectedSort);
@@ -374,7 +392,7 @@ export default function Home() {
     <div className="space-y-5">
       <section>
         <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">{t("filter.platform")}</h3>
-        <PlatformPills selected={selectedPlatform} onSelect={selectPlatform} layoutId="sheet-platform" />
+        <PlatformPills selected={selectedPlatform} onSelect={selectPlatform} layoutId="sheet-platform" platforms={ALL_PLATFORM_KEYS.filter(p => enabledStores.has(p))} />
       </section>
       <section>
         <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">{t("filter.sort")}</h3>
@@ -465,12 +483,24 @@ export default function Home() {
     </div>
   );
 
+  if (maintenanceMsg) {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900 p-6">
+        <div className="text-center max-w-md bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-800">
+          <div className="text-6xl mb-4">🚧</div>
+          <h1 className="text-2xl font-bold mb-2 bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">{brandText.logo}</h1>
+          <p className="text-gray-600 dark:text-gray-300">{maintenanceMsg}</p>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900 text-gray-900 dark:text-gray-100 transition-colors pb-16">
       <header className={`sticky top-0 z-30 transition-all duration-300 ${scrolled ? "bg-white/85 dark:bg-gray-950/85 backdrop-blur-md shadow-sm border-b border-gray-200 dark:border-gray-800" : "bg-transparent"}`}>
         <div className="max-w-[1400px] mx-auto px-3 md:px-6 py-3 flex items-center gap-2">
           <h1 className="text-base md:text-xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent truncate">
-            MultiScout
+            {brandText.logo}
           </h1>
 
           <div className="flex-1 hidden md:block max-w-md mx-2">
@@ -518,7 +548,7 @@ export default function Home() {
         <div className="hidden md:block max-w-[1400px] mx-auto px-6 pb-3">
           <div className="flex items-center gap-3 flex-wrap">
             <div className="flex-1 min-w-0">
-              <PlatformPills selected={selectedPlatform} onSelect={selectPlatform} layoutId="desk-platform" />
+              <PlatformPills selected={selectedPlatform} onSelect={selectPlatform} layoutId="desk-platform" platforms={ALL_PLATFORM_KEYS.filter(p => enabledStores.has(p))} />
             </div>
             <button onClick={() => setFilterOpen(true)} className="relative px-3 py-1.5 rounded-full text-sm font-medium bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
               ⚙️ {t("filter.title")}

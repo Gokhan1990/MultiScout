@@ -62,36 +62,37 @@ async def scrape_pazarama_deals(
             products_data = await page.evaluate("""() => {
               const turkishToFloat = (s) => {
                 if (!s) return null;
-                const m = s.match(/\\d{1,3}(?:\\.\\d{3})*,\\d{2}|\\d+,\\d{2}|\\d+/);
+                const m = s.match(/\\d{1,3}(?:\\.\\d{3})+(?:,\\d{2})?|\\d{1,3}(?:\\.\\d{3})*,\\d{2}|\\d+(?:,\\d{2})?/);
                 return m ? parseFloat(m[0].replace(/\\./g, '').replace(',', '.')) : null;
               };
               const formatTL = (n) => n.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' TL';
               const seen = new Set();
               const out = [];
-              let items = document.querySelectorAll('a[href*="/urun/"], [class*="ProductCard"], [class*="productCard"], [class*="product-card"]');
-              if (items.length < 3) items = document.querySelectorAll('article, .col-md-3, [class*="card"]');
+              let items = document.querySelectorAll('.product-card, [data-testid="listing-product-card-grid"]');
+              if (items.length < 3) items = document.querySelectorAll('[class*="product-card"], [class*="ProductCard"]');
               items.forEach((item) => {
-                const linkEl = (item.tagName === 'A' && item.href && item.href.includes('/urun/'))
-                  ? item
-                  : item.querySelector('a[href*="/urun/"]');
+                const linkEl = item.querySelector('a[href*="-p-"]');
                 if (!linkEl || !linkEl.href) return;
                 if (seen.has(linkEl.href)) return;
                 seen.add(linkEl.href);
-                let title = '';
-                const titleEl = item.querySelector('h3, h2, [class*="productName"], [class*="title"], [class*="name"]');
-                if (titleEl) title = titleEl.innerText.trim();
-                if (!title || title.length < 5) title = linkEl.getAttribute('title') || (linkEl.innerText || '').split('\\n').find(l => l.trim().length > 5) || '';
-                title = title.replace(/\\s+/g, ' ').trim();
+                let title = linkEl.getAttribute('title') || '';
+                if (!title || title.length < 5) {
+                  const titleEl = item.querySelector('h3, h2, [class*="productName"], [class*="title"], [class*="name"]');
+                  if (titleEl) title = titleEl.innerText.trim();
+                }
+                title = (title || '').replace(/\\s+/g, ' ').trim();
                 if (title.length < 5) return;
-                const txt = item.innerText || '';
-                const tlMatches = txt.match(/\\d{1,3}(?:\\.\\d{3})*,\\d{2}\\s*TL|\\d+,\\d{2}\\s*TL/g) || [];
+                const priceEl = item.querySelector('.product-card__price');
+                if (!priceEl) return;
+                const priceTxt = priceEl.innerText || '';
+                const tlMatches = priceTxt.match(/\\d{1,3}(?:\\.\\d{3})*,\\d{2}\\s*TL|\\d+,\\d{2}\\s*TL/g) || [];
                 const prices = tlMatches.map(turkishToFloat).filter(Boolean);
                 if (prices.length === 0) return;
                 const current = Math.min(...prices);
                 const original = prices.length > 1 ? Math.max(...prices) : null;
                 let discount = 0;
                 if (original && original > current) discount = Math.round(((original - current) / original) * 100);
-                const badge = txt.match(/%\\s*(\\d{1,2})/);
+                const badge = priceTxt.match(/%\\s*(\\d{1,2})/);
                 if (badge) {
                   const b = parseInt(badge[1]);
                   if (b >= 1 && b <= 90 && b > discount) discount = b;

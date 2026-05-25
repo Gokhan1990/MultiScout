@@ -16,7 +16,7 @@ window.chrome = {runtime: {}};
 async def scrape_trendyol_deals(
     output_file: str,
     category: str = "elektronik",
-    min_discount: int = 20,
+    min_discount: int = 5,
     max_pages: int = 1
 ):
     deals: list[dict] = []
@@ -71,38 +71,45 @@ async def scrape_trendyol_deals(
             products_data = await page.evaluate("""() => {
               const turkishToFloat = (s) => {
                 if (!s) return null;
-                const m = s.match(/\\d{1,3}(?:\\.\\d{3})*,\\d{2}|\\d+,\\d{2}|\\d+/);
+                const m = s.match(/\\d{1,3}(?:\\.\\d{3})+(?:,\\d{2})?|\\d{1,3}(?:\\.\\d{3})*,\\d{2}|\\d+(?:,\\d{2})?/);
                 return m ? parseFloat(m[0].replace(/\\./g, '').replace(',', '.')) : null;
               };
               const formatTL = (n) => n.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' TL';
               const seen = new Set();
               const out = [];
-              const cards = document.querySelectorAll('div.p-card-wrppr, div[class*="ProductCard"], a.p-card-chldrn-cntnr, a[href*="-p-"]');
-              cards.forEach((item) => {
-                const linkEl = item.tagName === 'A' && item.href ? item : item.querySelector('a[href*="-p-"], a[href*="/p-"]');
-                if (!linkEl || !linkEl.href || !linkEl.href.includes('trendyol.com')) return;
-                if (seen.has(linkEl.href)) return;
-                seen.add(linkEl.href);
-                const titleEl = item.querySelector('.prdct-desc-cntnr-name, .prdct-desc-cntnr-ttl, [class*="ProductDesc"], h3, [class*="ttl"]');
-                let title = titleEl ? titleEl.innerText.trim() : (linkEl.getAttribute('title') || linkEl.getAttribute('aria-label') || '');
+              const cards = document.querySelectorAll('a.seller-store-product-card[href*="-p-"], a[data-testid="seller-store-product-card"], a.p-card-chldrn-cntnr, a[href*="-p-"]');
+              cards.forEach((linkEl) => {
+                if (!linkEl || linkEl.tagName !== 'A') return;
+                const href = linkEl.getAttribute('href') || '';
+                if (!href.includes('-p-')) return;
+                const absHref = href.startsWith('http') ? href : 'https://www.trendyol.com' + href;
+                const cleanHref = absHref.split('?')[0];
+                if (seen.has(cleanHref)) return;
+                seen.add(cleanHref);
+                const img = linkEl.querySelector('img');
+                let title = '';
+                const titleEl = linkEl.querySelector('.product-name, .prdct-desc-cntnr-name, .prdct-desc-cntnr-ttl, [data-testid="seller-store-product-card-name"], [class*="ProductDesc"], h3, [class*="ttl"]');
+                if (titleEl) title = titleEl.innerText.trim();
+                if (!title || title.length < 5) title = img?.getAttribute('alt') || linkEl.getAttribute('title') || linkEl.getAttribute('aria-label') || '';
                 title = title.replace(/\\s+/g, ' ').trim();
                 if (title.length < 5) return;
-                const txt = item.innerText || '';
-                const tlMatches = txt.match(/\\d{1,3}(?:\\.\\d{3})*,\\d{2}\\s*TL|\\d+,\\d{2}\\s*TL/g) || [];
-                const prices = tlMatches.map(turkishToFloat).filter(Boolean);
+                const txt = linkEl.innerText || '';
+                const tlMatches = txt.match(/\\d{1,3}(?:\\.\\d{3})+(?:,\\d{2})?\\s*TL|\\d+,\\d{2}\\s*TL/g) || [];
+                const prices = tlMatches.map(turkishToFloat).filter(v => v && v >= 3);
                 if (prices.length === 0) return;
                 const current = Math.min(...prices);
                 const original = prices.length > 1 ? Math.max(...prices) : null;
                 let discount = 0;
                 if (original && original > current) discount = Math.round(((original - current) / original) * 100);
-                const badge = txt.match(/%\\s*(\\d{1,2})/);
+                const badge = txt.match(/-\\s*%\\s*(\\d{1,2})/);
                 if (badge) {
                   const b = parseInt(badge[1]);
                   if (b >= 1 && b <= 90 && b > discount) discount = b;
                 }
-                const img = item.querySelector('img');
-                const image = img ? (img.getAttribute('data-src') || img.src) : '';
-                out.push({title: title.substring(0,150), price: formatTL(current), discount, link: linkEl.href, image});
+                if (discount > 90) return;
+                let image = img?.getAttribute('src') || img?.getAttribute('data-src') || '';
+                if (image && image.startsWith('//')) image = 'https:' + image;
+                out.push({title: title.substring(0,150), price: formatTL(current), discount, link: cleanHref, image});
               });
               return out;
             }""")

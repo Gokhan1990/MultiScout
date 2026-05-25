@@ -10,7 +10,7 @@ from app.scrapers.io import get_file_lock, load_deals, save_deals, merge_deals_b
 async def scrape_n11_deals(
     output_file: str,
     category: str = "elektronik",
-    min_discount: int = 20,
+    min_discount: int = 5,
     max_pages: int = 1
 ):
     url = f"https://www.n11.com/arama?q={quote_plus(category)}"
@@ -60,50 +60,65 @@ async def scrape_n11_deals(
                     await browser.close()
                     return
 
-            for _ in range(4):
-                await page.mouse.wheel(0, random.randint(1000, 1500))
-                await page.wait_for_timeout(random.randint(600, 1200))
+            # N11 lazy-load: tüm ürün listesini gör
+            for _ in range(8):
+                await page.mouse.wheel(0, random.randint(1200, 1600))
+                await page.wait_for_timeout(random.randint(500, 900))
+            await page.evaluate("window.scrollTo(0, 0)")
+            await page.wait_for_timeout(500)
 
             products_data = await page.evaluate("""() => {
               const turkishToFloat = (s) => {
                 if (!s) return null;
-                const m = s.match(/\\d{1,3}(?:\\.\\d{3})*,\\d{2}|\\d+,\\d{2}|\\d+/);
+                const m = s.match(/\\d{1,3}(?:\\.\\d{3})+(?:,\\d{2})?|\\d{1,3}(?:\\.\\d{3})*,\\d{2}|\\d+(?:,\\d{2})?/);
                 return m ? parseFloat(m[0].replace(/\\./g, '').replace(',', '.')) : null;
               };
               const formatTL = (n) => n.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' TL';
               const seen = new Set();
               const out = [];
-              let items = document.querySelectorAll('li.column, .productItem, [class*="ProductCard"], a[href*="/p/"]');
-              if (items.length < 3) items = document.querySelectorAll('div.column, [data-test-id*="product"]');
-              items.forEach((item) => {
-                const linkEl = (item.tagName === 'A' && item.href && item.href.includes('/p/'))
-                  ? item
-                  : item.querySelector('a[href*="/p/"]');
-                if (!linkEl || !linkEl.href) return;
-                if (seen.has(linkEl.href)) return;
-                seen.add(linkEl.href);
-                let title = '';
-                const titleEl = item.querySelector('h3, h2, .productName, [class*="productName"], [class*="title"]');
-                if (titleEl) title = titleEl.innerText.trim();
-                if (!title || title.length < 5) title = (linkEl.innerText || '').split('\\n').find(l => l.trim().length > 5) || '';
+              const items = Array.from(document.querySelectorAll('a.product-item[href*="/urun/"], a[href*="/urun/"]'));
+              items.forEach((linkEl) => {
+                const href = linkEl.getAttribute('href') || '';
+                if (!href.includes('/urun/')) return;
+                const absHref = href.startsWith('http') ? href : 'https://www.n11.com' + href;
+                const cleanHref = absHref.split('?')[0];
+                if (seen.has(cleanHref)) return;
+                seen.add(cleanHref);
+                // N11 ürün card'ı linkEl'i kendisi içerir
+                const container = linkEl.closest('[class*="searchResults"], [class*="productList"], section, div') || linkEl;
+                const img = linkEl.querySelector('img');
+                let title = img?.getAttribute('alt') || linkEl.getAttribute('title') || linkEl.getAttribute('aria-label') || '';
+                if (!title || title.length < 5) {
+                  const titleEl = linkEl.querySelector('h3, h2, [class*="productName"], [class*="title"], [class*="name"]');
+                  if (titleEl) title = titleEl.innerText.trim();
+                }
+                if (!title || title.length < 5) {
+                  const lines = (linkEl.innerText || '').split('\\n').map(s => s.trim()).filter(s => s.length > 5 && !/TL|%|^[\\d.,]+$/.test(s));
+                  title = lines[0] || '';
+                }
                 title = title.replace(/\\s+/g, ' ').trim();
                 if (title.length < 5) return;
-                const txt = item.innerText || '';
-                const tlMatches = txt.match(/\\d{1,3}(?:\\.\\d{3})*,\\d{2}\\s*TL|\\d+,\\d{2}\\s*TL|\\d{2,}\\s*TL/g) || [];
-                const prices = tlMatches.map(turkishToFloat).filter(Boolean);
+                const txt = linkEl.innerText || '';
+                const tlMatches = txt.match(/\\d{1,3}(?:\\.\\d{3})+(?:,\\d{2})?\\s*TL|\\d+,\\d{2}\\s*TL|\\d{3,}\\s*TL/g) || [];
+                const prices = tlMatches.map(turkishToFloat).filter(v => v && v > 0);
                 if (prices.length === 0) return;
-                const current = Math.min(...prices);
-                const original = prices.length > 1 ? Math.max(...prices) : null;
+                // En düşük geçerli fiyatı seç (en az 3 TL — gramaj/birim fiyatlarını ele)
+                const validPrices = prices.filter(p => p >= 3);
+                if (validPrices.length === 0) return;
+                const current = Math.min(...validPrices);
+                const original = validPrices.length > 1 ? Math.max(...validPrices) : null;
                 let discount = 0;
                 if (original && original > current) discount = Math.round(((original - current) / original) * 100);
-                const badge = txt.match(/%\\s*(\\d{1,2})/);
+                // Sadece eksi-yüzde formatı kabul et (indirim badge): "-%30"
+                const badge = txt.match(/-\\s*%\\s*(\\d{1,2})/);
                 if (badge) {
                   const b = parseInt(badge[1]);
                   if (b >= 1 && b <= 90 && b > discount) discount = b;
                 }
-                const img = item.querySelector('img');
-                const image = img?.getAttribute('src') || img?.getAttribute('data-src') || '';
-                out.push({title: title.substring(0,150), price: formatTL(current), discount, link: linkEl.href, image});
+                if (discount > 90) return;  // gürültü
+                let image = img?.getAttribute('src') || img?.getAttribute('data-src') || '';
+                if (image && image.startsWith('//')) image = 'https:' + image;
+                out.push({title: title.substring(0,150), price: formatTL(current), discount, link: cleanHref, image});
               });
               return out;
             }""")

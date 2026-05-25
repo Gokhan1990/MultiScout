@@ -48,9 +48,16 @@ def get_category_tree():
 def get_deals(platform: str = Query("amazon"), category: str = Query(None), min_discount: int = Query(0), skip: int = Query(0), limit: int = Query(30), sort_by: str = Query("last_updated"), db: Session = Depends(get_db)):
     try:
         from sqlalchemy import func, cast, Float
+        from app.services.admin_settings import enabled_stores
 
         query = db.query(Deal)
-        if platform.lower() != "hepsi":
+        enabled = enabled_stores()
+        if platform.lower() == "hepsi":
+            if enabled:
+                query = query.filter(Deal.platform.in_(enabled))
+        else:
+            if platform.lower() not in enabled:
+                return {"status": "success", "data": [], "total": 0, "message": f"{platform} mağazası admin tarafından devre dışı"}
             query = query.filter(Deal.platform == platform.lower())
         if category:
             query = query.filter(Deal.category == category.lower())

@@ -17,11 +17,20 @@ CLEANUP_INTERVAL_HOUR = int(os.getenv("CLEANUP_INTERVAL_HOUR", "3"))
 SCHEDULER_ENABLED = os.getenv("SCHEDULER_ENABLED", "true").lower() not in ("0", "false", "no")
 
 
+def _try_auto_share():
+    try:
+        from app.services.auto_share import share_after_scrape
+        share_after_scrape()
+    except Exception as e:
+        print(f"[SCHEDULER] auto-share error: {e}", flush=True)
+
+
 async def _run_amazon():
     from app.routers.scrape import run_scrape_all_job
     print(f"[SCHEDULER] Amazon scraping started at {datetime.now()}", flush=True)
     await run_scrape_all_job(min_discount=20, platform="amazon")
     print(f"[SCHEDULER] Amazon scraping completed at {datetime.now()}", flush=True)
+    _try_auto_share()
 
 
 async def _run_other_platforms():
@@ -33,6 +42,7 @@ async def _run_other_platforms():
         return_exceptions=True
     )
     print(f"[SCHEDULER] Other platforms scraping completed at {datetime.now()}", flush=True)
+    _try_auto_share()
 
 
 def run_amazon_scrape():

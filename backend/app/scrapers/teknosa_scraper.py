@@ -55,30 +55,34 @@ async def scrape_teknosa_deals(
             await page.goto(url, timeout=60000, wait_until="domcontentloaded")
             await asyncio.sleep(random.uniform(2.5, 4.5))
 
-            for _ in range(4):
-                await page.mouse.wheel(0, random.randint(1000, 1500))
-                await page.wait_for_timeout(random.randint(600, 1000))
+            # Tüm sayfayı dolaş — lazy load resimleri tetiklensin
+            for _ in range(8):
+                await page.mouse.wheel(0, random.randint(800, 1200))
+                await page.wait_for_timeout(random.randint(400, 700))
+            await page.evaluate("window.scrollTo(0, 0)")
+            await page.wait_for_timeout(500)
 
             products_data = await page.evaluate("""() => {
               const turkishToFloat = (s) => {
                 if (!s) return null;
-                const m = s.match(/\\d{1,3}(?:\\.\\d{3})*,\\d{2}|\\d+,\\d{2}|\\d+/);
+                const m = s.match(/\\d{1,3}(?:\\.\\d{3})+(?:,\\d{2})?|\\d{1,3}(?:\\.\\d{3})*,\\d{2}|\\d+(?:,\\d{2})?/);
                 return m ? parseFloat(m[0].replace(/\\./g, '').replace(',', '.')) : null;
               };
               const formatTL = (n) => n.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' TL';
               const seen = new Set();
               const out = [];
-              let items = document.querySelectorAll('.product-item, .prd, a[href*="/urun/"], [class*="ProductCard"]');
-              if (items.length < 3) items = document.querySelectorAll('[class*="product"]');
+              let items = document.querySelectorAll('article.prd, .prd');
+              if (items.length < 3) items = document.querySelectorAll('[class*="prd-"]');
               items.forEach((item) => {
-                const linkEl = (item.tagName === 'A' && item.href && item.href.includes('/urun/'))
-                  ? item
-                  : item.querySelector('a[href*="/urun/"]');
-                if (!linkEl || !linkEl.href) return;
-                if (seen.has(linkEl.href)) return;
-                seen.add(linkEl.href);
+                const linkEl = item.querySelector('a.prd-link, a[href*="-p-"]') || (item.tagName === 'A' ? item : null);
+                if (!linkEl) return;
+                const href = linkEl.getAttribute('href') || '';
+                if (!href.includes('-p-') && !href.includes('/urun/')) return;
+                const absHref = href.startsWith('http') ? href : 'https://www.teknosa.com' + href;
+                if (seen.has(absHref)) return;
+                seen.add(absHref);
                 let title = '';
-                const titleEl = item.querySelector('.prd-name, h3, h2, [class*="productName"], [class*="title"]');
+                const titleEl = item.querySelector('.prd-title, .prd-title-style, h3, h2, [class*="title"]');
                 if (titleEl) title = titleEl.innerText.trim();
                 if (!title || title.length < 5) title = linkEl.getAttribute('title') || (linkEl.innerText || '').split('\\n').find(l => l.trim().length > 5) || '';
                 title = title.replace(/\\s+/g, ' ').trim();
@@ -97,9 +101,26 @@ async def scrape_teknosa_deals(
                   if (b >= 1 && b <= 90 && b > discount) discount = b;
                 }
                 const img = item.querySelector('img');
-                let image = img?.getAttribute('src') || img?.getAttribute('data-src') || '';
-                if (image && image.startsWith('//')) image = 'https:' + image;
-                out.push({title: title.substring(0,150), price: formatTL(current), discount, link: linkEl.href, image});
+                let image = '';
+                if (img) {
+                  // Lazy load placeholder'ları atla (1x1 gif gibi)
+                  const candidates = [
+                    img.getAttribute('data-src'),
+                    img.getAttribute('data-original'),
+                    img.getAttribute('data-lazy'),
+                    img.getAttribute('srcset')?.split(' ')[0],
+                    img.getAttribute('src'),
+                  ].filter(Boolean);
+                  for (const c of candidates) {
+                    if (!c) continue;
+                    if (c.startsWith('data:')) continue;
+                    if (c.includes('placeholder') || c.includes('blank.gif')) continue;
+                    image = c;
+                    break;
+                  }
+                  if (image && image.startsWith('//')) image = 'https:' + image;
+                }
+                out.push({title: title.substring(0,150), price: formatTL(current), discount, link: absHref, image});
               });
               return out;
             }""")
