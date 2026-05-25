@@ -1,24 +1,48 @@
-from fastapi import APIRouter, BackgroundTasks, Query
+from fastapi import APIRouter, BackgroundTasks, Query, Depends, HTTPException
 from datetime import datetime
 import asyncio
+from app.core.auth import require_api_key
 
 router = APIRouter()
 
 SCRAPE_ALL_STATUS = {
     "amazon": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
     "trendyol": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
-    "hepsiburada": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "hepsiburada": {"status": "idle", "message": "Stealth modu deneme aşamasında", "current_category": None, "updated_at": None},
     "n11": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "pazarama": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "ciceksepeti": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
 }
 
 CONCURRENT_SCRAPES = 2
 
+
+def _aggregate_status() -> dict:
+    statuses = [v.get("status") for v in SCRAPE_ALL_STATUS.values()]
+    if "running" in statuses:
+        top = "running"
+    elif "error" in statuses:
+        top = "error"
+    elif statuses and all(s in ("completed", "idle", "disabled") for s in statuses):
+        top = "completed" if "completed" in statuses else "idle"
+    else:
+        top = "idle"
+    messages = [v.get("message") for v in SCRAPE_ALL_STATUS.values() if v.get("message")]
+    return {
+        "status": top,
+        "message": "; ".join(m for m in messages if m) or "",
+        "updated_at": datetime.now().isoformat(),
+    }
+
+
 async def run_platform_scrape(platform: str, min_discount: int):
     from app.scrapers.scraper import scrape_amazon_deals, CATEGORY_URLS
     from app.scrapers.trendyol_scraper import scrape_trendyol_deals
-    from app.scrapers.hepsiburada_scraper import scrape_hepsiburada_deals
     from app.scrapers.n11_scraper import scrape_n11_deals
-    from app.core.category_mapping import TRENDYOL_CATEGORY_URLS, HEPSIBURADA_CATEGORY_URLS, N11_CATEGORY_URLS
+    from app.scrapers.hepsiburada_scraper import scrape_hepsiburada_deals
+    from app.scrapers.pazarama_scraper import scrape_pazarama_deals
+    from app.scrapers.ciceksepeti_scraper import scrape_ciceksepeti_deals
+    from app.core.category_mapping import TRENDYOL_CATEGORY_URLS, HEPSIBURADA_CATEGORY_URLS, N11_CATEGORY_URLS, PAZARAMA_CATEGORY_URLS, CICEKSEPETI_CATEGORY_URLS
     from app.services.sync_service import sync_json_to_db, PLATFORM_FILES
     from app.models.database import get_db
 
@@ -49,6 +73,14 @@ async def run_platform_scrape(platform: str, min_discount: int):
                     scrape_trendyol_deals(PLATFORM_FILES["trendyol"], cat, min_discount)
                     for cat in batch
                 ], return_exceptions=True)
+        elif platform == "n11":
+            categories = list(N11_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_n11_deals(PLATFORM_FILES["n11"], cat, min_discount)
+                    for cat in batch
+                ], return_exceptions=True)
         elif platform == "hepsiburada":
             categories = list(HEPSIBURADA_CATEGORY_URLS.keys())
             for index in range(0, len(categories), CONCURRENT_SCRAPES):
@@ -57,12 +89,20 @@ async def run_platform_scrape(platform: str, min_discount: int):
                     scrape_hepsiburada_deals(PLATFORM_FILES["hepsiburada"], cat, min_discount)
                     for cat in batch
                 ], return_exceptions=True)
-        elif platform == "n11":
-            categories = list(N11_CATEGORY_URLS.keys())
+        elif platform == "pazarama":
+            categories = list(PAZARAMA_CATEGORY_URLS.keys())
             for index in range(0, len(categories), CONCURRENT_SCRAPES):
                 batch = categories[index:index + CONCURRENT_SCRAPES]
                 await asyncio.gather(*[
-                    scrape_n11_deals(PLATFORM_FILES["n11"], cat, min_discount)
+                    scrape_pazarama_deals(PLATFORM_FILES["pazarama"], cat, min_discount)
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "ciceksepeti":
+            categories = list(CICEKSEPETI_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_ciceksepeti_deals(PLATFORM_FILES["ciceksepeti"], cat, min_discount)
                     for cat in batch
                 ], return_exceptions=True)
 
@@ -89,32 +129,45 @@ async def run_platform_scrape(platform: str, min_discount: int):
         }
     print(f"[DEBUG] Platform taraması tamamlandı: {platform}", flush=True)
 
+
 async def run_scrape_all_job(min_discount: int, platform: str = "all"):
     if platform == "all":
         await asyncio.gather(
-            run_platform_scrape("amazon", 20),
-            run_platform_scrape("trendyol", 20),
-            run_platform_scrape("hepsiburada", 20),
-            run_platform_scrape("n11", 5),
+            run_platform_scrape("amazon", min_discount),
+            run_platform_scrape("trendyol", min_discount),
+            run_platform_scrape("n11", min_discount),
+            run_platform_scrape("hepsiburada", min_discount),
+            run_platform_scrape("pazarama", min_discount),
+            run_platform_scrape("ciceksepeti", min_discount),
             return_exceptions=True
         )
     else:
         await run_platform_scrape(platform, min_discount)
 
-@router.post("/scrape-all")
+
+@router.post("/scrape-all", dependencies=[Depends(require_api_key)])
 def scrape_all(background_tasks: BackgroundTasks, platform: str = Query("all"), min_discount: int = Query(5)):
-    if SCRAPE_ALL_STATUS.get(platform, {}).get("status") == "running":
-        return {"status": "success", "message": "Tarama zaten çalışıyor.", "data": SCRAPE_ALL_STATUS.get(platform)}
+    if platform == "all":
+        if any(v.get("status") == "running" for k, v in SCRAPE_ALL_STATUS.items() if k != "hepsiburada"):
+            raise HTTPException(status_code=409, detail="Bir tarama zaten çalışıyor.")
+    else:
+        if SCRAPE_ALL_STATUS.get(platform, {}).get("status") == "running":
+            raise HTTPException(status_code=409, detail=f"{platform} taraması zaten çalışıyor.")
+
     background_tasks.add_task(run_scrape_all_job, min_discount, platform)
     return {"status": "success", "message": f"{platform} taraması arka planda başlatıldı."}
 
+
 @router.get("/scrape-all-status")
 def get_scrape_all_status():
-    return {"status": "success", "data": SCRAPE_ALL_STATUS}
+    agg = _aggregate_status()
+    data = {**agg, **SCRAPE_ALL_STATUS}
+    return {"status": "success", "data": data}
+
 
 @router.get("/scrape-status")
 def get_scrape_status(category: str = Query("gida")):
-    SCRAPE_STATUS = {}
+    SCRAPE_STATUS: dict = {}
     category = category.lower()
     return {
         "status": "success",

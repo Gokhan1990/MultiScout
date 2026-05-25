@@ -27,6 +27,24 @@ HEPSIBURADA_CATEGORY_URLS = {
     "spor": "https://www.hepsiburada.com/ara?q=spor",
 }
 
+PAZARAMA_CATEGORY_URLS = {
+    "elektronik": "https://www.pazarama.com/arama?q=elektronik",
+    "spor": "https://www.pazarama.com/arama?q=spor",
+    "ev": "https://www.pazarama.com/arama?q=ev+yasam",
+    "moda": "https://www.pazarama.com/arama?q=moda",
+    "kahve-makinesi": "https://www.pazarama.com/arama?q=kahve+makinesi",
+    "kisisel-bakim": "https://www.pazarama.com/arama?q=kisisel+bakim",
+}
+
+CICEKSEPETI_CATEGORY_URLS = {
+    "cicek": "https://www.ciceksepeti.com/arama?query=cicek",
+    "hediye": "https://www.ciceksepeti.com/arama?query=hediye",
+    "ev": "https://www.ciceksepeti.com/arama?query=ev+yasam",
+    "kisisel-bakim": "https://www.ciceksepeti.com/arama?query=kisisel+bakim",
+    "kahve": "https://www.ciceksepeti.com/arama?query=kahve",
+    "gida": "https://www.ciceksepeti.com/arama?query=gourmet",
+}
+
 N11_CATEGORY_URLS = {
     "gida": "https://www.n11.com/arama?q=gida",
     "elektronik": "https://www.n11.com/arama?q=elektronik",

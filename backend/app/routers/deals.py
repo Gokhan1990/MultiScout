@@ -1,19 +1,53 @@
 from fastapi import APIRouter, Query, Depends
 from sqlalchemy.orm import Session
 from app.models.database import get_db, Deal
+from app.core.auth import require_api_key
 from datetime import datetime
 
 router = APIRouter()
+
+
+def _build_category_tree(categories: list[str]) -> dict:
+    groups = {
+        "Elektronik": ["elektronik"],
+        "Yiyecek & İçecek": ["gida"],
+        "Kitap": ["kitap"],
+        "Oyuncak & Bebek": ["oyuncak", "bebek"],
+        "Spor": ["spor"],
+        "Moda": ["moda"],
+        "Ev & Yaşam": ["ev"],
+        "Kişisel Bakım": ["kisisel-bakim"],
+        "Ofis": ["ofis"],
+    }
+    tree: dict = {}
+    seen: set[str] = set()
+    for top, items in groups.items():
+        members = [c for c in items if c in categories]
+        if members:
+            tree[top] = members
+            seen.update(members)
+    extras = [c for c in categories if c not in seen]
+    if extras:
+        tree["Diğer"] = extras
+    return tree
+
 
 @router.get("/categories")
 def get_categories():
     from app.scrapers.scraper import CATEGORY_URLS
     return {"status": "success", "categories": list(CATEGORY_URLS.keys())}
 
+
+@router.get("/category-tree")
+def get_category_tree():
+    from app.scrapers.scraper import CATEGORY_URLS
+    return {"status": "success", "data": _build_category_tree(list(CATEGORY_URLS.keys()))}
+
+
 @router.get("/deals")
 def get_deals(platform: str = Query("amazon"), category: str = Query(None), min_discount: int = Query(0), skip: int = Query(0), limit: int = Query(30), sort_by: str = Query("last_updated"), db: Session = Depends(get_db)):
     try:
-        from sqlalchemy import func, cast, Float, String
+        from sqlalchemy import func, cast, Float
 
         query = db.query(Deal)
         if platform.lower() != "hepsi":
@@ -64,7 +98,8 @@ def get_deals(platform: str = Query("amazon"), category: str = Query(None), min_
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
-@router.post("/deals-cleanup-json")
+
+@router.post("/deals-cleanup-json", dependencies=[Depends(require_api_key)])
 def cleanup_json_duplicates(platform: str = Query("all"), db: Session = Depends(get_db)):
     try:
         from app.services.sync_service import cleanup_json_duplicates, PLATFORM_FILES
@@ -81,7 +116,8 @@ def cleanup_json_duplicates(platform: str = Query("all"), db: Session = Depends(
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
-@router.post("/deals-reset-db")
+
+@router.post("/deals-reset-db", dependencies=[Depends(require_api_key)])
 def reset_database(db: Session = Depends(get_db)):
     try:
         db.query(Deal).delete()
@@ -98,7 +134,8 @@ def reset_database(db: Session = Depends(get_db)):
         db.rollback()
         return {"status": "error", "message": str(e)}
 
-@router.post("/deals-cleanup-duplicates")
+
+@router.post("/deals-cleanup-duplicates", dependencies=[Depends(require_api_key)])
 def cleanup_db_duplicates(db: Session = Depends(get_db)):
     try:
         from app.models.database import cleanup_duplicates
