@@ -1,25 +1,47 @@
 import json
+import os
 from pathlib import Path
 from sqlalchemy.orm import Session
-from app.models.database import Deal, save_deal_to_db
-from datetime import datetime
+from app.models.database import save_deal_to_db
 
 PLATFORM_FILES = {
     "amazon": "data/deals.json",
     "trendyol": "data/deals_trendyol.json",
     "n11": "data/deals_n11.json",
+    "hepsiburada": "data/deals_hepsiburada.json",
+    "pazarama": "data/deals_pazarama.json",
+    "ciceksepeti": "data/deals_ciceksepeti.json",
+    "vatan": "data/deals_vatan.json",
+    "teknosa": "data/deals_teknosa.json",
+    "decathlon": "data/deals_decathlon.json",
+    "steam": "data/deals_steam.json",
 }
 
-def sync_json_to_db(platform: str, db: Session):
-    """JSON dosyasından veritabanına veri senkronize et"""
-    file_path = PLATFORM_FILES.get(platform)
 
-    if not file_path or not Path(file_path).exists():
-        print(f"[SYNC] {platform} için JSON dosyası bulunamadı: {file_path}", flush=True)
+def _resolve(path: str) -> str:
+    if os.path.isabs(path):
+        return path
+    if Path(path).exists():
+        return path
+    docker_path = f"/app/{path}"
+    if Path(docker_path).exists():
+        return docker_path
+    return path
+
+
+def sync_json_to_db(platform: str, db: Session):
+    file_path = PLATFORM_FILES.get(platform)
+    if not file_path:
+        print(f"[SYNC] Bilinmeyen platform: {platform}", flush=True)
+        return
+
+    resolved = _resolve(file_path)
+    if not Path(resolved).exists():
+        print(f"[SYNC] {platform} için JSON dosyası bulunamadı: {resolved}", flush=True)
         return
 
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(resolved, 'r', encoding='utf-8') as f:
             data = json.load(f)
 
         if isinstance(data, dict) and 'deals' in data:
@@ -30,38 +52,47 @@ def sync_json_to_db(platform: str, db: Session):
             print(f"[SYNC] {platform} JSON formatı geçersiz", flush=True)
             return
 
-        # Link'e göre unique deal'leri tut (son gelen veriyi baz al)
-        unique_deals = {}
+        unique_deals: dict[str, dict] = {}
         for deal in deals:
             link = deal.get('link')
             if link:
-                # Aynı link varsa son gelen bilgiyi (price, discount vb.) güncelle
                 unique_deals[link] = deal
 
         synced_count = 0
+        failed = 0
         for link, deal in unique_deals.items():
             try:
-                save_deal_to_db(deal, platform, db)
-                synced_count += 1
+                if save_deal_to_db(deal, platform, db, commit=False) is not None:
+                    synced_count += 1
             except Exception as e:
-                print(f"[SYNC] Deal senkronizasyon hatası ({platform}): {e}", flush=True)
-                continue
+                failed += 1
+                print(f"[SYNC] Deal hatası ({platform}): {e}", flush=True)
+                db.rollback()
 
-        print(f"[SYNC] {platform}: {synced_count} deal senkronize edildi", flush=True)
+        try:
+            db.commit()
+        except Exception as e:
+            print(f"[SYNC] Toplu commit hatası ({platform}): {e}", flush=True)
+            db.rollback()
+
+        print(f"[SYNC] {platform}: {synced_count} deal senkronize ({failed} hatalı)", flush=True)
 
     except Exception as e:
         print(f"[SYNC] {platform} senkronizasyon hatası: {e}", flush=True)
 
-def cleanup_json_duplicates(platform: str):
-    """JSON dosyasından duplicate ürünleri temizle"""
-    file_path = PLATFORM_FILES.get(platform)
 
-    if not file_path or not Path(file_path).exists():
-        print(f"[JSON_CLEANUP] {platform} için JSON dosyası bulunamadı: {file_path}", flush=True)
+def cleanup_json_duplicates(platform: str) -> int:
+    file_path = PLATFORM_FILES.get(platform)
+    if not file_path:
+        return 0
+
+    resolved = _resolve(file_path)
+    if not Path(resolved).exists():
+        print(f"[JSON_CLEANUP] {platform} için JSON dosyası bulunamadı: {resolved}", flush=True)
         return 0
 
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(resolved, 'r', encoding='utf-8') as f:
             data = json.load(f)
 
         if isinstance(data, dict) and 'deals' in data:
@@ -72,8 +103,7 @@ def cleanup_json_duplicates(platform: str):
             print(f"[JSON_CLEANUP] {platform} JSON formatı geçersiz", flush=True)
             return 0
 
-        # Link'e göre unique deal'leri tut (son olanı)
-        seen_links = {}
+        seen_links: dict[str, dict] = {}
         for deal in deals:
             link = deal.get('link', '')
             if link:
@@ -82,11 +112,10 @@ def cleanup_json_duplicates(platform: str):
         unique_deals = list(seen_links.values())
         removed_count = len(deals) - len(unique_deals)
 
-        # Temizlenmiş veriyi dosyaya yaz
-        with open(file_path, 'w', encoding='utf-8') as f:
+        with open(resolved, 'w', encoding='utf-8') as f:
             json.dump(unique_deals, f, ensure_ascii=False, indent=2)
 
-        print(f"[JSON_CLEANUP] {platform}: {removed_count} duplicate silindi, {len(unique_deals)} deal kaldı", flush=True)
+        print(f"[JSON_CLEANUP] {platform}: {removed_count} duplicate silindi, {len(unique_deals)} kaldı", flush=True)
         return removed_count
 
     except Exception as e:

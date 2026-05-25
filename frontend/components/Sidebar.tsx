@@ -1,12 +1,22 @@
+"use client";
 
 import { useState } from "react";
 
-const SidebarItem = ({ name, data, onSelect, selected }) => {
-  const [isOpen, setIsOpen] = useState(false);
+type CategoryNode = string[] | { [key: string]: CategoryNode };
+
+interface SidebarItemProps {
+  name: string;
+  data: CategoryNode;
+  onSelect: (item: string) => void;
+  selected: string;
+}
+
+const SidebarItem = ({ name, data, onSelect, selected }: SidebarItemProps) => {
+  const [isOpen, setIsOpen] = useState(true);
 
   if (Array.isArray(data)) {
     return (
-      <div className="ml-4">
+      <div className="ml-2">
         <div className="font-bold text-gray-700 py-1 text-sm">{name}</div>
         {data.map((item) => (
           <button
@@ -33,7 +43,7 @@ const SidebarItem = ({ name, data, onSelect, selected }) => {
         {name}
       </button>
       {isOpen && (
-        <div className="ml-4 border-l pl-2">
+        <div className="ml-2 border-l pl-2">
           {Object.entries(data).map(([key, value]) => (
             <SidebarItem key={key} name={key} data={value} onSelect={onSelect} selected={selected} />
           ))}

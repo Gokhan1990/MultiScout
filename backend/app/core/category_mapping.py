@@ -27,6 +27,52 @@ HEPSIBURADA_CATEGORY_URLS = {
     "spor": "https://www.hepsiburada.com/ara?q=spor",
 }
 
+PAZARAMA_CATEGORY_URLS = {
+    "elektronik": "https://www.pazarama.com/arama?q=elektronik",
+    "spor": "https://www.pazarama.com/arama?q=spor",
+    "ev": "https://www.pazarama.com/arama?q=ev+yasam",
+    "moda": "https://www.pazarama.com/arama?q=moda",
+    "kahve-makinesi": "https://www.pazarama.com/arama?q=kahve+makinesi",
+    "kisisel-bakim": "https://www.pazarama.com/arama?q=kisisel+bakim",
+}
+
+CICEKSEPETI_CATEGORY_URLS = {
+    "cicek": "https://www.ciceksepeti.com/arama?query=cicek",
+    "hediye": "https://www.ciceksepeti.com/arama?query=hediye",
+    "ev": "https://www.ciceksepeti.com/arama?query=ev+yasam",
+    "kisisel-bakim": "https://www.ciceksepeti.com/arama?query=kisisel+bakim",
+    "kahve": "https://www.ciceksepeti.com/arama?query=kahve",
+    "gida": "https://www.ciceksepeti.com/arama?query=gourmet",
+}
+
+VATAN_CATEGORY_URLS = {
+    "elektronik": "https://www.vatanbilgisayar.com/arama/?q=elektronik",
+    "bilgisayar": "https://www.vatanbilgisayar.com/arama/?q=bilgisayar",
+    "telefon": "https://www.vatanbilgisayar.com/arama/?q=telefon",
+    "tv": "https://www.vatanbilgisayar.com/arama/?q=televizyon",
+    "kulaklik": "https://www.vatanbilgisayar.com/arama/?q=kulaklik",
+}
+
+TEKNOSA_CATEGORY_URLS = {
+    "elektronik": "https://www.teknosa.com/arama/?s=elektronik",
+    "telefon": "https://www.teknosa.com/arama/?s=telefon",
+    "bilgisayar": "https://www.teknosa.com/arama/?s=bilgisayar",
+    "tv": "https://www.teknosa.com/arama/?s=televizyon",
+    "beyazesya": "https://www.teknosa.com/arama/?s=buzdolabi",
+}
+
+DECATHLON_CATEGORY_URLS = {
+    "spor": "https://www.decathlon.com.tr/search?Ntt=spor",
+    "kosu": "https://www.decathlon.com.tr/search?Ntt=kosu",
+    "bisiklet": "https://www.decathlon.com.tr/search?Ntt=bisiklet",
+    "kamp": "https://www.decathlon.com.tr/search?Ntt=kamp",
+    "yoga": "https://www.decathlon.com.tr/search?Ntt=yoga",
+}
+
+STEAM_CATEGORY_URLS = {
+    "oyun": "https://store.steampowered.com/api/featuredcategories?cc=tr&l=turkish",
+}
+
 N11_CATEGORY_URLS = {
     "gida": "https://www.n11.com/arama?q=gida",
     "elektronik": "https://www.n11.com/arama?q=elektronik",

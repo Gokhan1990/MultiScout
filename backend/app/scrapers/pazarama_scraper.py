@@ -1,6 +1,7 @@
 import asyncio
 import random
 from datetime import datetime
+from urllib.parse import quote_plus
 from playwright.async_api import async_playwright
 
 from app.scrapers.io import get_file_lock, load_deals, save_deals, merge_deals_by_link
@@ -13,15 +14,15 @@ window.chrome = {runtime: {}};
 """
 
 
-async def scrape_trendyol_deals(
+async def scrape_pazarama_deals(
     output_file: str,
     category: str = "elektronik",
-    min_discount: int = 20,
+    min_discount: int = 5,
     max_pages: int = 1
 ):
     deals: list[dict] = []
-    url = f"https://www.trendyol.com/sr?q={category}&discount=1"
-    print(f"[Trendyol] Başlıyor: {url}", flush=True)
+    url = f"https://www.pazarama.com/arama?q={quote_plus(category)}"
+    print(f"[Pazarama] Başlıyor: {url}", flush=True)
 
     try:
         async with async_playwright() as p:
@@ -35,12 +36,12 @@ async def scrape_trendyol_deals(
             context = await browser.new_context(
                 locale="tr-TR",
                 timezone_id="Europe/Istanbul",
+                viewport={"width": 1920, "height": 1080},
                 user_agent=(
                     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
                     "AppleWebKit/537.36 (KHTML, like Gecko) "
                     "Chrome/121.0.0.0 Safari/537.36"
                 ),
-                viewport={"width": 1920, "height": 1080},
                 extra_http_headers={
                     "Accept-Language": "tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7",
                     "sec-ch-ua": '"Not A(Brand";v="99", "Google Chrome";v="121", "Chromium";v="121"',
@@ -52,21 +53,11 @@ async def scrape_trendyol_deals(
             page = await context.new_page()
 
             await page.goto(url, timeout=60000, wait_until="domcontentloaded")
-            await asyncio.sleep(random.uniform(3, 6))
-
-            blocked_keywords = ("dakika lütfen", "Bir dakika", "Robot", "Güvenlik")
-            title = await page.title()
-            if any(k in title for k in blocked_keywords):
-                await asyncio.sleep(5)
-                title = await page.title()
-                if any(k in title for k in blocked_keywords):
-                    print("[Trendyol] Bot challenge geçilemedi", flush=True)
-                    await browser.close()
-                    return
+            await asyncio.sleep(random.uniform(2.5, 4.5))
 
             for _ in range(4):
-                await page.evaluate("window.scrollBy(0, 1500)")
-                await page.wait_for_timeout(800)
+                await page.mouse.wheel(0, random.randint(1000, 1500))
+                await page.wait_for_timeout(random.randint(600, 1000))
 
             products_data = await page.evaluate("""() => {
               const turkishToFloat = (s) => {
@@ -77,14 +68,19 @@ async def scrape_trendyol_deals(
               const formatTL = (n) => n.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' TL';
               const seen = new Set();
               const out = [];
-              const cards = document.querySelectorAll('div.p-card-wrppr, div[class*="ProductCard"], a.p-card-chldrn-cntnr, a[href*="-p-"]');
-              cards.forEach((item) => {
-                const linkEl = item.tagName === 'A' && item.href ? item : item.querySelector('a[href*="-p-"], a[href*="/p-"]');
-                if (!linkEl || !linkEl.href || !linkEl.href.includes('trendyol.com')) return;
+              let items = document.querySelectorAll('a[href*="/urun/"], [class*="ProductCard"], [class*="productCard"], [class*="product-card"]');
+              if (items.length < 3) items = document.querySelectorAll('article, .col-md-3, [class*="card"]');
+              items.forEach((item) => {
+                const linkEl = (item.tagName === 'A' && item.href && item.href.includes('/urun/'))
+                  ? item
+                  : item.querySelector('a[href*="/urun/"]');
+                if (!linkEl || !linkEl.href) return;
                 if (seen.has(linkEl.href)) return;
                 seen.add(linkEl.href);
-                const titleEl = item.querySelector('.prdct-desc-cntnr-name, .prdct-desc-cntnr-ttl, [class*="ProductDesc"], h3, [class*="ttl"]');
-                let title = titleEl ? titleEl.innerText.trim() : (linkEl.getAttribute('title') || linkEl.getAttribute('aria-label') || '');
+                let title = '';
+                const titleEl = item.querySelector('h3, h2, [class*="productName"], [class*="title"], [class*="name"]');
+                if (titleEl) title = titleEl.innerText.trim();
+                if (!title || title.length < 5) title = linkEl.getAttribute('title') || (linkEl.innerText || '').split('\\n').find(l => l.trim().length > 5) || '';
                 title = title.replace(/\\s+/g, ' ').trim();
                 if (title.length < 5) return;
                 const txt = item.innerText || '';
@@ -101,7 +97,8 @@ async def scrape_trendyol_deals(
                   if (b >= 1 && b <= 90 && b > discount) discount = b;
                 }
                 const img = item.querySelector('img');
-                const image = img ? (img.getAttribute('data-src') || img.src) : '';
+                let image = img?.getAttribute('src') || img?.getAttribute('data-src') || '';
+                if (image && image.startsWith('//')) image = 'https:' + image;
                 out.push({title: title.substring(0,150), price: formatTL(current), discount, link: linkEl.href, image});
               });
               return out;
@@ -122,65 +119,20 @@ async def scrape_trendyol_deals(
                     "discount_percentage": discount,
                     "link": link,
                     "image": prod.get("image", ""),
-                    "source": "trendyol",
+                    "source": "pazarama",
                     "category": category,
                     "last_updated": datetime.now().isoformat()
                 })
                 kept += 1
 
-            print(f"[Trendyol] {category}: {raw_count} ham, {kept} kept", flush=True)
+            print(f"[Pazarama] {category}: {raw_count} ham, {kept} kept", flush=True)
             await browser.close()
 
     except Exception as e:
-        print(f"[Trendyol] HATA ({category}): {e}", flush=True)
+        print(f"[Pazarama] HATA ({category}): {e}", flush=True)
 
     async with get_file_lock(output_file):
         existing = load_deals(output_file)
         merged = merge_deals_by_link(existing, deals)
-        print(f"[Trendyol] Toplam {len(merged)} ürün kaydediliyor (yeni: {len(deals)})...", flush=True)
+        print(f"[Pazarama] Toplam {len(merged)} ürün kaydediliyor (yeni: {len(deals)})...", flush=True)
         save_deals(output_file, merged)
-
-
-async def scrape_trendyol_prices(search_query: str):
-    prices = []
-    try:
-        async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=True)
-            page = await browser.new_page()
-            url = f"https://www.trendyol.com/sr?q={search_query}"
-            await page.goto(url, timeout=60000, wait_until="networkidle")
-            await page.wait_for_timeout(2000)
-
-            products_data = await page.evaluate("""() => {
-                const items = document.querySelectorAll('.p-card-wrppr');
-                if (items.length > 0) {
-                    const titleEl = items[0].querySelector('.prdct-desc-cntnr-name, .prdct-desc-cntnr-ttl');
-                    const priceEl = items[0].querySelector('.prc-box-dscntd, [class*="price"]');
-                    return {
-                        title: titleEl ? titleEl.innerText : '',
-                        price: priceEl ? priceEl.innerText : 'N/A'
-                    };
-                }
-                return null;
-            }""")
-
-            if products_data and products_data['title']:
-                prices.append({
-                    "title": products_data['title'][:80],
-                    "price": products_data['price'],
-                    "source": "trendyol"
-                })
-            await browser.close()
-    except Exception as e:
-        print(f"[Trendyol] Fiyat hatası: {e}", flush=True)
-    return prices
-
-
-async def compare_prices(amazon_product):
-    try:
-        title = amazon_product.get("title", "")[:50]
-        trendyol_prices = await scrape_trendyol_prices(title)
-        return {"amazon": amazon_product, "trendyol": trendyol_prices}
-    except Exception as e:
-        print(f"[Trendyol] Karşılaştırma hatası: {e}", flush=True)
-        return None
