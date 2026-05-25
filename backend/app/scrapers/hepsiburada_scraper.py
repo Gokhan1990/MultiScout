@@ -32,12 +32,11 @@ async def scrape_hepsiburada_deals(
     max_pages: int = 1
 ):
     deals: list[dict] = []
-    use_mobile = random.random() < 0.5
-    ua = MOBILE_UA if use_mobile else DESKTOP_UA
-    viewport = {"width": 390, "height": 844} if use_mobile else {"width": 1920, "height": 1080}
-    base = "https://m.hepsiburada.com" if use_mobile else "https://www.hepsiburada.com"
-    url = f"{base}/ara?q={quote_plus(category)}&filter%5Bdiscounted%5D=true"
-    print(f"[Hepsiburada] Başlıyor ({'mobile' if use_mobile else 'desktop'}): {url}", flush=True)
+    # m.hepsiburada.com bazı network'lerde DNS çözülemez, hep desktop kullan
+    ua = DESKTOP_UA
+    viewport = {"width": 1920, "height": 1080}
+    url = f"https://www.hepsiburada.com/ara?q={quote_plus(category)}&filter%5Bdiscounted%5D=true"
+    print(f"[Hepsiburada] Başlıyor: {url}", flush=True)
 
     try:
         async with async_playwright() as p:
@@ -60,8 +59,8 @@ async def scrape_hepsiburada_deals(
                     "Accept-Language": "tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7",
                     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
                     "Sec-Ch-Ua": '"Chromium";v="121", "Not A(Brand";v="99"',
-                    "Sec-Ch-Ua-Mobile": "?1" if use_mobile else "?0",
-                    "Sec-Ch-Ua-Platform": '"iOS"' if use_mobile else '"Windows"',
+                    "Sec-Ch-Ua-Mobile": "?0",
+                    "Sec-Ch-Ua-Platform": '"Windows"',
                 }
             )
             await context.add_init_script(STEALTH_SCRIPT)
@@ -95,63 +94,57 @@ async def scrape_hepsiburada_deals(
                 const seen = new Set();
                 const products = [];
 
-                const selectors = [
-                    'li[id^="i"]',
-                    'li.productListContent-item',
-                    '[data-test-id="product-card-container"]',
-                    'a[href*="/p-"]',
-                    '[class*="productCard"]',
-                ];
+                const items = document.querySelectorAll('li[id^="i"], [class*="horizontalProductCard"], [class*="productCard"]');
+                items.forEach((item) => {
+                    const linkEl = item.querySelector('a[href*="-p-"]') || (item.tagName === 'A' && item.href?.includes('-p-') ? item : null);
+                    if (!linkEl) return;
+                    const href = linkEl.getAttribute('href') || '';
+                    if (!href.includes('-p-')) return;
+                    const absHref = href.startsWith('http') ? href : 'https://www.hepsiburada.com' + href;
+                    const cleanHref = absHref.split('?')[0];
+                    if (seen.has(cleanHref)) return;
+                    seen.add(cleanHref);
 
-                for (const sel of selectors) {
-                    const items = document.querySelectorAll(sel);
-                    if (items.length < 3) continue;
+                    let title = item.querySelector('[data-test-id^="title-"]')?.innerText?.trim() || '';
+                    if (!title) title = linkEl.getAttribute('title') || linkEl.getAttribute('aria-label') || '';
+                    if (!title) {
+                        const lines = (linkEl.innerText || '').split('\\n').map(s => s.trim()).filter(s => s.length > 5);
+                        title = lines[0] || '';
+                    }
+                    title = title.replace(/\\s+/g, ' ').trim();
+                    if (title.length < 5) return;
 
-                    items.forEach((item) => {
-                        const linkEl = item.tagName === 'A' && item.href.includes('/p-')
-                            ? item
-                            : item.querySelector('a[href*="/p-"]');
-                        if (!linkEl || !linkEl.href) return;
-                        if (seen.has(linkEl.href)) return;
-                        seen.add(linkEl.href);
+                    const priceEl = item.querySelector('[data-test-id^="final-price-"]');
+                    const priceTxt = priceEl ? priceEl.innerText : (item.innerText || '');
+                    const tlMatches = priceTxt.match(/\\d{1,3}(?:\\.\\d{3})+(?:,\\d{2})?\\s*TL|\\d+,\\d{2}\\s*TL|\\d+(?:\\.\\d{3})+\\s*TL/g) || [];
+                    const prices = tlMatches.map(s => turkishToFloat(s)).filter(v => v && v > 0);
+                    if (prices.length === 0) return;
 
-                        const titleEl = item.querySelector('[data-test-id="product-card-name"], h3, h2, [class*="productName"], [class*="title"]');
-                        let title = titleEl ? titleEl.innerText.trim() : (linkEl.getAttribute('title') || linkEl.innerText || '').trim();
-                        title = title.split('\\n')[0];
-                        if (title.length < 5) return;
+                    const current = Math.min(...prices);
+                    const original = prices.length > 1 ? Math.max(...prices) : null;
+                    let discount = 0;
+                    if (original && original > current) {
+                        discount = Math.round(((original - current) / original) * 100);
+                    }
+                    const fullText = item.innerText || '';
+                    const badgeMatch = fullText.match(/-\\s*%(\\d{1,2})|%(\\d{1,2})/);
+                    if (badgeMatch) {
+                        const badge = parseInt(badgeMatch[1] || badgeMatch[2]);
+                        if (badge >= 1 && badge <= 90 && badge > discount) discount = badge;
+                    }
 
-                        const allText = item.innerText || '';
-                        const tlMatches = allText.match(/\\d{1,3}(?:\\.\\d{3})*,\\d{2}\\s*TL|\\d+,\\d{2}\\s*TL/g) || [];
-                        const prices = tlMatches.map(s => turkishToFloat(s)).filter(Boolean);
-                        if (prices.length === 0) return;
+                    const img = item.querySelector('img');
+                    let image = img?.getAttribute('src') || img?.getAttribute('data-src') || '';
+                    if (image && image.startsWith('//')) image = 'https:' + image;
 
-                        const current = Math.min(...prices);
-                        const original = prices.length > 1 ? Math.max(...prices) : null;
-
-                        let discount = 0;
-                        if (original && original > current) {
-                            discount = Math.round(((original - current) / original) * 100);
-                        }
-                        const badgeMatch = allText.match(/%\\s*(\\d{1,2})/);
-                        if (badgeMatch) {
-                            const badge = parseInt(badgeMatch[1]);
-                            if (badge >= 1 && badge <= 90 && badge > discount) discount = badge;
-                        }
-
-                        const img = item.querySelector('img');
-                        const image = img?.getAttribute('src') || img?.getAttribute('data-src') || '';
-
-                        products.push({
-                            title: title.substring(0, 150),
-                            price: formatTL(current),
-                            discount,
-                            link: linkEl.href,
-                            image
-                        });
+                    products.push({
+                        title: title.substring(0, 150),
+                        price: formatTL(current),
+                        discount,
+                        link: cleanHref,
+                        image
                     });
-
-                    if (products.length > 0) break;
-                }
+                });
                 return products;
             }""")
 
@@ -190,13 +183,13 @@ async def scrape_hepsiburada_prices(search_query: str):
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=True)
             context = await browser.new_context(
-                user_agent=MOBILE_UA,
+                user_agent=DESKTOP_UA,
                 viewport={"width": 390, "height": 844},
                 locale="tr-TR",
             )
             await context.add_init_script(STEALTH_SCRIPT)
             page = await context.new_page()
-            await page.goto(f"https://m.hepsiburada.com/ara?q={quote_plus(search_query)}", timeout=60000, wait_until="domcontentloaded")
+            await page.goto(f"https://www.hepsiburada.com/ara?q={quote_plus(search_query)}", timeout=60000, wait_until="domcontentloaded")
             await asyncio.sleep(2)
 
             data = await page.evaluate("""() => {

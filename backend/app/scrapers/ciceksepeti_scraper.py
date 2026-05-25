@@ -61,22 +61,23 @@ async def scrape_ciceksepeti_deals(
               const formatTL = (n) => n.toLocaleString('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' TL';
               const seen = new Set();
               const out = [];
-              let items = document.querySelectorAll('a[href*="-pr-"], a[href*="/urun/"], [class*="ProductCard"], [class*="productItem"]');
-              if (items.length < 3) items = document.querySelectorAll('article, [class*="card"]');
-              items.forEach((item) => {
-                const linkEl = (item.tagName === 'A' && item.href && (item.href.includes('-pr-') || item.href.includes('/urun/')))
-                    ? item
-                    : item.querySelector('a[href*="-pr-"], a[href*="/urun/"]');
-                if (!linkEl || !linkEl.href) return;
-                if (seen.has(linkEl.href)) return;
-                seen.add(linkEl.href);
-                let title = '';
-                const titleEl = item.querySelector('h3, h2, [class*="ProductCard-product"], [class*="productName"], [class*="title"]');
-                if (titleEl) title = titleEl.innerText.trim();
-                if (!title || title.length < 5) title = linkEl.getAttribute('title') || (linkEl.innerText || '').split('\\n').find(l => l.trim().length > 5) || '';
+              const items = document.querySelectorAll('a[data-cs-product-box="true"]');
+              items.forEach((linkEl) => {
+                if (!linkEl) return;
+                const href = linkEl.getAttribute('href') || '';
+                if (!href) return;
+                const absHref = href.startsWith('http') ? href : ('https://www.ciceksepeti.com' + (href.startsWith('/') ? href : '/' + href));
+                if (seen.has(absHref)) return;
+                seen.add(absHref);
+                const img = linkEl.querySelector('img');
+                let title = img?.getAttribute('alt') || linkEl.getAttribute('title') || '';
+                if (!title || title.length < 5) {
+                  const lines = (linkEl.innerText || '').split('\\n').map(s => s.trim()).filter(s => s.length > 5 && !/TL|%|\\(\\d+\\)|Ücretsiz|Sepette/i.test(s));
+                  title = lines[0] || '';
+                }
                 title = title.replace(/\\s+/g, ' ').trim();
                 if (title.length < 5) return;
-                const txt = item.innerText || '';
+                const txt = linkEl.innerText || '';
                 const tlMatches = txt.match(/\\d{1,3}(?:\\.\\d{3})*,\\d{2}\\s*TL|\\d+,\\d{2}\\s*TL/g) || [];
                 const prices = tlMatches.map(turkishToFloat).filter(Boolean);
                 if (prices.length === 0) return;
@@ -89,10 +90,9 @@ async def scrape_ciceksepeti_deals(
                   const b = parseInt(badge[1]);
                   if (b >= 1 && b <= 90 && b > discount) discount = b;
                 }
-                const img = item.querySelector('img');
                 let image = img?.getAttribute('src') || img?.getAttribute('data-src') || '';
                 if (image && image.startsWith('//')) image = 'https:' + image;
-                out.push({title: title.substring(0,150), price: formatTL(current), discount, link: linkEl.href, image});
+                out.push({title: title.substring(0,150), price: formatTL(current), discount, link: absHref, image});
               });
               return out;
             }""")

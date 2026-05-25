@@ -55,9 +55,12 @@ async def scrape_teknosa_deals(
             await page.goto(url, timeout=60000, wait_until="domcontentloaded")
             await asyncio.sleep(random.uniform(2.5, 4.5))
 
-            for _ in range(4):
-                await page.mouse.wheel(0, random.randint(1000, 1500))
-                await page.wait_for_timeout(random.randint(600, 1000))
+            # Tüm sayfayı dolaş — lazy load resimleri tetiklensin
+            for _ in range(8):
+                await page.mouse.wheel(0, random.randint(800, 1200))
+                await page.wait_for_timeout(random.randint(400, 700))
+            await page.evaluate("window.scrollTo(0, 0)")
+            await page.wait_for_timeout(500)
 
             products_data = await page.evaluate("""() => {
               const turkishToFloat = (s) => {
@@ -98,8 +101,25 @@ async def scrape_teknosa_deals(
                   if (b >= 1 && b <= 90 && b > discount) discount = b;
                 }
                 const img = item.querySelector('img');
-                let image = img?.getAttribute('src') || img?.getAttribute('data-src') || img?.getAttribute('data-original') || '';
-                if (image && image.startsWith('//')) image = 'https:' + image;
+                let image = '';
+                if (img) {
+                  // Lazy load placeholder'ları atla (1x1 gif gibi)
+                  const candidates = [
+                    img.getAttribute('data-src'),
+                    img.getAttribute('data-original'),
+                    img.getAttribute('data-lazy'),
+                    img.getAttribute('srcset')?.split(' ')[0],
+                    img.getAttribute('src'),
+                  ].filter(Boolean);
+                  for (const c of candidates) {
+                    if (!c) continue;
+                    if (c.startsWith('data:')) continue;
+                    if (c.includes('placeholder') || c.includes('blank.gif')) continue;
+                    image = c;
+                    break;
+                  }
+                  if (image && image.startsWith('//')) image = 'https:' + image;
+                }
                 out.push({title: title.substring(0,150), price: formatTL(current), discount, link: absHref, image});
               });
               return out;

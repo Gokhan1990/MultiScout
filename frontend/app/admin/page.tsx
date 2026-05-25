@@ -10,7 +10,7 @@ import {
   getAdminPassword, clearAdminPassword,
 } from "../../lib/admin";
 
-type Tab = "stores" | "scheduler" | "theme" | "social" | "auto_share" | "maintenance" | "docs";
+type Tab = "dashboard" | "stores" | "scheduler" | "theme" | "social" | "auto_share" | "boycott" | "maintenance" | "docs";
 
 interface Settings {
   stores: Record<string, boolean>;
@@ -32,11 +32,13 @@ const STORE_LABELS: Record<string, string> = {
 };
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
+  { id: "dashboard", label: "Dashboard", icon: "📊" },
   { id: "stores", label: "Mağazalar", icon: "🏪" },
   { id: "scheduler", label: "Tarama", icon: "🔄" },
   { id: "theme", label: "Tema", icon: "🎨" },
   { id: "social", label: "Sosyal Medya", icon: "📱" },
   { id: "auto_share", label: "Otomatik Paylaşım", icon: "🤖" },
+  { id: "boycott", label: "Boykot Listesi", icon: "🚫" },
   { id: "maintenance", label: "Bakım Modu", icon: "🚧" },
   { id: "docs", label: "API Rehberi", icon: "📚" },
 ];
@@ -46,7 +48,7 @@ export default function AdminPage() {
   const [password, setPassword] = useState("");
   const [loginErr, setLoginErr] = useState("");
   const [settings, setSettings] = useState<Settings | null>(null);
-  const [activeTab, setActiveTab] = useState<Tab>("stores");
+  const [activeTab, setActiveTab] = useState<Tab>("dashboard");
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -209,11 +211,13 @@ export default function AdminPage() {
                 transition={{ duration: 0.2 }}
                 className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800 p-5"
               >
+                {activeTab === "dashboard" && <DashboardTab />}
                 {activeTab === "stores" && <StoresTab settings={settings} onSave={(payload) => updateSection("stores", payload)} busy={busy} />}
                 {activeTab === "scheduler" && <SchedulerTab settings={settings} onSave={(payload) => updateSection("scheduler", payload)} busy={busy} />}
                 {activeTab === "theme" && <ThemeTab settings={settings} onSave={(payload) => updateSection("theme", payload)} busy={busy} />}
                 {activeTab === "social" && <SocialTab settings={settings} onSave={(payload) => updateSection("social", payload)} busy={busy} />}
                 {activeTab === "auto_share" && <AutoShareTab settings={settings} onSave={(payload) => updateSection("auto_share", payload)} busy={busy} />}
+                {activeTab === "boycott" && <BoycottTab />}
                 {activeTab === "maintenance" && <MaintenanceTab settings={settings} onSave={(payload) => updateSection("maintenance", payload)} busy={busy} />}
                 {activeTab === "docs" && <DocsTab />}
               </motion.div>
@@ -226,6 +230,218 @@ export default function AdminPage() {
 }
 
 type TabProps = { settings: Settings; onSave: (payload: Record<string, unknown>) => Promise<boolean>; busy: boolean };
+
+function DashboardTab() {
+  const [stats, setStats] = useState<{
+    total: number;
+    by_platform: Record<string, number>;
+    by_category: Record<string, number>;
+    avg_discount: number;
+    high_discount_count: number;
+    top_deals: Array<{ title: string; platform: string; discount: number; price: string; link: string }>;
+  } | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const pw = typeof window !== "undefined" ? localStorage.getItem("multiscout_admin_pw") : null;
+        if (!pw) return;
+        const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+        const res = await fetch(`${API}/api/admin/stats`, { headers: { "X-ADMIN-PASSWORD": pw } });
+        if (res.ok) {
+          const data = await res.json();
+          setStats(data.data);
+        }
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  if (loading) return <div className="text-gray-500">Yükleniyor...</div>;
+  if (!stats) return <div className="text-gray-500">İstatistik alınamadı.</div>;
+
+  const totalPlatforms = Object.keys(stats.by_platform).length;
+  const maxPlatformCount = Math.max(...Object.values(stats.by_platform), 1);
+  const maxCategoryCount = Math.max(...Object.values(stats.by_category), 1);
+
+  return (
+    <div className="space-y-6">
+      <h2 className="text-lg font-bold">İstatistikler</h2>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <Stat label="Toplam Fırsat" value={stats.total} accent="from-blue-500 to-blue-600" />
+        <Stat label="Platform" value={totalPlatforms} accent="from-purple-500 to-purple-600" />
+        <Stat label="Ortalama İndirim" value={`%${stats.avg_discount}`} accent="from-orange-500 to-red-500" />
+        <Stat label="%50+ Fırsat" value={stats.high_discount_count} accent="from-rose-500 to-pink-600" />
+      </div>
+
+      <section>
+        <h3 className="text-sm font-bold mb-2">Platform Dağılımı</h3>
+        <div className="space-y-1.5">
+          {Object.entries(stats.by_platform).sort((a, b) => b[1] - a[1]).map(([p, c]) => (
+            <div key={p} className="flex items-center gap-2">
+              <span className="w-24 text-xs text-gray-600 dark:text-gray-400">{p}</span>
+              <div className="flex-1 h-5 bg-gray-100 dark:bg-gray-800 rounded overflow-hidden">
+                <motion.div initial={{ width: 0 }} animate={{ width: `${(c / maxPlatformCount) * 100}%` }} transition={{ duration: 0.6 }} className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded" />
+              </div>
+              <span className="w-12 text-right text-xs font-mono">{c}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section>
+        <h3 className="text-sm font-bold mb-2">Top Kategoriler</h3>
+        <div className="space-y-1.5">
+          {Object.entries(stats.by_category).map(([c, n]) => (
+            <div key={c} className="flex items-center gap-2">
+              <span className="w-32 text-xs text-gray-600 dark:text-gray-400 truncate">{c}</span>
+              <div className="flex-1 h-4 bg-gray-100 dark:bg-gray-800 rounded overflow-hidden">
+                <motion.div initial={{ width: 0 }} animate={{ width: `${(n / maxCategoryCount) * 100}%` }} transition={{ duration: 0.6 }} className="h-full bg-gradient-to-r from-orange-400 to-red-500" />
+              </div>
+              <span className="w-10 text-right text-xs font-mono">{n}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section>
+        <h3 className="text-sm font-bold mb-2">Top 10 İndirim</h3>
+        <div className="space-y-1">
+          {stats.top_deals.map((d, i) => (
+            <a key={i} href={d.link} target="_blank" rel="noreferrer" className="flex items-center gap-3 px-3 py-2 bg-gray-50 dark:bg-gray-800/50 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+              <span className="font-bold text-rose-500 w-12">%{d.discount}</span>
+              <span className="flex-1 text-sm truncate">{d.title}</span>
+              <span className="text-xs text-gray-500 hidden sm:inline">{d.platform}</span>
+              <span className="text-sm font-bold">{d.price}</span>
+            </a>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function Stat({ label, value, accent }: { label: string; value: string | number; accent: string }) {
+  return (
+    <div className={`bg-gradient-to-br ${accent} rounded-xl p-3 text-white shadow-sm`}>
+      <div className="text-xs opacity-80">{label}</div>
+      <div className="text-2xl font-bold mt-1">{value}</div>
+    </div>
+  );
+}
+
+interface BoycottCategory { label: string; parent: string; brands: string[] }
+interface BoycottRaw { version: string; source: string; categories: Record<string, BoycottCategory>; excluded_keywords: string[] }
+
+function BoycottTab() {
+  const [data, setData] = useState<BoycottRaw | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [activeCat, setActiveCat] = useState<string>("");
+  const [newBrand, setNewBrand] = useState("");
+  const [excludedText, setExcludedText] = useState("");
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const pw = typeof window !== "undefined" ? localStorage.getItem("multiscout_admin_pw") : null;
+        if (!pw) return;
+        const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+        const res = await fetch(`${API}/api/admin/boycott-raw`, { headers: { "X-ADMIN-PASSWORD": pw } });
+        if (res.ok) {
+          const r = await res.json();
+          setData(r.data);
+          const keys = Object.keys(r.data.categories || {});
+          if (keys.length) setActiveCat(keys[0]);
+          setExcludedText((r.data.excluded_keywords || []).join("\n"));
+        }
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  const save = async () => {
+    if (!data) return;
+    setSaving(true);
+    const payload = { ...data, excluded_keywords: excludedText.split("\n").map((s) => s.trim()).filter(Boolean) };
+    const pw = localStorage.getItem("multiscout_admin_pw");
+    const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+    const res = await fetch(`${API}/api/admin/boycott-raw`, { method: "PUT", headers: { "Content-Type": "application/json", "X-ADMIN-PASSWORD": pw || "" }, body: JSON.stringify(payload) });
+    setSaving(false);
+    if (res.ok) toast.success("Boykot listesi kaydedildi");
+    else toast.error("Kaydedilemedi");
+  };
+
+  const addBrand = () => {
+    if (!data || !activeCat || !newBrand.trim()) return;
+    const cleaned = newBrand.trim().toLowerCase();
+    if (data.categories[activeCat].brands.includes(cleaned)) {
+      toast.error("Zaten ekli");
+      return;
+    }
+    const next = { ...data, categories: { ...data.categories, [activeCat]: { ...data.categories[activeCat], brands: [...data.categories[activeCat].brands, cleaned] } } };
+    setData(next);
+    setNewBrand("");
+  };
+
+  const removeBrand = (brand: string) => {
+    if (!data) return;
+    const next = { ...data, categories: { ...data.categories, [activeCat]: { ...data.categories[activeCat], brands: data.categories[activeCat].brands.filter((b) => b !== brand) } } };
+    setData(next);
+  };
+
+  if (loading) return <div className="text-gray-500">Yükleniyor...</div>;
+  if (!data) return <div className="text-gray-500">Liste alınamadı.</div>;
+
+  const totalBrands = Object.values(data.categories).reduce((s, c) => s + c.brands.length, 0);
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-start justify-between flex-wrap gap-2">
+        <div>
+          <h2 className="text-lg font-bold">Boykot Listesi</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Toplam {totalBrands} marka, {Object.keys(data.categories).length} kategori. Sürüm: {data.version}.</p>
+        </div>
+        <button onClick={save} disabled={saving} className="px-4 py-2 rounded-lg bg-blue-500 text-white font-semibold disabled:opacity-50">{saving ? "Kaydediliyor..." : "Tümünü Kaydet"}</button>
+      </div>
+
+      <div className="flex gap-2 flex-wrap">
+        {Object.entries(data.categories).map(([k, v]) => (
+          <button key={k} onClick={() => setActiveCat(k)} className={`px-3 py-1.5 rounded-full text-xs font-medium ${activeCat === k ? "bg-rose-500 text-white" : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700"}`}>
+            {v.label} ({v.brands.length})
+          </button>
+        ))}
+      </div>
+
+      {activeCat && data.categories[activeCat] && (
+        <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3">
+          <div className="text-xs text-gray-500 mb-2">Ana şirket: {data.categories[activeCat].parent}</div>
+          <div className="flex gap-1.5 flex-wrap mb-3">
+            {data.categories[activeCat].brands.map((b) => (
+              <span key={b} className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-xs">
+                {b}
+                <button onClick={() => removeBrand(b)} className="text-rose-500 hover:text-rose-700">×</button>
+              </span>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <input value={newBrand} onChange={(e) => setNewBrand(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addBrand()} placeholder="yeni marka adı" className="flex-1 px-3 py-1.5 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-sm" />
+            <button onClick={addBrand} className="px-3 py-1.5 rounded-lg bg-green-500 text-white text-sm font-medium">+ Ekle</button>
+          </div>
+        </div>
+      )}
+
+      <div>
+        <h3 className="text-sm font-semibold mb-2">İstisna Anahtarlar (false positive'leri eler)</h3>
+        <p className="text-xs text-gray-500 mb-2">Her satıra bir kelime. Örnek: <code>axess</code>, <code>kotonlu</code>, <code>kokoreç</code></p>
+        <textarea value={excludedText} onChange={(e) => setExcludedText(e.target.value)} rows={5} className="w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 font-mono text-sm" />
+      </div>
+    </div>
+  );
+}
 
 function StoresTab({ settings, onSave, busy }: TabProps) {
   const [stores, setStores] = useState(settings.stores);
@@ -357,7 +573,18 @@ function SocialTab({ settings, onSave, busy }: TabProps) {
           <input type="text" value={s.facebook.page_id} onChange={(e) => updateField("facebook", "page_id", e.target.value)} placeholder="123456789" className="mt-1 w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm font-mono" /></label>
       </fieldset>
 
-      <button onClick={() => onSave(s as unknown as Record<string, unknown>)} disabled={busy} className="px-4 py-2 rounded-lg bg-blue-500 text-white font-semibold disabled:opacity-50">Kaydet</button>
+      <div className="flex gap-2 flex-wrap">
+        <button onClick={() => onSave(s as unknown as Record<string, unknown>)} disabled={busy} className="px-4 py-2 rounded-lg bg-blue-500 text-white font-semibold disabled:opacity-50">Kaydet</button>
+        <button onClick={async () => {
+          const pw = localStorage.getItem("multiscout_admin_pw");
+          const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+          const tt = toast.loading("Telegram test mesajı gönderiliyor...");
+          const res = await fetch(`${API}/api/admin/test-telegram`, { method: "POST", headers: { "X-ADMIN-PASSWORD": pw || "" } });
+          const data = await res.json();
+          if (data.ok) toast.success("Telegram OK, mesaj gönderildi", { id: tt });
+          else toast.error(data.error || "Gönderilemedi", { id: tt });
+        }} className="px-4 py-2 rounded-lg bg-cyan-500 text-white font-semibold">📨 Telegram Test</button>
+      </div>
     </div>
   );
 }
@@ -388,7 +615,21 @@ function AutoShareTab({ settings, onSave, busy }: TabProps) {
           ))}
         </div>
       </div>
-      <button onClick={() => onSave(s as unknown as Record<string, unknown>)} disabled={busy} className="px-4 py-2 rounded-lg bg-blue-500 text-white font-semibold disabled:opacity-50">Kaydet</button>
+      <div className="flex gap-2 flex-wrap">
+        <button onClick={() => onSave(s as unknown as Record<string, unknown>)} disabled={busy} className="px-4 py-2 rounded-lg bg-blue-500 text-white font-semibold disabled:opacity-50">Kaydet</button>
+        <button onClick={async () => {
+          const pw = localStorage.getItem("multiscout_admin_pw");
+          const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+          const tt = toast.loading("Paylaşım tetikleniyor...");
+          const res = await fetch(`${API}/api/admin/trigger-share`, { method: "POST", headers: { "X-ADMIN-PASSWORD": pw || "" } });
+          if (res.ok) {
+            const data = await res.json();
+            toast.success(`${data.shared} deal paylaşıldı`, { id: tt });
+          } else {
+            toast.error("Tetiklenemedi", { id: tt });
+          }
+        }} className="px-4 py-2 rounded-lg bg-purple-500 text-white font-semibold">🚀 Şimdi Paylaş (test)</button>
+      </div>
     </div>
   );
 }
