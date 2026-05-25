@@ -9,7 +9,7 @@ import { DealGridSkeleton } from "../components/DealCardSkeleton";
 import ThemeToggle from "../components/ThemeToggle";
 import PriceHistoryChart from "../components/PriceHistoryChart";
 import FilterSheet from "../components/FilterSheet";
-import { isBoycotted } from "../lib/boycott";
+import { isBoycotted, refreshBoycottList, getBoycottMeta } from "../lib/boycott";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -170,6 +170,7 @@ export default function Home() {
   const [boycottMode, setBoycottMode] = useState<BoycottMode>("highlight");
   const [filterOpen, setFilterOpen] = useState(false);
   const [categoryOpen, setCategoryOpen] = useState(false);
+  const [boycottMeta, setBoycottMeta] = useState(() => getBoycottMeta());
 
   useEffect(() => {
     const stored = typeof window !== "undefined" ? localStorage.getItem("boycottMode") : null;
@@ -250,6 +251,10 @@ export default function Home() {
       })
       .catch((err) => console.error(err));
 
+    refreshBoycottList(false).then(() => {
+      setBoycottMeta(getBoycottMeta());
+    });
+
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchDeals(selectedCategory, selectedPlatform, true, selectedSort);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -328,8 +333,25 @@ export default function Home() {
         <SortPills selected={selectedSort} onSelect={selectSort} layoutId="sheet-sort" />
       </section>
       <section>
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">Boykot Ürünleri</h3>
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Boykot Ürünleri</h3>
+          <button
+            onClick={async () => {
+              const t = toast.loading("Boykot listesi güncelleniyor...");
+              await refreshBoycottList(true);
+              const meta = getBoycottMeta();
+              setBoycottMeta(meta);
+              toast.success(`Liste güncel: ${meta.count} marka (${meta.version || "?"})`, { id: t });
+            }}
+            className="text-[10px] font-semibold text-blue-600 dark:text-blue-400 hover:underline"
+          >
+            ↻ Güncelle
+          </button>
+        </div>
         <BoycottPills selected={boycottMode} onSelect={setBoycottMode} layoutId="sheet-boycott" />
+        <p className="mt-2 text-[10px] text-gray-400 dark:text-gray-500">
+          {boycottMeta.count} marka · {boycottMeta.version || "?"} · {boycottMeta.source || "?"}
+        </p>
       </section>
     </div>
   );
