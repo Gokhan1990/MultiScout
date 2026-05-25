@@ -15,7 +15,14 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "MultiScout — Akıllı Fırsat Takipçisi",
-  description: "Amazon, Trendyol, N11 ve Hepsiburada fırsatlarını tek yerde takip et",
+  description: "Amazon, Trendyol, N11, Hepsiburada, Pazarama, Çiçek Sepeti, Vatan, Teknosa, Decathlon, Steam fırsatlarını tek yerde takip et",
+  manifest: "/manifest.json",
+  themeColor: "#f97316",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "MultiScout",
+  },
 };
 
 export default function RootLayout({

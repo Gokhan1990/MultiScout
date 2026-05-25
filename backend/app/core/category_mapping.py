@@ -45,6 +45,34 @@ CICEKSEPETI_CATEGORY_URLS = {
     "gida": "https://www.ciceksepeti.com/arama?query=gourmet",
 }
 
+VATAN_CATEGORY_URLS = {
+    "elektronik": "https://www.vatanbilgisayar.com/arama/?q=elektronik",
+    "bilgisayar": "https://www.vatanbilgisayar.com/arama/?q=bilgisayar",
+    "telefon": "https://www.vatanbilgisayar.com/arama/?q=telefon",
+    "tv": "https://www.vatanbilgisayar.com/arama/?q=televizyon",
+    "kulaklik": "https://www.vatanbilgisayar.com/arama/?q=kulaklik",
+}
+
+TEKNOSA_CATEGORY_URLS = {
+    "elektronik": "https://www.teknosa.com/arama/?s=elektronik",
+    "telefon": "https://www.teknosa.com/arama/?s=telefon",
+    "bilgisayar": "https://www.teknosa.com/arama/?s=bilgisayar",
+    "tv": "https://www.teknosa.com/arama/?s=televizyon",
+    "beyazesya": "https://www.teknosa.com/arama/?s=buzdolabi",
+}
+
+DECATHLON_CATEGORY_URLS = {
+    "spor": "https://www.decathlon.com.tr/search?Ntt=spor",
+    "kosu": "https://www.decathlon.com.tr/search?Ntt=kosu",
+    "bisiklet": "https://www.decathlon.com.tr/search?Ntt=bisiklet",
+    "kamp": "https://www.decathlon.com.tr/search?Ntt=kamp",
+    "yoga": "https://www.decathlon.com.tr/search?Ntt=yoga",
+}
+
+STEAM_CATEGORY_URLS = {
+    "oyun": "https://store.steampowered.com/api/featuredcategories?cc=tr&l=turkish",
+}
+
 N11_CATEGORY_URLS = {
     "gida": "https://www.n11.com/arama?q=gida",
     "elektronik": "https://www.n11.com/arama?q=elektronik",

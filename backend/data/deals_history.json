@@ -3162,6 +3162,11 @@
                 "date": "2026-05-24",
                 "price": "77,99 TL",
                 "discount_percentage": 40
+            },
+            {
+                "date": "2026-05-25",
+                "price": "77,99 TL",
+                "discount_percentage": 40
             }
         ]
     },
@@ -5746,6 +5751,11 @@
         "price_history": [
             {
                 "date": "2026-05-24",
+                "price": "588,00 TL",
+                "discount_percentage": 34
+            },
+            {
+                "date": "2026-05-25",
                 "price": "588,00 TL",
                 "discount_percentage": 34
             }
@@ -8728,6 +8738,71 @@
                 "date": "2026-05-25",
                 "price": "55,58 TL",
                 "discount_percentage": 7
+            }
+        ]
+    },
+    "B0GJT9QLWR": {
+        "title": "Nish Kırmızı Orman Meyveleri Aromalı Püre Sos 1150 Gram",
+        "link": "https://www.amazon.com.tr/Nish-K%C4%B1rm%C4%B1z%C4%B1-Orman-Meyveleri-Aromal%C4%B1/dp/B0GJT9QLWR/ref=sr_1_64?dib=eyJ2IjoiMSJ9.mBNfYpMKZDvU6GMUwPmDRKO7aDerbMzBtPSu_GtBUd6RETuVGz8RK3k1q60MfdjLssNmWsQ3h2vfYKxY1po99Fv74DXFs46TEFheU0-GKd6xNCGLvL4Cm1cUyAD_kGPwV8pmnxARsPSHonryHZ3RbBSTqjwV0dbWVzEvGs7qGspJ9QqpMqBcd1-1II5uXH5fDObq9L8QiKCFAKYxo7slFNZYkW1CBOHIoYrEOVyiIe-TFcbViMkUhi2dpHXBQ73d5E6wnFUMBCVofDZILZ9pSDxFZJrgf8nerTQr3GSXf54.dW_Xm0D8v5NxRrHxBnNtT1O_U5JhsAtkwNIJbKY6BR4&dib_tag=se&qid=1779708984&refinements=p_8%3A20-&s=grocery",
+        "image": "https://m.media-amazon.com/images/I/616g-jr2jTL._AC_UL320_.jpg",
+        "category": "gida",
+        "price_history": [
+            {
+                "date": "2026-05-25",
+                "price": "346,21 TL",
+                "discount_percentage": 24
+            }
+        ]
+    },
+    "B0C541NMJS": {
+        "title": "Engo Apple iPad Air 5. Nesil Uyumlu Kağıt Hissi Veren Şeffaf Mat Ekran Koruyucu 10.9 inç",
+        "link": "https://www.amazon.com.tr/Apple-5-Nesil-Uyumlu-%C5%9Eeffaf-Koruyucu/dp/B0C541NMJS/ref=sr_1_55?dib=eyJ2IjoiMSJ9.kg9Wk434se3aNEFKuD8Gdvj4dqxxx39qU1u2yHKJLfSJiy6HxdFRowZ0OItROX3zNABk2DM-L7qB5jd5-EW38KqNuTj7gzEoeVQdm_6_4vf-8UWFhSkTd_Sda8ehR1WPubZiDuyj2zjFAqwZIcgv_LLhEijqvuVXQSPaPj86g4j7eTvmRt6lywzDOdKU1L79DypJLFCq7qeRHNxg4NESDHnFQAr48b6-fzrAG6Qz1ebffJ6pn5oV2qedn2fwgeboRbsBIcY-mwcWS5d9p0Nnw74lHdNDistTZ8OUTYWTwo4.s_kUuQcSjWpF5Nrmt-Lm2muARLOmLv9O5oAhuw8BnZ8&dib_tag=se&qid=1779709017&refinements=p_8%3A20-&s=electronics",
+        "image": "https://m.media-amazon.com/images/I/41NkANhrVyL._AC_UL320_.jpg",
+        "category": "elektronik",
+        "price_history": [
+            {
+                "date": "2026-05-25",
+                "price": "246,70 TL",
+                "discount_percentage": 7
+            }
+        ]
+    },
+    "B0DHSB4P94": {
+        "title": "LEGO DC Superman Robotu, Lex Luthor’a Karşı 76302-6 Yaş ve Üzeri Süper Kahraman Sevenler için Yaratıcı Oyuncak Yapım Seti,...",
+        "link": "https://www.amazon.com.tr/LEGO-Superman-Kahraman-Sevenler-Yarat%C4%B1c%C4%B1/dp/B0DHSB4P94/ref=sr_1_60?dib=eyJ2IjoiMSJ9.4F1E3G4bV__OcHR7k-2nMyo5szr52phXRr1n6m7K84Vv632qHvu3S8xZfTFHITG0kRd6fbeLcUmqe9lGkkLYZ-cjHXL-zfyoxOgJf8N3K78wkcr5eKaIrKMwakySBR3F294fWrRMnMq3y4FaAH2-ZzEl3ETGYZKZE_VaAJWTflhsiai2VOQOW99NTtyKlxwVuwW35fFP3uHsGvZGsJFw0Xl-uABoOGNu5SuvDESsyYqkJzRxZo7SFwHY1bJ_pvuEtIGnLbiR69OgsS32qynK3AFTxd40aXNVRQj7U9UQzrs.Ll54HPIUFRMBu-mpDPNQVLixclbUuUBI_xPyCDUZtPE&dib_tag=se&qid=1779709113&refinements=p_8%3A20-&s=toys",
+        "image": "https://m.media-amazon.com/images/I/81BwOcdE2zL._AC_UL320_.jpg",
+        "category": "oyuncak",
+        "price_history": [
+            {
+                "date": "2026-05-25",
+                "price": "647,10 TL",
+                "discount_percentage": 10
+            }
+        ]
+    },
+    "B0CNX7L8S4": {
+        "title": "Reebok ENERGEN TECH 2 Koşu AyakkabısıKadın",
+        "link": "https://www.amazon.com.tr/Reebok-ENERGEN-Kad%C4%B1n-Ayakkab%C4%B1-Beyaz/dp/B0CNX7L8S4/ref=sr_1_138?dib=eyJ2IjoiMSJ9.P3L_Clh7IUCPxPW34YtO_HxIz1cAa58J4hgvzZR3DYd34XoKj2yhLkuqtNhXLSHGQolyFJc_ZuwrZ1fA_pFI9uwEdpU0cIP7OwYpczkaCETOiF0QLEGXH5Y9OtAXJDhi1keDG_37kRsfjOv5L9rad72SxtW8fYvDEI1FEroCUJBQ-F9DD08GrtP49ay_EV_6LPaU0tLU_3inMuOWW6WdxXvERfOpkZRwNRuyG515L76rHmMfiYUR3IvrpeowjoF40yaOgBeXomkKSQ1a5VQ5B2tBz_HpXKfYApRRh5i4smA.1hU0YeWmhK2oRDSGveMc3aE9-ftK0vCfIRQIz0ekGxc&dib_tag=se&qid=1779709240&refinements=p_8%3A20-&s=apparel",
+        "image": "https://m.media-amazon.com/images/I/51IId3ec5bL._AC_UL320_.jpg",
+        "category": "moda",
+        "price_history": [
+            {
+                "date": "2026-05-25",
+                "price": "1.519,20 TL",
+                "discount_percentage": 8
+            }
+        ]
+    },
+    "B00006JNN7": {
+        "title": "Post-it Notlar, 7,62 cm x 7,62 cm, 5 Yapışkan Not Defteri, Her Ped 100 Yaprak, Çiçekli Fantezi Koleksiyonu, Yeni Yıl Organ...",
+        "link": "https://www.amazon.com.tr/Post-Amerikan%C4%B1n-Numaral%C4%B1-Koleksiyonu-D%C3%B6n%C3%BC%C5%9Ft%C3%BCr%C3%BClebilir/dp/B00006JNN7/ref=sr_1_55?dib=eyJ2IjoiMSJ9.qKmej_v6SGLjC8AVyjIwn4VE_Ljb0pf986-k2pmFdZowhi3RXg-24kotlxCCfbe6Y2L6mpkQ6O7IhY2RC72Hm-zyNJXBBNKG9adzt6LW1U5MQYNUwzjnejSgH7jvc3Jd2TTb9W4jkrM3AX4ULlso9yzV5oLq3CplKD8pHWdnoUqQzXTLTeARhpALldRXR9mCbmQPIex_uIlpUFCCcR352yeAkOpgZ7qdEI2SISl3p8zK3vxpMfDU035iDroEF8QqT4RBZZzT_LHkDObrn72-7Zl6AAczFHEe61qFFK3tbc4.AX65CdlW3Wk6UywJH90CAj7d8Ae6zx5WCgskBFQeA0Q&dib_tag=se&qid=1779709455&refinements=p_8%3A20-&s=office-products",
+        "image": "https://m.media-amazon.com/images/I/71dQVoEVECL._AC_UL320_.jpg",
+        "category": "ofis",
+        "price_history": [
+            {
+                "date": "2026-05-25",
+                "price": "320,46 TL",
+                "discount_percentage": 20
             }
         ]
     }

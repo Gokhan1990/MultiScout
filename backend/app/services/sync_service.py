@@ -11,6 +11,10 @@ PLATFORM_FILES = {
     "hepsiburada": "data/deals_hepsiburada.json",
     "pazarama": "data/deals_pazarama.json",
     "ciceksepeti": "data/deals_ciceksepeti.json",
+    "vatan": "data/deals_vatan.json",
+    "teknosa": "data/deals_teknosa.json",
+    "decathlon": "data/deals_decathlon.json",
+    "steam": "data/deals_steam.json",
 }
 
 

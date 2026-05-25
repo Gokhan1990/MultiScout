@@ -12,6 +12,10 @@ SCRAPE_ALL_STATUS = {
     "n11": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
     "pazarama": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
     "ciceksepeti": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "vatan": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "teknosa": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "decathlon": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "steam": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
 }
 
 CONCURRENT_SCRAPES = 2
@@ -42,7 +46,15 @@ async def run_platform_scrape(platform: str, min_discount: int):
     from app.scrapers.hepsiburada_scraper import scrape_hepsiburada_deals
     from app.scrapers.pazarama_scraper import scrape_pazarama_deals
     from app.scrapers.ciceksepeti_scraper import scrape_ciceksepeti_deals
-    from app.core.category_mapping import TRENDYOL_CATEGORY_URLS, HEPSIBURADA_CATEGORY_URLS, N11_CATEGORY_URLS, PAZARAMA_CATEGORY_URLS, CICEKSEPETI_CATEGORY_URLS
+    from app.scrapers.vatan_scraper import scrape_vatan_deals
+    from app.scrapers.teknosa_scraper import scrape_teknosa_deals
+    from app.scrapers.decathlon_scraper import scrape_decathlon_deals
+    from app.scrapers.steam_scraper import scrape_steam_deals
+    from app.core.category_mapping import (
+        TRENDYOL_CATEGORY_URLS, HEPSIBURADA_CATEGORY_URLS, N11_CATEGORY_URLS,
+        PAZARAMA_CATEGORY_URLS, CICEKSEPETI_CATEGORY_URLS,
+        VATAN_CATEGORY_URLS, TEKNOSA_CATEGORY_URLS, DECATHLON_CATEGORY_URLS, STEAM_CATEGORY_URLS,
+    )
     from app.services.sync_service import sync_json_to_db, PLATFORM_FILES
     from app.models.database import get_db
 
@@ -105,6 +117,32 @@ async def run_platform_scrape(platform: str, min_discount: int):
                     scrape_ciceksepeti_deals(PLATFORM_FILES["ciceksepeti"], cat, min_discount)
                     for cat in batch
                 ], return_exceptions=True)
+        elif platform == "vatan":
+            categories = list(VATAN_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_vatan_deals(PLATFORM_FILES["vatan"], cat, min_discount)
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "teknosa":
+            categories = list(TEKNOSA_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_teknosa_deals(PLATFORM_FILES["teknosa"], cat, min_discount)
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "decathlon":
+            categories = list(DECATHLON_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_decathlon_deals(PLATFORM_FILES["decathlon"], cat, min_discount)
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "steam":
+            await scrape_steam_deals(PLATFORM_FILES["steam"], "oyun", min_discount)
 
         SCRAPE_ALL_STATUS[platform] = {
             "status": "completed",
@@ -139,6 +177,10 @@ async def run_scrape_all_job(min_discount: int, platform: str = "all"):
             run_platform_scrape("hepsiburada", min_discount),
             run_platform_scrape("pazarama", min_discount),
             run_platform_scrape("ciceksepeti", min_discount),
+            run_platform_scrape("vatan", min_discount),
+            run_platform_scrape("teknosa", min_discount),
+            run_platform_scrape("decathlon", min_discount),
+            run_platform_scrape("steam", max(min_discount, 10)),
             return_exceptions=True
         )
     else:
