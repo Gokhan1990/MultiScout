@@ -86,8 +86,24 @@ async def scrape_n11_deals(
                 seen.add(cleanHref);
                 // N11 ürün card'ı linkEl'i kendisi içerir
                 const container = linkEl.closest('[class*="searchResults"], [class*="productList"], section, div') || linkEl;
-                const img = linkEl.querySelector('img');
+                // İLK img kupon/badge rozeti olabilir (class="square-size", parent="top-left-badge")
+                // Gerçek ürün resmi: img.listing-items-image veya img.swiper-lazy
+                const img = linkEl.querySelector('img.listing-items-image, img.swiper-lazy')
+                  || Array.from(linkEl.querySelectorAll('img')).find(i => {
+                       const cls = typeof i.className === 'string' ? i.className : '';
+                       const alt = i.getAttribute('alt') || '';
+                       // kupon/badge ve add-icon filtrele
+                       if (/square-size|card-add-button-icon|top-left-badge|coupon|kupon|voucher/i.test(cls)) return false;
+                       if (/^(SQUARE|add-icon|kupon|coupon)$/i.test(alt)) return false;
+                       const par = i.parentElement;
+                       const parCls = par && typeof par.className === 'string' ? par.className : '';
+                       if (/top-left-badge|coupon|kupon|badge/i.test(parCls)) return false;
+                       return true;
+                     })
+                  || linkEl.querySelector('img');
                 let title = img?.getAttribute('alt') || linkEl.getAttribute('title') || linkEl.getAttribute('aria-label') || '';
+                // alt "SQUARE" ise başlık değildir
+                if (title && /^(SQUARE|add-icon)$/i.test(title)) title = '';
                 if (!title || title.length < 5) {
                   const titleEl = linkEl.querySelector('h3, h2, [class*="productName"], [class*="title"], [class*="name"]');
                   if (titleEl) title = titleEl.innerText.trim();
@@ -116,7 +132,10 @@ async def scrape_n11_deals(
                   if (b >= 1 && b <= 90 && b > discount) discount = b;
                 }
                 if (discount > 90) return;  // gürültü
-                let image = img?.getAttribute('src') || img?.getAttribute('data-src') || '';
+                // src "data:image/svg+xml..." gibi placeholder olabilir → o zaman data-src'i tercih et
+                const srcAttr = img?.getAttribute('src') || '';
+                const dataSrcAttr = img?.getAttribute('data-src') || '';
+                let image = (srcAttr && !srcAttr.startsWith('data:')) ? srcAttr : (dataSrcAttr || srcAttr);
                 if (image && image.startsWith('//')) image = 'https:' + image;
                 out.push({title: title.substring(0,150), price: formatTL(current), discount, link: cleanHref, image});
               });
