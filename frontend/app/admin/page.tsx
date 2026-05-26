@@ -29,7 +29,9 @@ const STORE_LABELS: Record<string, string> = {
   amazon: "Amazon", trendyol: "Trendyol", n11: "N11", hepsiburada: "Hepsiburada",
   pazarama: "Pazarama", ciceksepeti: "Çiçek Sepeti", vatan: "Vatan Bilgisayar",
   teknosa: "Teknosa", decathlon: "Decathlon", steam: "Steam",
-  mediamarkt: "MediaMarkt", defacto: "Defacto",
+  mediamarkt: "MediaMarkt", defacto: "Defacto", gratis: "Gratis",
+  a101: "A101", bim: "BİM", sok: "ŞOK", migros: "MİGROS",
+  carrefoursa: "CarrefourSA", hakmar: "HAKMAR", tarimkredi: "Tarım Kredi",
 };
 
 const TABS: { id: Tab; label: string; icon: string }[] = [

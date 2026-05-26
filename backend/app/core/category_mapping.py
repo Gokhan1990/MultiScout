@@ -92,6 +92,29 @@ DEFACTO_CATEGORY_URLS = {
     "elbise": "https://www.defacto.com.tr/arama?q=elbise",
 }
 
+# marketfiyati: kategori -> arama anahtar kelimeleri (her birinden ~30 ürün gelir)
+MARKETFIYATI_CATEGORIES = {
+    "sut-kahvalti": ["süt", "yumurta", "peynir", "yoğurt", "tereyağı", "zeytin", "bal"],
+    "et-tavuk": ["tavuk", "kıyma", "sosis", "salam", "sucuk"],
+    "sebze-meyve": ["domates", "salatalık", "soğan", "patates", "elma", "muz", "portakal"],
+    "temel-gida": ["ekmek", "pirinç", "makarna", "un", "şeker", "yağ", "tuz", "salça"],
+    "icecek": ["su", "çay", "kahve", "kola", "ayran", "meyve suyu"],
+    "atistirmalik": ["çikolata", "bisküvi", "cips", "gofret", "kraker"],
+    "temizlik": ["deterjan", "sabun", "şampuan", "diş macunu", "çamaşır yumuşatıcı", "bulaşık deterjanı"],
+    "hijyen-bebek": ["bebek bezi", "hijyenik ped", "tuvalet kağıdı", "kağıt havlu", "ıslak mendil"],
+}
+
+GRATIS_CATEGORY_URLS = {
+    "parfum": "https://www.gratis.com/search?q=parfum",
+    "makyaj": "https://www.gratis.com/makyaj-c-501",
+    "cilt-bakim": "https://www.gratis.com/cilt-bakim-c-502",
+    "sac-bakim": "https://www.gratis.com/sac-bakim-c-503",
+    "erkek-bakim": "https://www.gratis.com/erkek-bakim-c-505",
+    "anne-bebek": "https://www.gratis.com/anne-bebek-c-507",
+    "elektrikli": "https://www.gratis.com/elektrikli-urunler-c-511",
+    "hijyen": "https://www.gratis.com/hijyen-bakim-c-515",
+}
+
 N11_CATEGORY_URLS = {
     "gida": "https://www.n11.com/arama?q=gida",
     "elektronik": "https://www.n11.com/arama?q=elektronik",

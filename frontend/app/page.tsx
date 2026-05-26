@@ -45,7 +45,8 @@ interface Deal {
 
 type PlatformKey =
   | "hepsi" | "amazon" | "trendyol" | "hepsiburada" | "n11"
-  | "pazarama" | "ciceksepeti" | "vatan" | "teknosa" | "decathlon" | "steam" | "mediamarkt" | "defacto";
+  | "pazarama" | "ciceksepeti" | "vatan" | "teknosa" | "decathlon" | "steam" | "mediamarkt" | "defacto" | "gratis"
+  | "a101" | "bim" | "sok" | "migros" | "carrefoursa" | "hakmar" | "tarimkredi";
 type BoycottMode = "highlight" | "hide" | "show";
 
 const PLATFORM_LABELS: Record<PlatformKey, string> = {
@@ -62,11 +63,20 @@ const PLATFORM_LABELS: Record<PlatformKey, string> = {
   steam: "Steam",
   mediamarkt: "MediaMarkt",
   defacto: "Defacto",
+  gratis: "Gratis",
+  a101: "A101",
+  bim: "BİM",
+  sok: "ŞOK",
+  migros: "MİGROS",
+  carrefoursa: "CarrefourSA",
+  hakmar: "HAKMAR",
+  tarimkredi: "Tarım Kredi",
 };
 
 const ALL_PLATFORM_KEYS: PlatformKey[] = [
   "hepsi", "amazon", "trendyol", "hepsiburada", "n11",
-  "pazarama", "ciceksepeti", "vatan", "teknosa", "decathlon", "steam", "mediamarkt", "defacto",
+  "pazarama", "ciceksepeti", "vatan", "teknosa", "decathlon", "steam", "mediamarkt", "defacto", "gratis",
+  "a101", "bim", "sok", "migros", "carrefoursa", "hakmar", "tarimkredi",
 ];
 
 const BOYCOTT_MODES: { key: BoycottMode; tKey: string; icon: string }[] = [
