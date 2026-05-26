@@ -31,7 +31,8 @@ const STORE_LABELS: Record<string, string> = {
   teknosa: "Teknosa", decathlon: "Decathlon", steam: "Steam",
   mediamarkt: "MediaMarkt", defacto: "Defacto", gratis: "Gratis",
   a101: "A101", bim: "BİM", sok: "ŞOK", migros: "MİGROS",
-  carrefoursa: "CarrefourSA", hakmar: "HAKMAR", tarimkredi: "Tarım Kredi",
+  carrefoursa: "CarrefourSA", tarimkredi: "Tarım Kredi",
+  hakmarexpress: "Hakmar Express", macrocenter: "Macrocenter", bizimtoptan: "Bizim Toptan",
 };
 
 const TABS: { id: Tab; label: string; icon: string }[] = [

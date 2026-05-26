@@ -23,8 +23,10 @@ PLATFORM_FILES = {
     "sok": "data/deals_sok.json",
     "migros": "data/deals_migros.json",
     "carrefoursa": "data/deals_carrefoursa.json",
-    "hakmar": "data/deals_hakmar.json",
     "tarimkredi": "data/deals_tarimkredi.json",
+    "hakmarexpress": "data/deals_hakmarexpress.json",
+    "macrocenter": "data/deals_macrocenter.json",
+    "bizimtoptan": "data/deals_bizimtoptan.json",
 }
 
 

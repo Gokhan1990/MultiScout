@@ -104,6 +104,40 @@ MARKETFIYATI_CATEGORIES = {
     "hijyen-bebek": ["bebek bezi", "hijyenik ped", "tuvalet kağıdı", "kağıt havlu", "ıslak mendil"],
 }
 
+HAKMAREXPRESS_CATEGORY_URLS = {
+    "temel-gida": "https://www.hakmarexpress.com.tr/temel-gida-c",
+    "atistirmalik": "https://www.hakmarexpress.com.tr/atistirmalik-c",
+    "icecek": "https://www.hakmarexpress.com.tr/icecek-c",
+    "et-et-urunleri": "https://www.hakmarexpress.com.tr/et-et-urunleri-c",
+    "sut-kahvaltilik": "https://www.hakmarexpress.com.tr/sut-kahvaltilik-c",
+    "kisisel-bakim": "https://www.hakmarexpress.com.tr/kisisel-bakim-kozmetik-c",
+    "temizlik": "https://www.hakmarexpress.com.tr/temizlik-c",
+    "anne-bebek": "https://www.hakmarexpress.com.tr/anne-bebek-c",
+}
+
+MACROCENTER_CATEGORY_URLS = {
+    "meyve-sebze": "https://www.macrocenter.com.tr/meyve-sebze-c-116a4",
+    "et-tavuk-balik": "https://www.macrocenter.com.tr/et-tavuk-balik-c-11535",
+    "sut-urunleri-kahvaltilik": "https://www.macrocenter.com.tr/sut-urunleri-kahvaltilik-c-116b7",
+    "temel-gida": "https://www.macrocenter.com.tr/temel-gida-c-11577",
+    "atistirmalik": "https://www.macrocenter.com.tr/atistirmalik-c-11468",
+    "icecek": "https://www.macrocenter.com.tr/icecek-c-11492",
+    "dondurma": "https://www.macrocenter.com.tr/dondurma-c-116b8",
+    "temizlik": "https://www.macrocenter.com.tr/temizlik-c-117ab",
+}
+
+BIZIMTOPTAN_CATEGORY_URLS = {
+    "temel-gida": "https://www.bizimtoptan.com.tr/temel-gida",
+    "icecek": "https://www.bizimtoptan.com.tr/icecek",
+    "sivi-yag-margarin": "https://www.bizimtoptan.com.tr/sivi-yag-margarin",
+    "temizlik": "https://www.bizimtoptan.com.tr/temizlik",
+    "atistirmalik": "https://www.bizimtoptan.com.tr/atistirmalik",
+    "sarkuteri-kahvaltilik": "https://www.bizimtoptan.com.tr/sarkuteri-kahvaltilik",
+    "et-urunleri-ve-sarkuteri": "https://www.bizimtoptan.com.tr/et-urunleri-ve-sarkuteri",
+    "kisisel-bakim": "https://www.bizimtoptan.com.tr/kisisel-bakim",
+    "bebek-urunleri": "https://www.bizimtoptan.com.tr/bebek-urunleri",
+}
+
 GRATIS_CATEGORY_URLS = {
     "parfum": "https://www.gratis.com/search?q=parfum",
     "makyaj": "https://www.gratis.com/makyaj-c-501",

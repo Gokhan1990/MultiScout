@@ -49,14 +49,13 @@ MARKET_KEY_ALIASES = {
     "migros": "migros",
     "carrefour": "carrefoursa",
     "carrefoursa": "carrefoursa",
-    "hakmar": "hakmar",
     "tarim_kredi": "tarimkredi",
     "tarimkredi": "tarimkredi",
     "tarımkredi": "tarimkredi",
 }
 
 # Internal label → bizim platform key
-ALL_MARKET_KEYS = ["a101", "bim", "sok", "migros", "carrefoursa", "hakmar", "tarimkredi"]
+ALL_MARKET_KEYS = ["a101", "bim", "sok", "migros", "carrefoursa", "tarimkredi"]
 
 
 def _normalize_market(raw: str) -> str | None:
