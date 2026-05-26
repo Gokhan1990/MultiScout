@@ -148,6 +148,11 @@ async def scrape_n11_deals(
                 discount = prod.get("discount", 0)
                 if discount < min_discount:
                     continue
+                # Defansif: title "SQUARE"/"add-icon" veya image /org/ ise = badge resmi → atla
+                ptitle = (prod.get("title") or "").strip()
+                pimage = prod.get("image") or ""
+                if ptitle.upper() in ("SQUARE", "ADD-ICON") or "/org/" in pimage:
+                    continue
                 deals.append({
                     "title": prod.get("title", ""),
                     "price": prod.get("price", "N/A"),
