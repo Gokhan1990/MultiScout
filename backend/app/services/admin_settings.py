@@ -12,7 +12,11 @@ DEFAULTS: dict[str, Any] = {
     "stores": {
         "amazon": True, "trendyol": True, "n11": True, "hepsiburada": True,
         "pazarama": True, "ciceksepeti": True, "vatan": True, "teknosa": True,
-        "decathlon": False, "steam": True,
+        "decathlon": False, "steam": True, "mediamarkt": True, "defacto": True,
+        "gratis": True,
+        "a101": True, "bim": True, "sok": True, "migros": True,
+        "carrefoursa": True, "tarimkredi": True,
+        "hakmarexpress": True, "macrocenter": True, "bizimtoptan": True,
     },
     "theme": {
         "primary": "#f97316",

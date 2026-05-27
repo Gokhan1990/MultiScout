@@ -16,7 +16,22 @@ SCRAPE_ALL_STATUS = {
     "teknosa": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
     "decathlon": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
     "steam": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "defacto": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "mediamarkt": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "gratis": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "a101": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "bim": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "sok": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "migros": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "carrefoursa": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "tarimkredi": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "hakmarexpress": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "macrocenter": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "bizimtoptan": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
 }
+
+# marketfiyati API ile beslenen marketler — tek API call ile 6 market beraber çıkar
+MARKETFIYATI_PLATFORMS = {"a101", "bim", "sok", "migros", "carrefoursa", "tarimkredi"}
 
 CONCURRENT_SCRAPES = 2
 
@@ -50,10 +65,20 @@ async def run_platform_scrape(platform: str, min_discount: int):
     from app.scrapers.teknosa_scraper import scrape_teknosa_deals
     from app.scrapers.decathlon_scraper import scrape_decathlon_deals
     from app.scrapers.steam_scraper import scrape_steam_deals
+    from app.scrapers.defacto_scraper import scrape_defacto_deals
+    from app.scrapers.mediamarkt_scraper import scrape_mediamarkt_deals
+    from app.scrapers.gratis_scraper import scrape_gratis_deals
+    from app.scrapers.marketfiyati_scraper import scrape_marketfiyati_all, ALL_MARKET_KEYS as MF_KEYS
+    from app.scrapers.hakmarexpress_scraper import scrape_hakmarexpress_deals
+    from app.scrapers.macrocenter_scraper import scrape_macrocenter_deals
+    from app.scrapers.bizimtoptan_scraper import scrape_bizimtoptan_deals
     from app.core.category_mapping import (
         TRENDYOL_CATEGORY_URLS, HEPSIBURADA_CATEGORY_URLS, N11_CATEGORY_URLS,
         PAZARAMA_CATEGORY_URLS, CICEKSEPETI_CATEGORY_URLS,
         VATAN_CATEGORY_URLS, TEKNOSA_CATEGORY_URLS, DECATHLON_CATEGORY_URLS, STEAM_CATEGORY_URLS,
+        DEFACTO_CATEGORY_URLS, MEDIAMARKT_CATEGORY_URLS, GRATIS_CATEGORY_URLS,
+        MARKETFIYATI_CATEGORIES,
+        HAKMAREXPRESS_CATEGORY_URLS, MACROCENTER_CATEGORY_URLS, BIZIMTOPTAN_CATEGORY_URLS,
     )
     from app.services.sync_service import sync_json_to_db, PLATFORM_FILES
     from app.models.database import get_db
@@ -134,15 +159,96 @@ async def run_platform_scrape(platform: str, min_discount: int):
                     for cat in batch
                 ], return_exceptions=True)
         elif platform == "decathlon":
+            # Cloudflare rate limit — kategorileri seri tara, aralarda bekle
             categories = list(DECATHLON_CATEGORY_URLS.keys())
+            for i, cat in enumerate(categories):
+                try:
+                    await scrape_decathlon_deals(PLATFORM_FILES["decathlon"], cat, min_discount)
+                except Exception as e:
+                    print(f"[Decathlon] {cat} error: {e}", flush=True)
+                if i < len(categories) - 1:
+                    await asyncio.sleep(20)
+        elif platform == "steam":
+            await scrape_steam_deals(PLATFORM_FILES["steam"], "oyun", min_discount)
+        elif platform == "defacto":
+            categories = list(DEFACTO_CATEGORY_URLS.keys())
             for index in range(0, len(categories), CONCURRENT_SCRAPES):
                 batch = categories[index:index + CONCURRENT_SCRAPES]
                 await asyncio.gather(*[
-                    scrape_decathlon_deals(PLATFORM_FILES["decathlon"], cat, min_discount)
+                    scrape_defacto_deals(PLATFORM_FILES["defacto"], cat, min_discount)
                     for cat in batch
                 ], return_exceptions=True)
-        elif platform == "steam":
-            await scrape_steam_deals(PLATFORM_FILES["steam"], "oyun", min_discount)
+        elif platform == "mediamarkt":
+            categories = list(MEDIAMARKT_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_mediamarkt_deals(PLATFORM_FILES["mediamarkt"], cat, min_discount)
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "gratis":
+            categories = list(GRATIS_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_gratis_deals(
+                        PLATFORM_FILES["gratis"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=GRATIS_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "hakmarexpress":
+            # Hakmar Express: everyday-low-price model → discount yok, min_discount=0 zorla
+            categories = list(HAKMAREXPRESS_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_hakmarexpress_deals(
+                        PLATFORM_FILES["hakmarexpress"],
+                        category=cat,
+                        min_discount=0,
+                        category_url=HAKMAREXPRESS_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "macrocenter":
+            # Macrocenter: discount badge yok, Money kart loyalty fiyatı → min_discount=0
+            categories = list(MACROCENTER_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_macrocenter_deals(
+                        PLATFORM_FILES["macrocenter"],
+                        category=cat,
+                        min_discount=0,
+                        category_url=MACROCENTER_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "bizimtoptan":
+            # Bizim Toptan: toptan, sadece bulk-discount → min_discount=0 ile geniş kapsama
+            categories = list(BIZIMTOPTAN_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_bizimtoptan_deals(
+                        PLATFORM_FILES["bizimtoptan"],
+                        category=cat,
+                        min_discount=0,
+                        category_url=BIZIMTOPTAN_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform in MARKETFIYATI_PLATFORMS:
+            # Tek API call ile 7 market — diğer 6'sının statüsünü de güncelle
+            out_files = {mk: PLATFORM_FILES[mk] for mk in MF_KEYS}
+            for cat, kws in MARKETFIYATI_CATEGORIES.items():
+                try:
+                    await scrape_marketfiyati_all(out_files, category=cat, keywords=kws, min_discount=min_discount)
+                except Exception as e:
+                    print(f"[MarketFiyati] {cat} hata: {e}", flush=True)
 
         SCRAPE_ALL_STATUS[platform] = {
             "status": "completed",
@@ -154,7 +260,22 @@ async def run_platform_scrape(platform: str, min_discount: int):
         db_gen = get_db()
         db = next(db_gen)
         try:
-            sync_json_to_db(platform, db)
+            if platform in MARKETFIYATI_PLATFORMS:
+                # 7 marketin hepsini DB'ye senkronize et + status'larını "completed" yap
+                for mk in MF_KEYS:
+                    try:
+                        sync_json_to_db(mk, db)
+                    except Exception as e:
+                        print(f"[SYNC] {mk} hata: {e}", flush=True)
+                    if mk != platform:
+                        SCRAPE_ALL_STATUS[mk] = {
+                            "status": "completed",
+                            "message": "MarketFiyati taramasıyla güncellendi.",
+                            "current_category": None,
+                            "updated_at": datetime.now().isoformat(),
+                        }
+            else:
+                sync_json_to_db(platform, db)
         finally:
             db.close()
 
@@ -172,12 +293,24 @@ async def run_scrape_all_job(min_discount: int, platform: str = "all"):
     from app.services.admin_settings import enabled_stores
     if platform == "all":
         enabled = set(enabled_stores())
-        all_platforms = ["amazon","trendyol","n11","hepsiburada","pazarama","ciceksepeti","vatan","teknosa","decathlon","steam"]
+        all_platforms = [
+            "amazon","trendyol","n11","hepsiburada","pazarama","ciceksepeti",
+            "vatan","teknosa","decathlon","steam","defacto","mediamarkt","gratis",
+            "a101","bim","sok","migros","carrefoursa","tarimkredi",
+            "hakmarexpress","macrocenter","bizimtoptan",
+        ]
         tasks = []
+        # marketfiyati platformları içinde herhangi biri açıksa tek bir tarama yeter
+        marketfiyati_done = False
         for p in all_platforms:
-            if p in enabled:
-                md = max(min_discount, 10) if p == "steam" else min_discount
-                tasks.append(run_platform_scrape(p, md))
+            if p not in enabled:
+                continue
+            if p in MARKETFIYATI_PLATFORMS:
+                if marketfiyati_done:
+                    continue
+                marketfiyati_done = True
+            md = max(min_discount, 10) if p == "steam" else min_discount
+            tasks.append(run_platform_scrape(p, md))
         if tasks:
             await asyncio.gather(*tasks, return_exceptions=True)
     else:

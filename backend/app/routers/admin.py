@@ -2,7 +2,7 @@ from fastapi import APIRouter, Header, HTTPException, Body
 from app.services.admin_settings import (
     load_settings, save_settings, update_section, verify_admin, enabled_stores,
 )
-from app.services.auto_share import test_telegram, share_after_scrape
+from app.services.auto_share import test_telegram, test_facebook, test_instagram, share_after_scrape
 
 router = APIRouter()
 
@@ -44,6 +44,18 @@ def patch_section(section: str, payload: dict = Body(...), x_admin_password: str
 def admin_test_telegram(x_admin_password: str | None = Header(default=None, alias="X-ADMIN-PASSWORD")):
     _require_admin(x_admin_password)
     return test_telegram()
+
+
+@router.post("/admin/test-facebook")
+def admin_test_facebook(x_admin_password: str | None = Header(default=None, alias="X-ADMIN-PASSWORD")):
+    _require_admin(x_admin_password)
+    return test_facebook()
+
+
+@router.post("/admin/test-instagram")
+def admin_test_instagram(x_admin_password: str | None = Header(default=None, alias="X-ADMIN-PASSWORD")):
+    _require_admin(x_admin_password)
+    return test_instagram()
 
 
 @router.post("/admin/trigger-share")

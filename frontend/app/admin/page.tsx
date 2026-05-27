@@ -29,6 +29,10 @@ const STORE_LABELS: Record<string, string> = {
   amazon: "Amazon", trendyol: "Trendyol", n11: "N11", hepsiburada: "Hepsiburada",
   pazarama: "Pazarama", ciceksepeti: "Çiçek Sepeti", vatan: "Vatan Bilgisayar",
   teknosa: "Teknosa", decathlon: "Decathlon", steam: "Steam",
+  mediamarkt: "MediaMarkt", defacto: "Defacto", gratis: "Gratis",
+  a101: "A101", bim: "BİM", sok: "ŞOK", migros: "MİGROS",
+  carrefoursa: "CarrefourSA", tarimkredi: "Tarım Kredi",
+  hakmarexpress: "Hakmar Express", macrocenter: "Macrocenter", bizimtoptan: "Bizim Toptan",
 };
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
@@ -584,6 +588,24 @@ function SocialTab({ settings, onSave, busy }: TabProps) {
           if (data.ok) toast.success("Telegram OK, mesaj gönderildi", { id: tt });
           else toast.error(data.error || "Gönderilemedi", { id: tt });
         }} className="px-4 py-2 rounded-lg bg-cyan-500 text-white font-semibold">📨 Telegram Test</button>
+        <button onClick={async () => {
+          const pw = localStorage.getItem("multiscout_admin_pw");
+          const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+          const tt = toast.loading("Facebook test gönderiliyor...");
+          const res = await fetch(`${API}/api/admin/test-facebook`, { method: "POST", headers: { "X-ADMIN-PASSWORD": pw || "" } });
+          const data = await res.json();
+          if (data.ok) toast.success("Facebook OK, gönderi paylaşıldı", { id: tt });
+          else toast.error(data.error || "Gönderilemedi", { id: tt });
+        }} className="px-4 py-2 rounded-lg bg-indigo-500 text-white font-semibold">📘 Facebook Test</button>
+        <button onClick={async () => {
+          const pw = localStorage.getItem("multiscout_admin_pw");
+          const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+          const tt = toast.loading("Instagram test gönderiliyor...");
+          const res = await fetch(`${API}/api/admin/test-instagram`, { method: "POST", headers: { "X-ADMIN-PASSWORD": pw || "" } });
+          const data = await res.json();
+          if (data.ok) toast.success("Instagram OK, paylaşıldı", { id: tt });
+          else toast.error(data.error || "Gönderilemedi", { id: tt });
+        }} className="px-4 py-2 rounded-lg bg-pink-500 text-white font-semibold">📷 Instagram Test</button>
       </div>
     </div>
   );

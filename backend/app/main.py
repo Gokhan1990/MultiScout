@@ -2,7 +2,7 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.models.database import init_db
-from app.routers import deals, scrape, compare, boycott, admin
+from app.routers import deals, scrape, compare, boycott, admin, ai
 from app.services.scheduler import start_scheduler, stop_scheduler
 
 app = FastAPI(title="MultiScout API")
@@ -31,6 +31,7 @@ app.include_router(scrape.router, prefix="/api")
 app.include_router(compare.router, prefix="/api")
 app.include_router(boycott.router, prefix="/api")
 app.include_router(admin.router, prefix="/api")
+app.include_router(ai.router, prefix="/api")
 
 @app.get("/")
 def health_check():

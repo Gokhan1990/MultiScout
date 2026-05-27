@@ -15,6 +15,18 @@ PLATFORM_FILES = {
     "teknosa": "data/deals_teknosa.json",
     "decathlon": "data/deals_decathlon.json",
     "steam": "data/deals_steam.json",
+    "defacto": "data/deals_defacto.json",
+    "mediamarkt": "data/deals_mediamarkt.json",
+    "gratis": "data/deals_gratis.json",
+    "a101": "data/deals_a101.json",
+    "bim": "data/deals_bim.json",
+    "sok": "data/deals_sok.json",
+    "migros": "data/deals_migros.json",
+    "carrefoursa": "data/deals_carrefoursa.json",
+    "tarimkredi": "data/deals_tarimkredi.json",
+    "hakmarexpress": "data/deals_hakmarexpress.json",
+    "macrocenter": "data/deals_macrocenter.json",
+    "bizimtoptan": "data/deals_bizimtoptan.json",
 }
 
 

@@ -74,6 +74,81 @@ STEAM_CATEGORY_URLS = {
     "oyun": "https://store.steampowered.com/api/featuredcategories?cc=tr&l=turkish",
 }
 
+MEDIAMARKT_CATEGORY_URLS = {
+    "elektronik": "https://www.mediamarkt.com.tr/tr/search.html?query=elektronik",
+    "beyaz-esya": "https://www.mediamarkt.com.tr/tr/search.html?query=beyaz+esya",
+    "tv": "https://www.mediamarkt.com.tr/tr/search.html?query=televizyon",
+    "telefon": "https://www.mediamarkt.com.tr/tr/search.html?query=telefon",
+    "bilgisayar": "https://www.mediamarkt.com.tr/tr/search.html?query=bilgisayar",
+    "oyun-konsol": "https://www.mediamarkt.com.tr/tr/search.html?query=oyun+konsol",
+}
+
+DEFACTO_CATEGORY_URLS = {
+    "kadin": "https://www.defacto.com.tr/arama?q=kadin",
+    "erkek": "https://www.defacto.com.tr/arama?q=erkek",
+    "cocuk": "https://www.defacto.com.tr/arama?q=cocuk",
+    "ic-giyim": "https://www.defacto.com.tr/arama?q=ic+giyim",
+    "pantolon": "https://www.defacto.com.tr/arama?q=pantolon",
+    "elbise": "https://www.defacto.com.tr/arama?q=elbise",
+}
+
+# marketfiyati: kategori -> arama anahtar kelimeleri (her birinden ~30 ürün gelir)
+MARKETFIYATI_CATEGORIES = {
+    "sut-kahvalti": ["süt", "yumurta", "peynir", "yoğurt", "tereyağı", "zeytin", "bal"],
+    "et-tavuk": ["tavuk", "kıyma", "sosis", "salam", "sucuk"],
+    "sebze-meyve": ["domates", "salatalık", "soğan", "patates", "elma", "muz", "portakal"],
+    "temel-gida": ["ekmek", "pirinç", "makarna", "un", "şeker", "yağ", "tuz", "salça"],
+    "icecek": ["su", "çay", "kahve", "kola", "ayran", "meyve suyu"],
+    "atistirmalik": ["çikolata", "bisküvi", "cips", "gofret", "kraker"],
+    "temizlik": ["deterjan", "sabun", "şampuan", "diş macunu", "çamaşır yumuşatıcı", "bulaşık deterjanı"],
+    "hijyen-bebek": ["bebek bezi", "hijyenik ped", "tuvalet kağıdı", "kağıt havlu", "ıslak mendil"],
+}
+
+HAKMAREXPRESS_CATEGORY_URLS = {
+    "temel-gida": "https://www.hakmarexpress.com.tr/temel-gida-c",
+    "atistirmalik": "https://www.hakmarexpress.com.tr/atistirmalik-c",
+    "icecek": "https://www.hakmarexpress.com.tr/icecek-c",
+    "et-et-urunleri": "https://www.hakmarexpress.com.tr/et-et-urunleri-c",
+    "sut-kahvaltilik": "https://www.hakmarexpress.com.tr/sut-kahvaltilik-c",
+    "kisisel-bakim": "https://www.hakmarexpress.com.tr/kisisel-bakim-kozmetik-c",
+    "temizlik": "https://www.hakmarexpress.com.tr/temizlik-c",
+    "anne-bebek": "https://www.hakmarexpress.com.tr/anne-bebek-c",
+}
+
+MACROCENTER_CATEGORY_URLS = {
+    "meyve-sebze": "https://www.macrocenter.com.tr/meyve-sebze-c-116a4",
+    "et-tavuk-balik": "https://www.macrocenter.com.tr/et-tavuk-balik-c-11535",
+    "sut-urunleri-kahvaltilik": "https://www.macrocenter.com.tr/sut-urunleri-kahvaltilik-c-116b7",
+    "temel-gida": "https://www.macrocenter.com.tr/temel-gida-c-11577",
+    "atistirmalik": "https://www.macrocenter.com.tr/atistirmalik-c-11468",
+    "icecek": "https://www.macrocenter.com.tr/icecek-c-11492",
+    "dondurma": "https://www.macrocenter.com.tr/dondurma-c-116b8",
+    "temizlik": "https://www.macrocenter.com.tr/temizlik-c-117ab",
+}
+
+BIZIMTOPTAN_CATEGORY_URLS = {
+    "temel-gida": "https://www.bizimtoptan.com.tr/temel-gida",
+    "icecek": "https://www.bizimtoptan.com.tr/icecek",
+    "sivi-yag-margarin": "https://www.bizimtoptan.com.tr/sivi-yag-margarin",
+    "temizlik": "https://www.bizimtoptan.com.tr/temizlik",
+    "atistirmalik": "https://www.bizimtoptan.com.tr/atistirmalik",
+    "sarkuteri-kahvaltilik": "https://www.bizimtoptan.com.tr/sarkuteri-kahvaltilik",
+    "et-urunleri-ve-sarkuteri": "https://www.bizimtoptan.com.tr/et-urunleri-ve-sarkuteri",
+    "kisisel-bakim": "https://www.bizimtoptan.com.tr/kisisel-bakim",
+    "bebek-urunleri": "https://www.bizimtoptan.com.tr/bebek-urunleri",
+}
+
+GRATIS_CATEGORY_URLS = {
+    "parfum": "https://www.gratis.com/search?q=parfum",
+    "makyaj": "https://www.gratis.com/makyaj-c-501",
+    "cilt-bakim": "https://www.gratis.com/cilt-bakim-c-502",
+    "sac-bakim": "https://www.gratis.com/sac-bakim-c-503",
+    "erkek-bakim": "https://www.gratis.com/erkek-bakim-c-505",
+    "anne-bebek": "https://www.gratis.com/anne-bebek-c-507",
+    "elektrikli": "https://www.gratis.com/elektrikli-urunler-c-511",
+    "hijyen": "https://www.gratis.com/hijyen-bakim-c-515",
+}
+
 N11_CATEGORY_URLS = {
     "gida": "https://www.n11.com/arama?q=gida",
     "elektronik": "https://www.n11.com/arama?q=elektronik",
