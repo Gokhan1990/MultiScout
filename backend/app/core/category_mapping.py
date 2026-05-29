@@ -708,6 +708,19 @@ SARAR_CATEGORY_URLS = {
     "aksesuar":        "https://www.sarar.com/aksesuar",
 }
 
+HUAWEI_CATEGORY_URLS = {
+    "phones":          "https://consumer.huawei.com/tr/phones/",
+    "tablets":         "https://consumer.huawei.com/tr/tablets/",
+    "laptops":         "https://consumer.huawei.com/tr/laptops/",
+    "wearables":       "https://consumer.huawei.com/tr/wearables/",
+    "audio":           "https://consumer.huawei.com/tr/audio/",
+    "monitors":        "https://consumer.huawei.com/tr/monitors/",
+    "smart-screens":   "https://consumer.huawei.com/tr/smart-screens/",
+    "smart-home":      "https://consumer.huawei.com/tr/smart-home/",
+    "accessories":     "https://consumer.huawei.com/tr/accessories/",
+    "routers":         "https://consumer.huawei.com/tr/routers/",
+}
+
 DR_CATEGORY_URLS = {
     "kitap":             "https://www.dr.com.tr/kategori/kitap",
     "egitim-kitaplari":  "https://www.dr.com.tr/kategori/egitim-kitaplari",

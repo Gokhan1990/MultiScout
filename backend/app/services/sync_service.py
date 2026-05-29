@@ -67,6 +67,7 @@ PLATFORM_FILES = {
     "atasay": "data/deals_atasay.json",
     "reebok": "data/deals_reebok.json",
     "sarar": "data/deals_sarar.json",
+    "huawei": "data/deals_huawei.json",
 }
 
 

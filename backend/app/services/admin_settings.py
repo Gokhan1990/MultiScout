@@ -30,7 +30,7 @@ DEFAULTS: dict[str, Any] = {
         "mac": True, "apple": True,
         "saatvesaat": True, "altinbas": True, "pasabahce": True,
         "akakce": True, "ramsey": True, "atasay": True,
-        "reebok": True, "sarar": True,
+        "reebok": True, "sarar": True, "huawei": True,
     },
     "theme": {
         "primary": "#f97316",
