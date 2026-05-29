@@ -44,6 +44,7 @@ const STORE_LABELS: Record<string, string> = {
   beko: "Beko", arcelik: "Arçelik", vestel: "Vestel",
   network: "Network", northface: "The North Face",
   mac: "MAC Cosmetics", apple: "Apple",
+  saatvesaat: "Saat ve Saat", altinbas: "Altınbaş", pasabahce: "Paşabahçe",
 };
 
 const TABS: { id: Tab; label: string; icon: string }[] = [

@@ -59,6 +59,9 @@ PLATFORM_FILES = {
     "northface": "data/deals_northface.json",
     "mac": "data/deals_mac.json",
     "apple": "data/deals_apple.json",
+    "saatvesaat": "data/deals_saatvesaat.json",
+    "altinbas": "data/deals_altinbas.json",
+    "pasabahce": "data/deals_pasabahce.json",
 }
 
 

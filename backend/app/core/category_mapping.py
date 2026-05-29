@@ -599,6 +599,45 @@ APPLE_CATEGORY_URLS = {
     "imac":        "https://www.apple.com/tr/shop/buy-mac/imac",
 }
 
+SAATVESAAT_CATEGORY_URLS = {
+    "erkek-saat":     "https://www.saatvesaat.com.tr/erkek-saat",
+    "kadin-saat":     "https://www.saatvesaat.com.tr/kadin-saat",
+    "cocuk-saat":     "https://www.saatvesaat.com.tr/cocuk-saat",
+    "casio":          "https://www.saatvesaat.com.tr/casio",
+    "guess":          "https://www.saatvesaat.com.tr/guess",
+    "fossil":         "https://www.saatvesaat.com.tr/fossil",
+    "michael-kors":   "https://www.saatvesaat.com.tr/michael-kors",
+    "klasik-saat":    "https://www.saatvesaat.com.tr/klasik-saatler",
+    "spor-saat":      "https://www.saatvesaat.com.tr/spor-saatler",
+    "akilli-saat":    "https://www.saatvesaat.com.tr/akilli-saatler",
+}
+
+ALTINBAS_CATEGORY_URLS = {
+    "kolye":          "https://www.altinbas.com/kolye",
+    "yuzuk":          "https://www.altinbas.com/yuzuk",
+    "kupe":           "https://www.altinbas.com/kupe",
+    "bilezik":        "https://www.altinbas.com/bilezik",
+    "bileklik":       "https://www.altinbas.com/bileklik",
+    "altin":          "https://www.altinbas.com/altin",
+    "pirlanta":       "https://www.altinbas.com/pirlanta",
+    "saat":           "https://www.altinbas.com/saat",
+    "kadin":          "https://www.altinbas.com/kadin",
+    "erkek":          "https://www.altinbas.com/erkek",
+}
+
+PASABAHCE_CATEGORY_URLS = {
+    "sofra":          "https://www.pasabahce.com.tr/sofra",
+    "bardak":         "https://www.pasabahce.com.tr/bardak",
+    "kahve":          "https://www.pasabahce.com.tr/kahve",
+    "cay":            "https://www.pasabahce.com.tr/cay",
+    "tabak":          "https://www.pasabahce.com.tr/tabak",
+    "vazo":           "https://www.pasabahce.com.tr/vazo",
+    "kase":           "https://www.pasabahce.com.tr/kase",
+    "cocuk":          "https://www.pasabahce.com.tr/cocuk-sofrasi",
+    "outlet":         "https://www.pasabahce.com.tr/outlet",
+    "yeni":           "https://www.pasabahce.com.tr/yeni-urunler",
+}
+
 DR_CATEGORY_URLS = {
     "kitap":             "https://www.dr.com.tr/kategori/kitap",
     "egitim-kitaplari":  "https://www.dr.com.tr/kategori/egitim-kitaplari",
