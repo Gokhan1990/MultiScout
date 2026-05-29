@@ -362,6 +362,32 @@ VIVENSE_CATEGORY_URLS = {
     "calisma-masasi": "https://www.vivense.com/arama?q=%C3%A7al%C4%B1%C5%9Fma+masas%C4%B1",
 }
 
+TEPEHOME_CATEGORY_URLS = {
+    "oturma-grubu":     "https://www.tepehome.com.tr/oturma-grubu",
+    "yatak-odasi":      "https://www.tepehome.com.tr/yatak-odasi",
+    "yemek-odasi":      "https://www.tepehome.com.tr/yemek-odasi",
+    "tv-unitesi":       "https://www.tepehome.com.tr/tv-unitesi",
+    "ev-tekstili":      "https://www.tepehome.com.tr/ev-tekstili",
+    "dekorasyon":       "https://www.tepehome.com.tr/dekorasyon",
+    "hali":             "https://www.tepehome.com.tr/hali",
+    "aydinlatma":       "https://www.tepehome.com.tr/aydinlatma",
+    "bebek-cocuk":      "https://www.tepehome.com.tr/bebek-cocuk",
+    "bahce-balkon":     "https://www.tepehome.com.tr/bahce-balkon",
+}
+
+SKECHERS_CATEGORY_URLS = {
+    "erkek":           "https://www.skechers.com.tr/erkek",
+    "kadin":           "https://www.skechers.com.tr/kadin",
+    "cocuk":           "https://www.skechers.com.tr/cocuk",
+    "erkek-ayakkabi":  "https://www.skechers.com.tr/erkek-ayakkabi",
+    "kadin-ayakkabi":  "https://www.skechers.com.tr/kadin-ayakkabi",
+    "spor-ayakkabi":   "https://www.skechers.com.tr/arama?q=spor+ayakkab%C4%B1",
+    "sandalet":        "https://www.skechers.com.tr/arama?q=sandalet",
+    "tisort":          "https://www.skechers.com.tr/arama?q=ti%C5%9F%C3%B6rt",
+    "esofman":         "https://www.skechers.com.tr/arama?q=e%C5%9Fofman",
+    "indirim":         "https://www.skechers.com.tr/arama?q=indirim",
+}
+
 DR_CATEGORY_URLS = {
     "kitap":             "https://www.dr.com.tr/kategori/kitap",
     "egitim-kitaplari":  "https://www.dr.com.tr/kategori/egitim-kitaplari",

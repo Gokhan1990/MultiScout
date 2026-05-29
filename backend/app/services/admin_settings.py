@@ -21,6 +21,7 @@ DEFAULTS: dict[str, Any] = {
         "boyner": True, "penti": True, "watsons": True, "dr": True,
         "karaca": True, "englishhome": False, "idefix": True, "tchibo": True,
         "mudo": True, "madamecoco": True, "vivense": True,
+        "tepehome": True, "skechers": True,
     },
     "theme": {
         "primary": "#f97316",

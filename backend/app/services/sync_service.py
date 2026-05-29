@@ -41,6 +41,8 @@ PLATFORM_FILES = {
     "mudo": "data/deals_mudo.json",
     "madamecoco": "data/deals_madamecoco.json",
     "vivense": "data/deals_vivense.json",
+    "tepehome": "data/deals_tepehome.json",
+    "skechers": "data/deals_skechers.json",
 }
 
 

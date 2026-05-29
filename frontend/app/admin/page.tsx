@@ -37,6 +37,7 @@ const STORE_LABELS: Record<string, string> = {
   boyner: "Boyner", penti: "Penti", watsons: "Watsons", dr: "D&R",
   karaca: "Karaca", englishhome: "English Home", idefix: "Idefix", tchibo: "Tchibo",
   mudo: "Mudo", madamecoco: "Madame Coco", vivense: "Vivense",
+  tepehome: "Tepe Home", skechers: "Skechers",
 };
 
 const TABS: { id: Tab; label: string; icon: string }[] = [

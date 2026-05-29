@@ -51,7 +51,8 @@ type PlatformKey =
   | "lcwaikiki" | "koton" | "mavi"
   | "boyner" | "penti" | "watsons" | "dr"
   | "karaca" | "englishhome" | "idefix" | "tchibo"
-  | "mudo" | "madamecoco" | "vivense";
+  | "mudo" | "madamecoco" | "vivense"
+  | "tepehome" | "skechers";
 type BoycottMode = "highlight" | "hide" | "show";
 
 const PLATFORM_LABELS: Record<PlatformKey, string> = {
@@ -92,6 +93,8 @@ const PLATFORM_LABELS: Record<PlatformKey, string> = {
   mudo: "Mudo",
   madamecoco: "Madame Coco",
   vivense: "Vivense",
+  tepehome: "Tepe Home",
+  skechers: "Skechers",
 };
 
 const ALL_PLATFORM_KEYS: PlatformKey[] = [
@@ -103,6 +106,7 @@ const ALL_PLATFORM_KEYS: PlatformKey[] = [
   "boyner", "penti", "watsons", "dr",
   "karaca", "englishhome", "idefix", "tchibo",
   "mudo", "madamecoco", "vivense",
+  "tepehome", "skechers",
 ];
 
 const BOYCOTT_MODES: { key: BoycottMode; tKey: string; icon: string }[] = [
