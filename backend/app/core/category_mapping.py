@@ -229,6 +229,9 @@ MAVI_CATEGORY_URLS = {
     "erkek-sweat":   "https://www.mavi.com/search?text=erkek+sweatshirt",
     "erkek-mont":    "https://www.mavi.com/search?text=erkek+mont",
     "kadin-mont":    "https://www.mavi.com/search?text=kad%C4%B1n+mont",
+    # Outlet (R12 keşfi — /outlet/c/N format)
+    "kadin-outlet":  "https://www.mavi.com/kadin/outlet/c/3",
+    "erkek-outlet":  "https://www.mavi.com/erkek/outlet/c/4",
 }
 
 BOYNER_CATEGORY_URLS = {
@@ -568,6 +571,32 @@ NORTHFACE_CATEGORY_URLS = {
     "erkek-alt-giyim":  "https://www.thenorthface.com.tr/erkek/alt-giyim",
     "erkek-ayakkabi":   "https://www.thenorthface.com.tr/erkek/ayakkabilar",
     "erkek-aksesuar":   "https://www.thenorthface.com.tr/erkek/aksesuarlar",
+}
+
+MAC_CATEGORY_URLS = {
+    "makyaj":         "https://www.maccosmetics.com.tr/makyaj",
+    "dudak":          "https://www.maccosmetics.com.tr/dudak",
+    "ruj":            "https://www.maccosmetics.com.tr/dudak/ruj",
+    "yuz":            "https://www.maccosmetics.com.tr/yuz",
+    "fondoten":       "https://www.maccosmetics.com.tr/yuz/fondoten",
+    "goz":            "https://www.maccosmetics.com.tr/goz",
+    "maskara":        "https://www.maccosmetics.com.tr/goz/maskara",
+    "cilt-bakimi":    "https://www.maccosmetics.com.tr/cilt-bakimi",
+    "mini":           "https://www.maccosmetics.com.tr/mini",
+    "setler":         "https://www.maccosmetics.com.tr/setler",
+}
+
+APPLE_CATEGORY_URLS = {
+    "iphone":      "https://www.apple.com/tr/shop/buy-iphone",
+    "ipad":        "https://www.apple.com/tr/shop/buy-ipad",
+    "mac":         "https://www.apple.com/tr/shop/buy-mac",
+    "watch":       "https://www.apple.com/tr/shop/buy-watch",
+    "airpods":     "https://www.apple.com/tr/shop/buy-airpods",
+    "tv":          "https://www.apple.com/tr/shop/buy-tv",
+    "homepod":     "https://www.apple.com/tr/shop/buy-homepod",
+    "macbook-air": "https://www.apple.com/tr/shop/buy-mac/macbook-air",
+    "macbook-pro": "https://www.apple.com/tr/shop/buy-mac/macbook-pro",
+    "imac":        "https://www.apple.com/tr/shop/buy-mac/imac",
 }
 
 DR_CATEGORY_URLS = {

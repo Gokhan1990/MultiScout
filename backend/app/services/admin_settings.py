@@ -27,6 +27,7 @@ DEFAULTS: dict[str, Any] = {
         "flo": True, "hummel": True, "evidea": True,
         "beko": True, "arcelik": True, "vestel": True,
         "network": True, "northface": True,
+        "mac": True, "apple": True,
     },
     "theme": {
         "primary": "#f97316",

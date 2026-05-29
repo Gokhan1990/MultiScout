@@ -43,6 +43,7 @@ const STORE_LABELS: Record<string, string> = {
   flo: "FLO", hummel: "Hummel", evidea: "Evidea",
   beko: "Beko", arcelik: "Arçelik", vestel: "Vestel",
   network: "Network", northface: "The North Face",
+  mac: "MAC Cosmetics", apple: "Apple",
 };
 
 const TABS: { id: Tab; label: string; icon: string }[] = [

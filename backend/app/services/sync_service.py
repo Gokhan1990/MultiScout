@@ -57,6 +57,8 @@ PLATFORM_FILES = {
     "vestel": "data/deals_vestel.json",
     "network": "data/deals_network.json",
     "northface": "data/deals_northface.json",
+    "mac": "data/deals_mac.json",
+    "apple": "data/deals_apple.json",
 }
 
 

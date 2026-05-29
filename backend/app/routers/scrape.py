@@ -58,6 +58,8 @@ SCRAPE_ALL_STATUS = {
     "vestel": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
     "network": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
     "northface": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "mac": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "apple": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
 }
 
 # marketfiyati API ile beslenen marketler — tek API call ile 6 market beraber çıkar
@@ -132,6 +134,8 @@ async def run_platform_scrape(platform: str, min_discount: int):
     from app.scrapers.vestel_scraper import scrape_vestel_deals
     from app.scrapers.network_scraper import scrape_network_deals
     from app.scrapers.northface_scraper import scrape_northface_deals
+    from app.scrapers.mac_scraper import scrape_mac_deals
+    from app.scrapers.apple_scraper import scrape_apple_deals
     from app.core.category_mapping import (
         TRENDYOL_CATEGORY_URLS, HEPSIBURADA_CATEGORY_URLS, N11_CATEGORY_URLS,
         PAZARAMA_CATEGORY_URLS, CICEKSEPETI_CATEGORY_URLS,
@@ -149,6 +153,7 @@ async def run_platform_scrape(platform: str, min_discount: int):
         FLO_CATEGORY_URLS, HUMMEL_CATEGORY_URLS, EVIDEA_CATEGORY_URLS,
         BEKO_CATEGORY_URLS, ARCELIK_CATEGORY_URLS, VESTEL_CATEGORY_URLS,
         NETWORK_CATEGORY_URLS, NORTHFACE_CATEGORY_URLS,
+        MAC_CATEGORY_URLS, APPLE_CATEGORY_URLS,
     )
     from app.services.sync_service import sync_json_to_db, PLATFORM_FILES
     from app.models.database import get_db
@@ -701,6 +706,32 @@ async def run_platform_scrape(platform: str, min_discount: int):
                     )
                     for cat in batch
                 ], return_exceptions=True)
+        elif platform == "mac":
+            categories = list(MAC_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_mac_deals(
+                        PLATFORM_FILES["mac"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=MAC_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "apple":
+            categories = list(APPLE_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_apple_deals(
+                        PLATFORM_FILES["apple"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=APPLE_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
         elif platform in MARKETFIYATI_PLATFORMS:
             # Tek API call ile 7 market — diğer 6'sının statüsünü de güncelle
             out_files = {mk: PLATFORM_FILES[mk] for mk in MF_KEYS}
@@ -768,6 +799,7 @@ async def run_scrape_all_job(min_discount: int, platform: str = "all"):
             "flo","hummel","evidea",
             "beko","arcelik","vestel",
             "network","northface",
+            "mac","apple",
         ]
         tasks = []
         # marketfiyati platformları içinde herhangi biri açıksa tek bir tarama yeter
