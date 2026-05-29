@@ -323,6 +323,45 @@ TCHIBO_CATEGORY_URLS = {
     "erkek-giyim":      "https://www.tchibo.com.tr/c/erkek",
 }
 
+MUDO_CATEGORY_URLS = {
+    "kadin":            "https://www.mudo.com.tr/kadin",
+    "erkek":            "https://www.mudo.com.tr/erkek",
+    "ev-yasam":         "https://www.mudo.com.tr/ev-yasam",
+    "mobilya":          "https://www.mudo.com.tr/mobilya",
+    "kadin-elbise":     "https://www.mudo.com.tr/kadin-elbise",
+    "kadin-pantolon":   "https://www.mudo.com.tr/kadin-pantolon",
+    "kadin-tisort":     "https://www.mudo.com.tr/kadin-t-shirt",
+    "erkek-tisort":     "https://www.mudo.com.tr/erkek-t-shirt",
+    "erkek-pantolon":   "https://www.mudo.com.tr/erkek-pantolon",
+    "ev-aksesuar":      "https://www.mudo.com.tr/ev-aksesuar",
+}
+
+MADAMECOCO_CATEGORY_URLS = {
+    "dekorasyon":     "https://www.madamecoco.com/dekorasyon",
+    "yatak-odasi":    "https://www.madamecoco.com/yatak-odasi",
+    "banyo":          "https://www.madamecoco.com/banyo",
+    "mutfak":         "https://www.madamecoco.com/mutfak",
+    "sofra":          "https://www.madamecoco.com/sofra",
+    "hali-kilim":     "https://www.madamecoco.com/hali-kilim",
+    "kozmetik":       "https://www.madamecoco.com/kozmetik",
+    "ev-yasam":       "https://www.madamecoco.com/ev-yasam",
+    "ceyiz":          "https://www.madamecoco.com/ceyiz-urunleri",
+    "kampanyali":     "https://www.madamecoco.com/kampanyali-urunler",
+}
+
+VIVENSE_CATEGORY_URLS = {
+    "koltuk":         "https://www.vivense.com/arama?q=koltuk",
+    "kanepe":         "https://www.vivense.com/arama?q=kanepe",
+    "yatak":          "https://www.vivense.com/arama?q=yatak",
+    "yatak-odasi":    "https://www.vivense.com/arama?q=yatak+odasi",
+    "yemek-masasi":   "https://www.vivense.com/arama?q=yemek+masasi",
+    "sandalye":       "https://www.vivense.com/arama?q=sandalye",
+    "gardrop":        "https://www.vivense.com/arama?q=gardrop",
+    "hali":           "https://www.vivense.com/arama?q=hali",
+    "tv-unitesi":     "https://www.vivense.com/arama?q=tv+%C3%BCnitesi",
+    "calisma-masasi": "https://www.vivense.com/arama?q=%C3%A7al%C4%B1%C5%9Fma+masas%C4%B1",
+}
+
 DR_CATEGORY_URLS = {
     "kitap":             "https://www.dr.com.tr/kategori/kitap",
     "egitim-kitaplari":  "https://www.dr.com.tr/kategori/egitim-kitaplari",

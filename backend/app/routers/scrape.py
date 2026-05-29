@@ -39,6 +39,9 @@ SCRAPE_ALL_STATUS = {
     "englishhome": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
     "idefix": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
     "tchibo": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "mudo": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "madamecoco": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "vivense": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
 }
 
 # marketfiyati API ile beslenen marketler — tek API call ile 6 market beraber çıkar
@@ -94,6 +97,9 @@ async def run_platform_scrape(platform: str, min_discount: int):
     from app.scrapers.englishhome_scraper import scrape_englishhome_deals
     from app.scrapers.idefix_scraper import scrape_idefix_deals
     from app.scrapers.tchibo_scraper import scrape_tchibo_deals
+    from app.scrapers.mudo_scraper import scrape_mudo_deals
+    from app.scrapers.madamecoco_scraper import scrape_madamecoco_deals
+    from app.scrapers.vivense_scraper import scrape_vivense_deals
     from app.core.category_mapping import (
         TRENDYOL_CATEGORY_URLS, HEPSIBURADA_CATEGORY_URLS, N11_CATEGORY_URLS,
         PAZARAMA_CATEGORY_URLS, CICEKSEPETI_CATEGORY_URLS,
@@ -104,6 +110,7 @@ async def run_platform_scrape(platform: str, min_discount: int):
         LCWAIKIKI_CATEGORY_URLS, KOTON_CATEGORY_URLS, MAVI_CATEGORY_URLS,
         BOYNER_CATEGORY_URLS, PENTI_CATEGORY_URLS, WATSONS_CATEGORY_URLS, DR_CATEGORY_URLS,
         KARACA_CATEGORY_URLS, ENGLISHHOME_CATEGORY_URLS, IDEFIX_CATEGORY_URLS, TCHIBO_CATEGORY_URLS,
+        MUDO_CATEGORY_URLS, MADAMECOCO_CATEGORY_URLS, VIVENSE_CATEGORY_URLS,
     )
     from app.services.sync_service import sync_json_to_db, PLATFORM_FILES
     from app.models.database import get_db
@@ -409,6 +416,45 @@ async def run_platform_scrape(platform: str, min_discount: int):
                     )
                     for cat in batch
                 ], return_exceptions=True)
+        elif platform == "mudo":
+            categories = list(MUDO_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_mudo_deals(
+                        PLATFORM_FILES["mudo"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=MUDO_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "madamecoco":
+            categories = list(MADAMECOCO_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_madamecoco_deals(
+                        PLATFORM_FILES["madamecoco"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=MADAMECOCO_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "vivense":
+            categories = list(VIVENSE_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_vivense_deals(
+                        PLATFORM_FILES["vivense"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=VIVENSE_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
         elif platform in MARKETFIYATI_PLATFORMS:
             # Tek API call ile 7 market — diğer 6'sının statüsünü de güncelle
             out_files = {mk: PLATFORM_FILES[mk] for mk in MF_KEYS}
@@ -469,6 +515,7 @@ async def run_scrape_all_job(min_discount: int, platform: str = "all"):
             "lcwaikiki","koton","mavi",
             "boyner","penti","watsons","dr",
             "karaca","englishhome","idefix","tchibo",
+            "mudo","madamecoco","vivense",
         ]
         tasks = []
         # marketfiyati platformları içinde herhangi biri açıksa tek bir tarama yeter

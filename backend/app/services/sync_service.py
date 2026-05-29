@@ -38,6 +38,9 @@ PLATFORM_FILES = {
     "englishhome": "data/deals_englishhome.json",
     "idefix": "data/deals_idefix.json",
     "tchibo": "data/deals_tchibo.json",
+    "mudo": "data/deals_mudo.json",
+    "madamecoco": "data/deals_madamecoco.json",
+    "vivense": "data/deals_vivense.json",
 }
 
 
