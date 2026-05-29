@@ -505,6 +505,45 @@ EVIDEA_CATEGORY_URLS = {
     "berjer":         "https://www.evidea.com/arama?q=berjer",
 }
 
+BEKO_CATEGORY_URLS = {
+    "buzdolabi":         "https://www.beko.com.tr/buzdolabi",
+    "camasir-makinesi":  "https://www.beko.com.tr/camasir-makinesi",
+    "bulasik-makinesi":  "https://www.beko.com.tr/bulasik-makinesi",
+    "firin":             "https://www.beko.com.tr/firin",
+    "ankastre":          "https://www.beko.com.tr/ankastre",
+    "kucuk-ev-aletleri": "https://www.beko.com.tr/kucuk-ev-aletleri",
+    "kahve-makinesi":    "https://www.beko.com.tr/kahve-makineleri",
+    "elektrikli-supurge":"https://www.beko.com.tr/elektrikli-supurgeler",
+    "klima":             "https://www.beko.com.tr/klima",
+    "televizyon":        "https://www.beko.com.tr/televizyonlar",
+}
+
+ARCELIK_CATEGORY_URLS = {
+    "buzdolabi":         "https://www.arcelik.com.tr/buzdolabi",
+    "camasir-makinesi":  "https://www.arcelik.com.tr/camasir-makinesi",
+    "bulasik-makinesi":  "https://www.arcelik.com.tr/bulasik-makinesi",
+    "firin":             "https://www.arcelik.com.tr/firin",
+    "ankastre":          "https://www.arcelik.com.tr/ankastre",
+    "kucuk-ev-aletleri": "https://www.arcelik.com.tr/kucuk-ev-aletleri",
+    "kahve-makinesi":    "https://www.arcelik.com.tr/kahve-makineleri",
+    "elektrikli-supurge":"https://www.arcelik.com.tr/elektrikli-supurgeler",
+    "klima":             "https://www.arcelik.com.tr/klima",
+    "televizyon":        "https://www.arcelik.com.tr/televizyonlar",
+}
+
+VESTEL_CATEGORY_URLS = {
+    "televizyon":        "https://www.vestel.com.tr/televizyonlar",
+    "buzdolabi":         "https://www.vestel.com.tr/buzdolaplari",
+    "camasir-makinesi":  "https://www.vestel.com.tr/camasir-makinesi",
+    "bulasik-makinesi":  "https://www.vestel.com.tr/bulasik-makinesi",
+    "firin":             "https://www.vestel.com.tr/firinlar",
+    "klima":             "https://www.vestel.com.tr/klima",
+    "elektrikli-supurge":"https://www.vestel.com.tr/elektrikli-supurgeler",
+    "kucuk-ev-aletleri": "https://www.vestel.com.tr/kucuk-ev-aletleri",
+    "kahve-makinesi":    "https://www.vestel.com.tr/kahve-makineleri",
+    "telefon":           "https://www.vestel.com.tr/telefon",
+}
+
 DR_CATEGORY_URLS = {
     "kitap":             "https://www.dr.com.tr/kategori/kitap",
     "egitim-kitaplari":  "https://www.dr.com.tr/kategori/egitim-kitaplari",

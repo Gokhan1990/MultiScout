@@ -52,6 +52,9 @@ PLATFORM_FILES = {
     "flo": "data/deals_flo.json",
     "hummel": "data/deals_hummel.json",
     "evidea": "data/deals_evidea.json",
+    "beko": "data/deals_beko.json",
+    "arcelik": "data/deals_arcelik.json",
+    "vestel": "data/deals_vestel.json",
 }
 
 
