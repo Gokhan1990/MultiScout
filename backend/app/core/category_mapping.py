@@ -721,6 +721,19 @@ HUAWEI_CATEGORY_URLS = {
     "routers":         "https://consumer.huawei.com/tr/routers/",
 }
 
+LEGO_CATEGORY_URLS = {
+    "categories":     "https://www.lego.com/tr-tr/categories",
+    "themes":         "https://www.lego.com/tr-tr/themes",
+    "technic":        "https://www.lego.com/tr-tr/themes/technic",
+    "city":           "https://www.lego.com/tr-tr/themes/city",
+    "star-wars":      "https://www.lego.com/tr-tr/themes/star-wars",
+    "harry-potter":   "https://www.lego.com/tr-tr/themes/harry-potter",
+    "friends":        "https://www.lego.com/tr-tr/themes/friends",
+    "ninjago":        "https://www.lego.com/tr-tr/themes/ninjago",
+    "duplo":          "https://www.lego.com/tr-tr/themes/duplo",
+    "creator":        "https://www.lego.com/tr-tr/themes/creator-3-in-1",
+}
+
 DR_CATEGORY_URLS = {
     "kitap":             "https://www.dr.com.tr/kategori/kitap",
     "egitim-kitaplari":  "https://www.dr.com.tr/kategori/egitim-kitaplari",

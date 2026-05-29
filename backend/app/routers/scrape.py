@@ -69,6 +69,7 @@ SCRAPE_ALL_STATUS = {
     "reebok": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
     "sarar": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
     "huawei": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "lego": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
 }
 
 # marketfiyati API ile beslenen marketler — tek API call ile 6 market beraber çıkar
@@ -154,6 +155,7 @@ async def run_platform_scrape(platform: str, min_discount: int):
     from app.scrapers.reebok_scraper import scrape_reebok_deals
     from app.scrapers.sarar_scraper import scrape_sarar_deals
     from app.scrapers.huawei_scraper import scrape_huawei_deals
+    from app.scrapers.lego_scraper import scrape_lego_deals
     from app.core.category_mapping import (
         TRENDYOL_CATEGORY_URLS, HEPSIBURADA_CATEGORY_URLS, N11_CATEGORY_URLS,
         PAZARAMA_CATEGORY_URLS, CICEKSEPETI_CATEGORY_URLS,
@@ -174,7 +176,7 @@ async def run_platform_scrape(platform: str, min_discount: int):
         MAC_CATEGORY_URLS, APPLE_CATEGORY_URLS,
         SAATVESAAT_CATEGORY_URLS, ALTINBAS_CATEGORY_URLS, PASABAHCE_CATEGORY_URLS,
         AKAKCE_CATEGORY_URLS, RAMSEY_CATEGORY_URLS, ATASAY_CATEGORY_URLS,
-        REEBOK_CATEGORY_URLS, SARAR_CATEGORY_URLS, HUAWEI_CATEGORY_URLS,
+        REEBOK_CATEGORY_URLS, SARAR_CATEGORY_URLS, HUAWEI_CATEGORY_URLS, LEGO_CATEGORY_URLS,
     )
     from app.services.sync_service import sync_json_to_db, PLATFORM_FILES
     from app.models.database import get_db
@@ -870,6 +872,19 @@ async def run_platform_scrape(platform: str, min_discount: int):
                     )
                     for cat in batch
                 ], return_exceptions=True)
+        elif platform == "lego":
+            categories = list(LEGO_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_lego_deals(
+                        PLATFORM_FILES["lego"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=LEGO_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
         elif platform in MARKETFIYATI_PLATFORMS:
             # Tek API call ile 7 market — diğer 6'sının statüsünü de güncelle
             out_files = {mk: PLATFORM_FILES[mk] for mk in MF_KEYS}
@@ -939,7 +954,7 @@ async def run_scrape_all_job(min_discount: int, platform: str = "all"):
             "network","northface",
             "mac","apple",
             "saatvesaat","altinbas","pasabahce",
-            "akakce","ramsey","atasay","reebok","sarar","huawei",
+            "akakce","ramsey","atasay","reebok","sarar","huawei","lego",
         ]
         tasks = []
         # marketfiyati platformları içinde herhangi biri açıksa tek bir tarama yeter

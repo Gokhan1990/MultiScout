@@ -60,7 +60,7 @@ type PlatformKey =
   | "network" | "northface"
   | "mac" | "apple"
   | "saatvesaat" | "altinbas" | "pasabahce"
-  | "akakce" | "ramsey" | "atasay" | "reebok" | "sarar" | "huawei";
+  | "akakce" | "ramsey" | "atasay" | "reebok" | "sarar" | "huawei" | "lego";
 type BoycottMode = "highlight" | "hide" | "show";
 
 const PLATFORM_LABELS: Record<PlatformKey, string> = {
@@ -128,6 +128,7 @@ const PLATFORM_LABELS: Record<PlatformKey, string> = {
   reebok: "Reebok",
   sarar: "Sarar",
   huawei: "Huawei",
+  lego: "Lego",
 };
 
 const ALL_PLATFORM_KEYS: PlatformKey[] = [
@@ -147,7 +148,7 @@ const ALL_PLATFORM_KEYS: PlatformKey[] = [
   "network", "northface",
   "mac", "apple",
   "saatvesaat", "altinbas", "pasabahce",
-  "akakce", "ramsey", "atasay", "reebok", "sarar", "huawei",
+  "akakce", "ramsey", "atasay", "reebok", "sarar", "huawei", "lego",
 ];
 
 const BOYCOTT_MODES: { key: BoycottMode; tKey: string; icon: string }[] = [

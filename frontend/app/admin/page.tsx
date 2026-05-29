@@ -46,7 +46,7 @@ const STORE_LABELS: Record<string, string> = {
   mac: "MAC Cosmetics", apple: "Apple",
   saatvesaat: "Saat ve Saat", altinbas: "Altınbaş", pasabahce: "Paşabahçe",
   akakce: "Akakçe", ramsey: "Ramsey", atasay: "Atasay",
-  reebok: "Reebok", sarar: "Sarar", huawei: "Huawei",
+  reebok: "Reebok", sarar: "Sarar", huawei: "Huawei", lego: "Lego",
 };
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
