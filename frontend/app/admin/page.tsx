@@ -10,7 +10,16 @@ import {
   getAdminPassword, clearAdminPassword,
 } from "../../lib/admin";
 
-type Tab = "dashboard" | "stores" | "scheduler" | "theme" | "social" | "auto_share" | "boycott" | "maintenance" | "logs" | "docs";
+type Tab = "dashboard" | "stores" | "scheduler" | "health" | "webhooks" | "backup" | "theme" | "social" | "auto_share" | "boycott" | "maintenance" | "logs" | "docs";
+
+interface SchedulerTier { enabled: boolean; interval_min: number; min_discount: number; platforms: string[] }
+interface SchedulerSettings {
+  enabled: boolean;
+  amazon_interval_min: number;
+  other_interval_min: number;
+  tiers: Record<string, SchedulerTier>;
+}
+interface Webhooks { enabled: boolean; min_discount: number; discord_url: string; slack_url: string }
 
 interface Settings {
   stores: Record<string, boolean>;
@@ -21,7 +30,8 @@ interface Settings {
     facebook: { enabled: boolean; page_access_token: string; page_id: string };
   };
   auto_share: { enabled: boolean; min_discount: number; max_per_day: number; platforms: string[] };
-  scheduler: { enabled: boolean; amazon_interval_min: number; other_interval_min: number };
+  scheduler: SchedulerSettings;
+  webhooks: Webhooks;
   maintenance: { enabled: boolean; message: string };
 }
 
@@ -79,6 +89,9 @@ const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: "dashboard", label: "Dashboard", icon: "📊" },
   { id: "stores", label: "Mağazalar", icon: "🏪" },
   { id: "scheduler", label: "Tarama", icon: "🔄" },
+  { id: "health", label: "Sağlık", icon: "🩺" },
+  { id: "webhooks", label: "Webhook", icon: "📡" },
+  { id: "backup", label: "Yedek", icon: "💾" },
   { id: "theme", label: "Tema", icon: "🎨" },
   { id: "social", label: "Sosyal Medya", icon: "📱" },
   { id: "auto_share", label: "Otomatik Paylaşım", icon: "🤖" },
@@ -261,6 +274,9 @@ export default function AdminPage() {
                 {activeTab === "dashboard" && <DashboardTab />}
                 {activeTab === "stores" && <StoresTab settings={settings} onSave={(payload) => updateSection("stores", payload)} busy={busy} />}
                 {activeTab === "scheduler" && <SchedulerTab settings={settings} onSave={(payload) => updateSection("scheduler", payload)} busy={busy} />}
+                {activeTab === "health" && <HealthTab />}
+                {activeTab === "webhooks" && <WebhookTab settings={settings} onSave={(payload) => updateSection("webhooks", payload)} busy={busy} />}
+                {activeTab === "backup" && <BackupTab />}
                 {activeTab === "theme" && <ThemeTab settings={settings} onSave={(payload) => updateSection("theme", payload)} busy={busy} />}
                 {activeTab === "social" && <SocialTab settings={settings} onSave={(payload) => updateSection("social", payload)} busy={busy} />}
                 {activeTab === "auto_share" && <AutoShareTab settings={settings} onSave={(payload) => updateSection("auto_share", payload)} busy={busy} />}
@@ -781,24 +797,454 @@ function StoresTab({ settings, onSave, busy }: TabProps) {
   );
 }
 
+const TIER_META: Record<string, { label: string; icon: string; hint: string }> = {
+  market: { label: "Market (Gıda)", icon: "🛒", hint: "A101/BİM/ŞOK — taze fiyat takibi" },
+  fashion: { label: "Moda", icon: "👗", hint: "LCW/Koton/Mavi vb." },
+  marketplace: { label: "Marketplace", icon: "🛍️", hint: "Trendyol/Amazon/N11/Hepsiburada" },
+  electronics: { label: "Elektronik & Tech", icon: "💻", hint: "Beko/Arçelik/Vestel/Apple/Huawei" },
+  home: { label: "Ev / Dekorasyon", icon: "🏠", hint: "Karaca/Vivense/Tepe Home vs." },
+  default: { label: "Diğer (Default)", icon: "📦", hint: "Yukarıda kapsanmayan tüm aktif platformlar" },
+};
+
 function SchedulerTab({ settings, onSave, busy }: TabProps) {
-  const [s, setS] = useState(settings.scheduler);
+  const [s, setS] = useState<SchedulerSettings>(settings.scheduler);
+  const [restarting, setRestarting] = useState(false);
+
+  const toggleTier = (tier: string, enabled: boolean) => {
+    setS({ ...s, tiers: { ...s.tiers, [tier]: { ...s.tiers[tier], enabled } } });
+  };
+  const setTierField = (tier: string, field: keyof SchedulerTier, val: number) => {
+    setS({ ...s, tiers: { ...s.tiers, [tier]: { ...s.tiers[tier], [field]: val } } });
+  };
+
+  const save = async () => {
+    const ok = await onSave(s as unknown as Record<string, unknown>);
+    if (ok) toast.success("Ayarlar kaydedildi. Etkin olması için scheduler'ı yeniden başlat.");
+  };
+
+  const restart = async () => {
+    if (!confirm("Scheduler yeniden başlatılsın mı? Yeni tier ayarları uygulanır.")) return;
+    setRestarting(true);
+    try {
+      const pw = localStorage.getItem("multiscout_admin_pw");
+      const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const res = await fetch(`${API}/api/admin/scheduler/restart`, {
+        method: "POST",
+        headers: { "X-ADMIN-PASSWORD": pw || "" },
+      });
+      if (res.ok) toast.success("Scheduler yeniden başlatıldı");
+      else toast.error("Yeniden başlatma hatası");
+    } finally {
+      setRestarting(false);
+    }
+  };
+
+  const tiers = s.tiers || {};
+  const tierKeys = Object.keys(tiers);
+
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-bold">Otomatik Tarama Ayarları</h2>
-      <p className="text-sm text-gray-500 dark:text-gray-400">Backend yeniden başlatılmadan etki etmez (env'den okunuyor). Değişikliği uygulamak için backend restart gerekir.</p>
-      <label className="flex items-center gap-3"><input type="checkbox" checked={s.enabled} onChange={(e) => setS({ ...s, enabled: e.target.checked })} className="w-5 h-5 accent-blue-600" /><span className="text-sm">Scheduler aktif</span></label>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <label className="block">
-          <span className="text-sm text-gray-600 dark:text-gray-400">Amazon aralığı (dakika)</span>
-          <input type="number" min="5" value={s.amazon_interval_min} onChange={(e) => setS({ ...s, amazon_interval_min: parseInt(e.target.value) || 60 })} className="mt-1 w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700" />
-        </label>
-        <label className="block">
-          <span className="text-sm text-gray-600 dark:text-gray-400">Diğer platformlar (dakika)</span>
-          <input type="number" min="5" value={s.other_interval_min} onChange={(e) => setS({ ...s, other_interval_min: parseInt(e.target.value) || 45 })} className="mt-1 w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700" />
-        </label>
+      <div className="flex items-start justify-between flex-wrap gap-3">
+        <div>
+          <h2 className="text-lg font-bold">Çok-katmanlı Tarama Ayarları</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Her tier kendi interval ve min-indirim eşiğine sahip. Tier'larda olmayan platformlar "Diğer (Default)" tier'ına düşer.
+          </p>
+        </div>
+        <div className="flex gap-2 flex-wrap">
+          <button onClick={save} disabled={busy} className="px-4 py-1.5 rounded-lg bg-blue-500 text-white text-sm font-semibold disabled:opacity-50">
+            {busy ? "Kaydediliyor..." : "Kaydet"}
+          </button>
+          <button onClick={restart} disabled={restarting} className="px-4 py-1.5 rounded-lg bg-purple-500 text-white text-sm font-semibold disabled:opacity-50">
+            {restarting ? "Yeniden başlatılıyor..." : "🔄 Scheduler'ı yeniden başlat"}
+          </button>
+        </div>
       </div>
-      <button onClick={() => onSave(s as unknown as Record<string, unknown>)} disabled={busy} className="px-4 py-2 rounded-lg bg-blue-500 text-white font-semibold disabled:opacity-50">Kaydet</button>
+
+      <label className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700">
+        <input type="checkbox" checked={s.enabled} onChange={(e) => setS({ ...s, enabled: e.target.checked })} className="w-5 h-5 accent-blue-600" />
+        <div>
+          <div className="font-semibold text-sm">Scheduler genel anahtarı</div>
+          <div className="text-xs text-gray-500 dark:text-gray-400">Kapalıysa hiçbir tier çalışmaz (tier'lar zaten kapalıyken bypass etmez).</div>
+        </div>
+      </label>
+
+      <div className="space-y-3">
+        {tierKeys.map((tk) => {
+          const t = tiers[tk];
+          const meta = TIER_META[tk] || { label: tk, icon: "⚙️", hint: "" };
+          const platformList = (t.platforms || []).map(p => STORE_LABELS[p] || p);
+          return (
+            <div key={tk} className={`rounded-xl border p-4 transition ${
+              t.enabled ? "bg-white dark:bg-gray-900 border-blue-200 dark:border-blue-700/40" : "bg-gray-50 dark:bg-gray-800/30 border-gray-200 dark:border-gray-700 opacity-70"
+            }`}>
+              <div className="flex items-center justify-between gap-3 flex-wrap mb-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">{meta.icon}</span>
+                  <div>
+                    <div className="font-bold">{meta.label}</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">{meta.hint}</div>
+                  </div>
+                </div>
+                <label className="flex items-center gap-2 text-sm">
+                  <input type="checkbox" checked={t.enabled} onChange={(e) => toggleTier(tk, e.target.checked)} className="w-4 h-4 accent-blue-600" />
+                  <span>Aktif</span>
+                </label>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <label className="block">
+                  <span className="text-xs text-gray-600 dark:text-gray-400">Tarama aralığı (dakika)</span>
+                  <input type="number" min="5" value={t.interval_min}
+                    onChange={(e) => setTierField(tk, "interval_min", parseInt(e.target.value) || 60)}
+                    className="mt-1 w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm" />
+                </label>
+                <label className="block">
+                  <span className="text-xs text-gray-600 dark:text-gray-400">Minimum indirim (%)</span>
+                  <input type="number" min="0" max="90" value={t.min_discount}
+                    onChange={(e) => setTierField(tk, "min_discount", parseInt(e.target.value) || 0)}
+                    className="mt-1 w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm" />
+                </label>
+              </div>
+              {platformList.length > 0 && (
+                <div className="mt-3">
+                  <div className="text-xs text-gray-500 mb-1">Kapsanan platformlar ({platformList.length})</div>
+                  <div className="flex flex-wrap gap-1">
+                    {platformList.slice(0, 16).map((p) => (
+                      <span key={p} className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300">{p}</span>
+                    ))}
+                    {platformList.length > 16 && <span className="text-[10px] text-gray-500">+{platformList.length - 16}</span>}
+                  </div>
+                </div>
+              )}
+              {tk === "default" && (
+                <div className="text-xs text-gray-500 mt-2 italic">
+                  Diğer tier'larda kapsanmayan aktif platformlar otomatik buraya düşer.
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function HealthTab() {
+  const [data, setData] = useState<{
+    status: string;
+    uptime_sec: number;
+    now: string;
+    checks: Record<string, Record<string, unknown>>;
+  } | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchHealth = async () => {
+    try {
+      const pw = typeof window !== "undefined" ? localStorage.getItem("multiscout_admin_pw") : null;
+      if (!pw) return;
+      const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const res = await fetch(`${API}/api/admin/health`, { headers: { "X-ADMIN-PASSWORD": pw } });
+      if (res.ok) {
+        const json = await res.json();
+        setData(json.data);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchHealth();
+    const interval = setInterval(fetchHealth, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+  if (loading) return <div className="text-gray-500">Yükleniyor...</div>;
+  if (!data) return <div className="text-gray-500">Health alınamadı.</div>;
+
+  const uptime = (() => {
+    let s = data.uptime_sec;
+    const d = Math.floor(s / 86400); s %= 86400;
+    const h = Math.floor(s / 3600); s %= 3600;
+    const m = Math.floor(s / 60);
+    return [d && `${d}g`, h && `${h}sa`, m && `${m}dk`].filter(Boolean).join(" ") || "<1dk";
+  })();
+
+  const statusColor = data.status === "ok" ? "from-green-500 to-emerald-600"
+    : data.status === "warning" ? "from-amber-500 to-orange-500"
+    : "from-rose-500 to-red-600";
+
+  const checks = data.checks || {};
+
+  type CheckCard = { key: string; title: string; icon: string; ok: boolean | undefined; lines: string[] };
+  const cards: CheckCard[] = [];
+
+  const db = checks.db as { ok?: boolean; deal_count?: number; error?: string };
+  cards.push({ key: "db", title: "Veritabanı", icon: "🗄️", ok: db?.ok, lines: db?.ok ? [`${db.deal_count ?? 0} deal`] : [db?.error || "Bağlanılamadı"] });
+
+  const sched = checks.scheduler as { ok?: boolean; running?: boolean; jobs?: Array<{ id: string; next_run?: string }>; error?: string };
+  cards.push({
+    key: "scheduler",
+    title: "Scheduler",
+    icon: "⏰",
+    ok: sched?.ok,
+    lines: sched?.ok
+      ? [`${sched.jobs?.length || 0} aktif job`, ...(sched.jobs?.slice(0, 3) || []).map(j => `${j.id} → ${j.next_run ? new Date(j.next_run).toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" }) : "?"}`)]
+      : [sched?.error || "Çalışmıyor"],
+  });
+
+  const pw = checks.playwright as { ok?: boolean; version?: string; error?: string };
+  cards.push({ key: "playwright", title: "Playwright", icon: "🎭", ok: pw?.ok, lines: pw?.ok ? [`v${pw.version}`] : [pw?.error || "Yok"] });
+
+  const disk = checks.disk as { ok?: boolean; pct_free?: number; free_gb?: number; total_gb?: number; error?: string };
+  cards.push({
+    key: "disk",
+    title: "Disk",
+    icon: "💾",
+    ok: disk?.ok,
+    lines: disk?.ok ? [`%${disk.pct_free} boş`, `${disk.free_gb} / ${disk.total_gb} GB`] : [disk?.error || "Okunamadı"],
+  });
+
+  const mem = checks.memory as { ok?: boolean; pct_free?: number; free_mb?: number; total_mb?: number; error?: string };
+  cards.push({
+    key: "memory",
+    title: "Bellek",
+    icon: "🧠",
+    ok: mem?.ok,
+    lines: mem?.ok ? [`%${mem.pct_free} boş`, `${mem.free_mb} / ${mem.total_mb} MB`] : [mem?.error || "Okunamadı"],
+  });
+
+  cards.push({ key: "uptime", title: "Uptime", icon: "⏱️", ok: true, lines: [uptime] });
+
+  return (
+    <div className="space-y-5">
+      <div className={`rounded-xl p-4 bg-gradient-to-r ${statusColor} text-white shadow-sm flex items-center justify-between flex-wrap gap-3`}>
+        <div className="flex items-center gap-3">
+          <span className="text-3xl">{data.status === "ok" ? "✅" : data.status === "warning" ? "⚠️" : "🚨"}</span>
+          <div>
+            <div className="text-sm opacity-80">Genel durum</div>
+            <div className="text-2xl font-bold uppercase tracking-wide">{data.status}</div>
+          </div>
+        </div>
+        <button onClick={fetchHealth} className="px-3 py-1.5 rounded-lg bg-white/20 hover:bg-white/30 text-white text-sm font-medium backdrop-blur-sm">
+          🔄 Yenile
+        </button>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        {cards.map((c) => (
+          <div key={c.key} className={`rounded-xl border p-3 ${
+            c.ok ? "bg-green-50 dark:bg-green-900/15 border-green-200 dark:border-green-700/40"
+            : c.ok === false ? "bg-rose-50 dark:bg-rose-900/15 border-rose-200 dark:border-rose-700/40"
+            : "bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700"
+          }`}>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-xl">{c.icon}</span>
+              <span className="font-bold text-sm">{c.title}</span>
+              <span className="ml-auto text-xs">{c.ok ? "✓" : c.ok === false ? "✗" : "·"}</span>
+            </div>
+            <div className="space-y-0.5">
+              {c.lines.map((l, i) => (
+                <div key={i} className="text-xs text-gray-700 dark:text-gray-300 truncate" title={l}>{l}</div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="text-xs text-gray-500 dark:text-gray-400">
+        Otomatik yenileme: 10 saniye. Son güncelleme: {new Date(data.now).toLocaleString("tr-TR")}
+      </div>
+    </div>
+  );
+}
+
+function WebhookTab({ settings, onSave, busy }: TabProps) {
+  const [w, setW] = useState<Webhooks>(settings.webhooks);
+  const [testingKind, setTestingKind] = useState<string | null>(null);
+
+  const save = () => onSave(w as unknown as Record<string, unknown>);
+
+  const sendTest = async (kind: "discord" | "slack") => {
+    setTestingKind(kind);
+    try {
+      const pw = localStorage.getItem("multiscout_admin_pw");
+      const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const res = await fetch(`${API}/api/admin/test-webhook?kind=${kind}`, {
+        method: "POST",
+        headers: { "X-ADMIN-PASSWORD": pw || "" },
+      });
+      const json = await res.json();
+      if (json.status === "success") toast.success(json.message || "Test gönderildi");
+      else toast.error(json.message || "Gönderilemedi");
+    } finally {
+      setTestingKind(null);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h2 className="text-lg font-bold">Discord / Slack Webhooks</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          Tarama sonrası eşik üstü deal'ler otomatik kanala gönderilir (son 1 saatte eklenenler, max 5 mesaj).
+        </p>
+      </div>
+
+      <label className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700">
+        <input type="checkbox" checked={w.enabled} onChange={(e) => setW({ ...w, enabled: e.target.checked })} className="w-5 h-5 accent-blue-600" />
+        <div>
+          <div className="font-semibold text-sm">Webhook bildirimleri aktif</div>
+          <div className="text-xs text-gray-500 dark:text-gray-400">Kapalıysa scheduler tarama sonrası kanala mesaj göndermez.</div>
+        </div>
+      </label>
+
+      <label className="block">
+        <span className="text-sm text-gray-600 dark:text-gray-400">Minimum indirim eşiği (%)</span>
+        <input type="number" min="0" max="99" value={w.min_discount}
+          onChange={(e) => setW({ ...w, min_discount: parseInt(e.target.value) || 50 })}
+          className="mt-1 w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm" />
+        <span className="text-xs text-gray-400 mt-1 block">Bu yüzdenin üstündeki deal'ler webhook'a gider.</span>
+      </label>
+
+      <section className="rounded-xl border border-indigo-200 dark:border-indigo-700/40 bg-indigo-50/40 dark:bg-indigo-900/15 p-4">
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <h3 className="font-bold flex items-center gap-2">💬 Discord</h3>
+          <button onClick={() => sendTest("discord")} disabled={!w.discord_url || testingKind === "discord"}
+            className="text-xs px-3 py-1 rounded bg-indigo-500 text-white font-medium disabled:opacity-50">
+            {testingKind === "discord" ? "Gönderiliyor..." : "🚀 Test gönder"}
+          </button>
+        </div>
+        <input type="text" value={w.discord_url} onChange={(e) => setW({ ...w, discord_url: e.target.value })}
+          placeholder="https://discord.com/api/webhooks/123.../abcdef..."
+          className="w-full px-3 py-2 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-sm font-mono" />
+        <div className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+          Discord kanal → ⚙️ Edit Channel → Integrations → Webhooks → New Webhook → Copy URL
+        </div>
+      </section>
+
+      <section className="rounded-xl border border-emerald-200 dark:border-emerald-700/40 bg-emerald-50/40 dark:bg-emerald-900/15 p-4">
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <h3 className="font-bold flex items-center gap-2">💼 Slack</h3>
+          <button onClick={() => sendTest("slack")} disabled={!w.slack_url || testingKind === "slack"}
+            className="text-xs px-3 py-1 rounded bg-emerald-500 text-white font-medium disabled:opacity-50">
+            {testingKind === "slack" ? "Gönderiliyor..." : "🚀 Test gönder"}
+          </button>
+        </div>
+        <input type="text" value={w.slack_url} onChange={(e) => setW({ ...w, slack_url: e.target.value })}
+          placeholder="https://hooks.slack.com/services/T.../B.../..."
+          className="w-full px-3 py-2 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-sm font-mono" />
+        <div className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+          Slack workspace → Apps → Incoming Webhooks → Add Configuration → Copy webhook URL
+        </div>
+      </section>
+
+      <button onClick={save} disabled={busy} className="px-4 py-2 rounded-lg bg-blue-500 text-white font-semibold disabled:opacity-50">
+        {busy ? "Kaydediliyor..." : "Kaydet"}
+      </button>
+    </div>
+  );
+}
+
+function BackupTab() {
+  const [busy, setBusy] = useState(false);
+  const [opts, setOpts] = useState({ restoreSettings: true, restoreBoycott: true });
+  const fileRef = useRef<HTMLInputElement | null>(null);
+
+  const download = async () => {
+    setBusy(true);
+    try {
+      const pw = localStorage.getItem("multiscout_admin_pw");
+      const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const res = await fetch(`${API}/api/admin/backup`, { headers: { "X-ADMIN-PASSWORD": pw || "" } });
+      if (!res.ok) { toast.error("İndirilemedi"); return; }
+      const blob = await res.blob();
+      const cd = res.headers.get("Content-Disposition") || "";
+      const m = cd.match(/filename="?([^";]+)/);
+      const fname = m ? m[1] : `multiscout-backup-${new Date().toISOString().slice(0, 10)}.zip`;
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = fname;
+      a.click();
+      URL.revokeObjectURL(a.href);
+      toast.success("Yedek indirildi");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const upload = async () => {
+    const file = fileRef.current?.files?.[0];
+    if (!file) { toast.warning("Önce bir .zip dosyası seç"); return; }
+    if (!confirm(`'${file.name}' yedeği geri yüklensin mi? Mevcut config üzerine yazılacak.`)) return;
+    setBusy(true);
+    try {
+      const pw = localStorage.getItem("multiscout_admin_pw");
+      const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const form = new FormData();
+      form.append("file", file);
+      const url = `${API}/api/admin/restore?restore_settings=${opts.restoreSettings}&restore_boycott=${opts.restoreBoycott}`;
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "X-ADMIN-PASSWORD": pw || "" },
+        body: form,
+      });
+      const json = await res.json();
+      if (json.status === "success") {
+        toast.success(`Geri yüklendi: ${(json.restored || []).join(", ")}`);
+        setTimeout(() => window.location.reload(), 1200);
+      } else {
+        toast.error(json.error || "Hata");
+      }
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="space-y-5">
+      <div>
+        <h2 className="text-lg font-bold">Yedek Al / Geri Yükle</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          Admin ayarları (mağaza durumları, scheduler tier'ları, sosyal medya tokenları, webhook URL'leri, tema)
+          ve boykot listesini ZIP olarak yedekler. <strong>Veritabanı (deal'ler) yedeklenmez</strong> — onu separately pg_dump ile alın.
+        </p>
+      </div>
+
+      <section className="rounded-xl border border-blue-200 dark:border-blue-700/40 bg-blue-50/40 dark:bg-blue-900/15 p-4">
+        <h3 className="font-bold flex items-center gap-2 mb-3">⬇️ Yedek Al</h3>
+        <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">
+          ZIP içeriği: <code>admin_settings.json</code>, <code>boycott_brands.json</code>, <code>meta.json</code>
+        </p>
+        <button onClick={download} disabled={busy}
+          className="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm font-bold shadow-sm hover:shadow-md disabled:opacity-50">
+          {busy ? "Hazırlanıyor..." : "📥 Yedek İndir (.zip)"}
+        </button>
+      </section>
+
+      <section className="rounded-xl border border-amber-200 dark:border-amber-700/40 bg-amber-50/40 dark:bg-amber-900/15 p-4">
+        <h3 className="font-bold flex items-center gap-2 mb-3">⬆️ Geri Yükle</h3>
+        <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">
+          Yüklenen ZIP'ten config üzerine yazılır. Mevcut mağaza durumları, ayarlar vs. <strong>üzerine yazılır</strong>.
+          İşlem sonrası sayfa yenilenir.
+        </p>
+        <input ref={fileRef} type="file" accept=".zip" className="block w-full text-sm text-gray-600 dark:text-gray-300 mb-3
+          file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-gray-200 dark:file:bg-gray-700 file:text-sm file:font-medium" />
+        <div className="space-y-2 mb-3">
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" checked={opts.restoreSettings} onChange={(e) => setOpts({ ...opts, restoreSettings: e.target.checked })} className="accent-blue-600" />
+            <span>admin_settings.json'u geri yükle</span>
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" checked={opts.restoreBoycott} onChange={(e) => setOpts({ ...opts, restoreBoycott: e.target.checked })} className="accent-blue-600" />
+            <span>boycott_brands.json'u geri yükle</span>
+          </label>
+        </div>
+        <button onClick={upload} disabled={busy}
+          className="px-4 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-bold shadow-sm hover:shadow-md disabled:opacity-50">
+          {busy ? "Yükleniyor..." : "🔄 Geri Yükle"}
+        </button>
+      </section>
     </div>
   );
 }

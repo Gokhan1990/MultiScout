@@ -52,8 +52,56 @@ DEFAULTS: dict[str, Any] = {
     },
     "scheduler": {
         "enabled": True,
+        # Eski (geriye uyumluluk için bırakıldı, kullanılmıyorsa zarar yok)
         "amazon_interval_min": 60,
         "other_interval_min": 45,
+        # Çok-katmanlı (multi-tier) interval — kategoriye göre farklı zamanlama
+        # Her tier: { interval_min, min_discount, platforms[] }
+        # Tier'larda olmayan platformlar "default" tier'ına düşer
+        "tiers": {
+            "market": {
+                "enabled": True,
+                "interval_min": 30,
+                "min_discount": 0,
+                "platforms": ["a101", "bim", "sok", "migros", "carrefoursa", "tarimkredi", "hakmarexpress", "macrocenter", "bizimtoptan", "tchibo"],
+            },
+            "fashion": {
+                "enabled": True,
+                "interval_min": 90,
+                "min_discount": 10,
+                "platforms": ["lcwaikiki", "koton", "mavi", "defacto", "boyner", "penti", "watsons", "mudo", "network", "yargici", "ramsey", "sarar", "reebok"],
+            },
+            "marketplace": {
+                "enabled": True,
+                "interval_min": 60,
+                "min_discount": 15,
+                "platforms": ["amazon", "trendyol", "n11", "hepsiburada", "pazarama", "ciceksepeti", "pttavm"],
+            },
+            "electronics": {
+                "enabled": True,
+                "interval_min": 240,
+                "min_discount": 5,
+                "platforms": ["vatan", "teknosa", "mediamarkt", "beko", "arcelik", "vestel", "apple", "huawei", "casper", "monster"],
+            },
+            "home": {
+                "enabled": True,
+                "interval_min": 180,
+                "min_discount": 10,
+                "platforms": ["karaca", "madamecoco", "vivense", "tepehome", "evidea", "englishhome", "pasabahce"],
+            },
+            "default": {
+                "enabled": True,
+                "interval_min": 120,
+                "min_discount": 5,
+                "platforms": [],  # kapsanmayan tüm aktif platformlar
+            },
+        },
+    },
+    "webhooks": {
+        "enabled": False,
+        "min_discount": 50,           # Bu yüzdenin üstündeki deal'ler gönderilir
+        "discord_url": "",            # https://discord.com/api/webhooks/...
+        "slack_url": "",              # https://hooks.slack.com/services/...
     },
     "maintenance": {
         "enabled": False,
