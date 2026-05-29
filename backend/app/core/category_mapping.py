@@ -17,6 +17,11 @@ TRENDYOL_CATEGORY_URLS = {
     "parfum": "https://www.trendyol.com/sr?q=parfum",
     "bebek-bezi": "https://www.trendyol.com/sr?q=bebek+bezi",
     "yazici": "https://www.trendyol.com/sr?q=yazici",
+    # Outlet — R16 keşfi (Trendyol Outlet section, /outlet-x-c0-y0)
+    "outlet":   "https://www.trendyol.com/outlet-x-c0-y0",
+    "outlet-kadin": "https://www.trendyol.com/sr?q=outlet+kadin",
+    "outlet-erkek": "https://www.trendyol.com/sr?q=outlet+erkek",
+    "indirim":  "https://www.trendyol.com/sr?q=indirim",
 }
 
 HEPSIBURADA_CATEGORY_URLS = {
