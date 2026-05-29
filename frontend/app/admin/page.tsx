@@ -1,7 +1,7 @@
 "use client";
 /* eslint-disable react/no-unescaped-entities */
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
@@ -10,7 +10,7 @@ import {
   getAdminPassword, clearAdminPassword,
 } from "../../lib/admin";
 
-type Tab = "dashboard" | "stores" | "scheduler" | "theme" | "social" | "auto_share" | "boycott" | "maintenance" | "docs";
+type Tab = "dashboard" | "stores" | "scheduler" | "theme" | "social" | "auto_share" | "boycott" | "maintenance" | "logs" | "docs";
 
 interface Settings {
   stores: Record<string, boolean>;
@@ -84,6 +84,7 @@ const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: "auto_share", label: "Otomatik Paylaşım", icon: "🤖" },
   { id: "boycott", label: "Boykot Listesi", icon: "🚫" },
   { id: "maintenance", label: "Bakım Modu", icon: "🚧" },
+  { id: "logs", label: "Loglar", icon: "📜" },
   { id: "docs", label: "API Rehberi", icon: "📚" },
 ];
 
@@ -203,7 +204,7 @@ export default function AdminPage() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-950 dark:to-gray-900 text-gray-900 dark:text-gray-100">
       <div className="max-w-6xl mx-auto p-4 md:p-6">
-        <header className="flex items-center justify-between mb-6 flex-wrap gap-3">
+        <header className="flex items-center justify-between mb-4 flex-wrap gap-3">
           <div className="flex items-center gap-3">
             <Link href="/" className="text-sm text-gray-500 hover:text-gray-900 dark:hover:text-white">← Anasayfa</Link>
             <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
@@ -217,6 +218,8 @@ export default function AdminPage() {
             Çıkış
           </button>
         </header>
+
+        <GlobalStatusBar onNavigate={(tab) => setActiveTab(tab as Tab)} />
 
         <div className="flex flex-col md:flex-row gap-6">
           <nav className="md:w-56 shrink-0">
@@ -263,6 +266,7 @@ export default function AdminPage() {
                 {activeTab === "auto_share" && <AutoShareTab settings={settings} onSave={(payload) => updateSection("auto_share", payload)} busy={busy} />}
                 {activeTab === "boycott" && <BoycottTab />}
                 {activeTab === "maintenance" && <MaintenanceTab settings={settings} onSave={(payload) => updateSection("maintenance", payload)} busy={busy} />}
+                {activeTab === "logs" && <LogsTab />}
                 {activeTab === "docs" && <DocsTab />}
               </motion.div>
             </AnimatePresence>
@@ -972,6 +976,210 @@ function MaintenanceTab({ settings, onSave, busy }: TabProps) {
         <textarea value={m.message} onChange={(e) => setM({ ...m, message: e.target.value })} rows={3} className="mt-1 w-full px-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700" />
       </label>
       <button onClick={() => onSave(m as unknown as Record<string, unknown>)} disabled={busy} className="px-4 py-2 rounded-lg bg-blue-500 text-white font-semibold disabled:opacity-50">Kaydet</button>
+    </div>
+  );
+}
+
+/** Tüm admin sayfalarında üstte görünen canlı tarama durum çubuğu */
+function GlobalStatusBar({ onNavigate }: { onNavigate?: (tab: string) => void }) {
+  const [statuses, setStatuses] = useState<Record<string, PlatformStatus>>({});
+  const [global, setGlobal] = useState<{ status: string; updated_at: string } | null>(null);
+
+  useEffect(() => {
+    const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+    let stopped = false;
+    const fetchStatus = async () => {
+      try {
+        const res = await fetch(`${API}/api/scrape-all-status`);
+        if (!res.ok) return;
+        const json = await res.json();
+        if (stopped) return;
+        const d = json.data || {};
+        const { status, updated_at } = d;
+        const platforms = { ...d };
+        delete platforms.status; delete platforms.message; delete platforms.updated_at;
+        setGlobal({ status: status || "idle", updated_at: updated_at || "" });
+        setStatuses(platforms as Record<string, PlatformStatus>);
+      } catch {}
+    };
+    fetchStatus();
+    const interval = setInterval(fetchStatus, 5000);
+    return () => { stopped = true; clearInterval(interval); };
+  }, []);
+
+  const running = Object.entries(statuses).filter(([, v]) => v?.status === "running");
+  const errored = Object.entries(statuses).filter(([, v]) => v?.status === "error");
+  const completed = Object.entries(statuses).filter(([, v]) => v?.status === "completed").length;
+
+  if (running.length === 0 && errored.length === 0) {
+    // Idle — kompakt yeşil dot + sayı
+    return (
+      <div className="mb-4 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+        <span className="w-2 h-2 rounded-full bg-green-500" />
+        <span>{completed > 0 ? `${completed} platform son taramayı tamamladı` : "Tarama yapılmıyor"}</span>
+        {global?.updated_at && (
+          <span className="opacity-60">· {new Date(global.updated_at).toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" })}</span>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <button
+      onClick={() => onNavigate?.("logs")}
+      className={`w-full mb-4 px-4 py-2.5 rounded-lg border text-left transition cursor-pointer ${
+        errored.length > 0
+          ? "bg-rose-50 dark:bg-rose-900/20 border-rose-300 dark:border-rose-700/50 hover:border-rose-400"
+          : "bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-700/50 hover:border-blue-400"
+      }`}
+    >
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex items-center gap-2">
+          <span className={`w-2.5 h-2.5 rounded-full ${running.length > 0 ? "bg-blue-500 animate-pulse" : "bg-rose-500"}`} />
+          <span className="text-sm font-semibold">
+            {running.length > 0 && `${running.length} platform taranıyor`}
+            {running.length > 0 && errored.length > 0 && " · "}
+            {errored.length > 0 && `${errored.length} platformda hata`}
+          </span>
+        </div>
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {running.slice(0, 8).map(([p]) => (
+            <span key={p} className="text-[10px] px-2 py-0.5 rounded-full bg-white dark:bg-gray-900 border border-blue-200 dark:border-blue-700/40 text-blue-700 dark:text-blue-300 font-medium">
+              {STORE_LABELS[p] || p}
+            </span>
+          ))}
+          {running.length > 8 && (
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-500">
+              +{running.length - 8}
+            </span>
+          )}
+          <span className="text-[10px] text-gray-500 ml-1">Loglara git →</span>
+        </div>
+      </div>
+    </button>
+  );
+}
+
+/** Backend stdout/stderr ring buffer'ından log akışı */
+function LogsTab() {
+  const [logs, setLogs] = useState<Array<{ ts: string; platform: string | null; src: string; msg: string }>>([]);
+  const [filter, setFilter] = useState("");
+  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [autoScroll, setAutoScroll] = useState(true);
+  const [paused, setPaused] = useState(false);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!autoRefresh) return;
+    let stopped = false;
+    const fetchLogs = async () => {
+      if (paused) return;
+      try {
+        const pw = typeof window !== "undefined" ? localStorage.getItem("multiscout_admin_pw") : null;
+        if (!pw) return;
+        const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+        const url = `${API}/api/admin/logs?lines=300${filter ? `&platform=${encodeURIComponent(filter)}` : ""}`;
+        const res = await fetch(url, { headers: { "X-ADMIN-PASSWORD": pw } });
+        if (!res.ok || stopped) return;
+        const json = await res.json();
+        setLogs(json.data?.lines || []);
+      } catch {}
+    };
+    fetchLogs();
+    const interval = setInterval(fetchLogs, 2500);
+    return () => { stopped = true; clearInterval(interval); };
+  }, [autoRefresh, filter, paused]);
+
+  useEffect(() => {
+    if (autoScroll && scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [logs, autoScroll]);
+
+  const platforms = Array.from(new Set(logs.map(l => l.platform).filter((p): p is string => !!p))).sort();
+  const filtered = filter ? logs.filter(l => l.platform === filter.toLowerCase()) : logs;
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-start justify-between gap-3 flex-wrap">
+        <div>
+          <h2 className="text-lg font-bold">Loglar</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Backend stdout/stderr son 300 satır. 2.5 sn'de bir otomatik yenilenir.</p>
+        </div>
+        <div className="flex gap-2 items-center flex-wrap">
+          <label className="flex items-center gap-1.5 text-xs">
+            <input type="checkbox" checked={autoRefresh} onChange={(e) => setAutoRefresh(e.target.checked)} className="accent-blue-600" />
+            <span>Otomatik yenile</span>
+          </label>
+          <label className="flex items-center gap-1.5 text-xs">
+            <input type="checkbox" checked={autoScroll} onChange={(e) => setAutoScroll(e.target.checked)} className="accent-blue-600" />
+            <span>Auto scroll</span>
+          </label>
+          <button
+            onClick={() => setPaused(!paused)}
+            className={`px-3 py-1 rounded text-xs font-medium ${paused ? "bg-green-500 text-white" : "bg-gray-200 dark:bg-gray-700"}`}
+          >
+            {paused ? "▶ Devam" : "⏸ Duraklat"}
+          </button>
+        </div>
+      </div>
+
+      {/* Platform filter chips */}
+      {platforms.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          <button
+            onClick={() => setFilter("")}
+            className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${
+              !filter
+                ? "bg-blue-500 text-white"
+                : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"
+            }`}
+          >
+            Tümü ({logs.length})
+          </button>
+          {platforms.map(p => {
+            const cnt = logs.filter(l => l.platform === p).length;
+            const isActive = filter.toLowerCase() === p;
+            return (
+              <button
+                key={p}
+                onClick={() => setFilter(isActive ? "" : p)}
+                className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${
+                  isActive
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200"
+                }`}
+              >
+                {STORE_LABELS[p] || p} ({cnt})
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Log viewer */}
+      <div
+        ref={scrollRef}
+        className="bg-gray-950 text-gray-200 rounded-lg p-3 font-mono text-[11px] leading-relaxed overflow-auto"
+        style={{ maxHeight: "70vh", minHeight: "400px" }}
+      >
+        {filtered.length === 0 && (
+          <div className="text-gray-500 italic">Henüz log yok. {filter && `"${filter}" için kayıt yok.`}</div>
+        )}
+        {filtered.map((l, i) => {
+          const ts = l.ts ? new Date(l.ts).toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit", second: "2-digit" }) : "";
+          const isErr = l.src === "err" || /HATA|Error|error|Traceback|hata/.test(l.msg);
+          return (
+            <div key={i} className={`flex gap-2 ${isErr ? "text-rose-300" : ""}`}>
+              <span className="text-gray-500 shrink-0">{ts}</span>
+              {l.platform && (
+                <span className="text-cyan-400 shrink-0">[{l.platform}]</span>
+              )}
+              <span className="break-all whitespace-pre-wrap">{l.msg.replace(/^\[[\w]+\]\s*/, "")}</span>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

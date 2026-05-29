@@ -93,6 +93,20 @@ def admin_stats(x_admin_password: str | None = Header(default=None, alias="X-ADM
         db.close()
 
 
+@router.get("/admin/logs")
+def admin_logs(
+    lines: int = 200,
+    platform: str | None = None,
+    x_admin_password: str | None = Header(default=None, alias="X-ADMIN-PASSWORD"),
+):
+    """Backend container stdout/stderr son N satır. Docker logs üzerinden değil,
+    backend kendi log akışını basit bir in-memory ring buffer'da tutuyor."""
+    _require_admin(x_admin_password)
+    from app.services.log_buffer import get_log_lines
+    rows = get_log_lines(limit=min(max(lines, 10), 2000), platform_filter=platform)
+    return {"status": "success", "data": {"lines": rows, "count": len(rows)}}
+
+
 @router.get("/stores-status")
 def public_stores_status():
     s = load_settings()
