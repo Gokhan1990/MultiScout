@@ -34,6 +34,10 @@ PLATFORM_FILES = {
     "penti": "data/deals_penti.json",
     "watsons": "data/deals_watsons.json",
     "dr": "data/deals_dr.json",
+    "karaca": "data/deals_karaca.json",
+    "englishhome": "data/deals_englishhome.json",
+    "idefix": "data/deals_idefix.json",
+    "tchibo": "data/deals_tchibo.json",
 }
 
 

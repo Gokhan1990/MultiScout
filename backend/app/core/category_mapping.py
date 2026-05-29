@@ -272,6 +272,57 @@ WATSONS_CATEGORY_URLS = {
     "vitamin":      "https://www.watsons.com.tr/search/vitamin",
 }
 
+KARACA_CATEGORY_URLS = {
+    "kahve-makineleri":     "https://www.karaca.com/kahve-makineleri",
+    "yemek-takimlari":      "https://www.karaca.com/yemek-takimlari",
+    "kahvalti-takimi":      "https://www.karaca.com/kahvalti-takimi",
+    "catal-kasik-bicak":    "https://www.karaca.com/catal-kasik-bicak-takimlari",
+    "tencere-takimlari":    "https://www.karaca.com/tencere-takimlari",
+    "tava":                 "https://www.karaca.com/tava",
+    "cay-bardagi":          "https://www.karaca.com/cay-bardaklari",
+    "su-bardagi":           "https://www.karaca.com/su-bardaklari",
+    "kucuk-ev-aletleri":    "https://www.karaca.com/kucuk-ev-aletleri",
+    "ev-tekstili":          "https://www.karaca.com/ev-tekstili",
+}
+
+ENGLISHHOME_CATEGORY_URLS = {
+    # English Home kategori URL'leri /c-{slug} prefix kullanır
+    "havlu":           "https://www.englishhome.com/c-havlu",
+    "nevresim":        "https://www.englishhome.com/c-nevresim-takimi",
+    "yatak-ortusu":    "https://www.englishhome.com/c-yatak-ortusu",
+    "yastik":          "https://www.englishhome.com/c-yastik",
+    "yorgan":          "https://www.englishhome.com/c-yorgan",
+    "kilim":           "https://www.englishhome.com/c-kilim",
+    "perde":           "https://www.englishhome.com/c-perde",
+    "masa-ortusu":     "https://www.englishhome.com/c-masa-ortusu-runner",
+    "mutfak-tekstili": "https://www.englishhome.com/c-mutfak-tekstili",
+    "bebek-tekstili":  "https://www.englishhome.com/c-bebek-tekstili",
+}
+
+IDEFIX_CATEGORY_URLS = {
+    "kitap":             "https://www.idefix.com/Search/?query=kitap",
+    "cok-satan":         "https://www.idefix.com/Search/?query=%C3%A7ok+satan+kitap",
+    "edebiyat":          "https://www.idefix.com/Search/?query=edebiyat",
+    "cocuk-kitabi":      "https://www.idefix.com/Search/?query=%C3%A7ocuk+kitab%C4%B1",
+    "yabanci-dil":       "https://www.idefix.com/Search/?query=yabanc%C4%B1+dilde+kitap",
+    "muzik-cd":          "https://www.idefix.com/Search/?query=m%C3%BCzik+cd",
+    "elektronik":        "https://www.idefix.com/Search/?query=elektronik",
+    "oyuncak":           "https://www.idefix.com/Search/?query=oyuncak",
+    "hediyelik":         "https://www.idefix.com/Search/?query=hediyelik",
+}
+
+TCHIBO_CATEGORY_URLS = {
+    "kahve":            "https://www.tchibo.com.tr/c/kahve",
+    "cekirdek-kahve":   "https://www.tchibo.com.tr/c/cekirdek-kahve",
+    "filtre-kahve":     "https://www.tchibo.com.tr/c/filtre-kahve",
+    "kapsul-kahve":     "https://www.tchibo.com.tr/c/kapsul-kahve",
+    "kahve-makineleri": "https://www.tchibo.com.tr/c/kahve-makineleri",
+    "tekstil":          "https://www.tchibo.com.tr/c/tekstil",
+    "yatak-tekstil":    "https://www.tchibo.com.tr/c/yatak-tekstili",
+    "kadin-giyim":      "https://www.tchibo.com.tr/c/kadin",
+    "erkek-giyim":      "https://www.tchibo.com.tr/c/erkek",
+}
+
 DR_CATEGORY_URLS = {
     "kitap":             "https://www.dr.com.tr/kategori/kitap",
     "egitim-kitaplari":  "https://www.dr.com.tr/kategori/egitim-kitaplari",

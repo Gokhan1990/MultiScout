@@ -35,6 +35,10 @@ SCRAPE_ALL_STATUS = {
     "penti": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
     "watsons": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
     "dr": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "karaca": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "englishhome": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "idefix": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "tchibo": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
 }
 
 # marketfiyati API ile beslenen marketler — tek API call ile 6 market beraber çıkar
@@ -86,6 +90,10 @@ async def run_platform_scrape(platform: str, min_discount: int):
     from app.scrapers.penti_scraper import scrape_penti_deals
     from app.scrapers.watsons_scraper import scrape_watsons_deals
     from app.scrapers.dr_scraper import scrape_dr_deals
+    from app.scrapers.karaca_scraper import scrape_karaca_deals
+    from app.scrapers.englishhome_scraper import scrape_englishhome_deals
+    from app.scrapers.idefix_scraper import scrape_idefix_deals
+    from app.scrapers.tchibo_scraper import scrape_tchibo_deals
     from app.core.category_mapping import (
         TRENDYOL_CATEGORY_URLS, HEPSIBURADA_CATEGORY_URLS, N11_CATEGORY_URLS,
         PAZARAMA_CATEGORY_URLS, CICEKSEPETI_CATEGORY_URLS,
@@ -95,6 +103,7 @@ async def run_platform_scrape(platform: str, min_discount: int):
         HAKMAREXPRESS_CATEGORY_URLS, MACROCENTER_CATEGORY_URLS, BIZIMTOPTAN_CATEGORY_URLS,
         LCWAIKIKI_CATEGORY_URLS, KOTON_CATEGORY_URLS, MAVI_CATEGORY_URLS,
         BOYNER_CATEGORY_URLS, PENTI_CATEGORY_URLS, WATSONS_CATEGORY_URLS, DR_CATEGORY_URLS,
+        KARACA_CATEGORY_URLS, ENGLISHHOME_CATEGORY_URLS, IDEFIX_CATEGORY_URLS, TCHIBO_CATEGORY_URLS,
     )
     from app.services.sync_service import sync_json_to_db, PLATFORM_FILES
     from app.models.database import get_db
@@ -348,6 +357,58 @@ async def run_platform_scrape(platform: str, min_discount: int):
                     )
                     for cat in batch
                 ], return_exceptions=True)
+        elif platform == "karaca":
+            categories = list(KARACA_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_karaca_deals(
+                        PLATFORM_FILES["karaca"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=KARACA_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "englishhome":
+            categories = list(ENGLISHHOME_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_englishhome_deals(
+                        PLATFORM_FILES["englishhome"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=ENGLISHHOME_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "idefix":
+            categories = list(IDEFIX_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_idefix_deals(
+                        PLATFORM_FILES["idefix"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=IDEFIX_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "tchibo":
+            categories = list(TCHIBO_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_tchibo_deals(
+                        PLATFORM_FILES["tchibo"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=TCHIBO_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
         elif platform in MARKETFIYATI_PLATFORMS:
             # Tek API call ile 7 market — diğer 6'sının statüsünü de güncelle
             out_files = {mk: PLATFORM_FILES[mk] for mk in MF_KEYS}
@@ -407,6 +468,7 @@ async def run_scrape_all_job(min_discount: int, platform: str = "all"):
             "hakmarexpress","macrocenter","bizimtoptan",
             "lcwaikiki","koton","mavi",
             "boyner","penti","watsons","dr",
+            "karaca","englishhome","idefix","tchibo",
         ]
         tasks = []
         # marketfiyati platformları içinde herhangi biri açıksa tek bir tarama yeter
