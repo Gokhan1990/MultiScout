@@ -275,6 +275,9 @@ export default function AdminPage() {
 
 type TabProps = { settings: Settings; onSave: (payload: Record<string, unknown>) => Promise<boolean>; busy: boolean };
 
+type ScrapeStatus = "idle" | "running" | "completed" | "error" | "disabled";
+interface PlatformStatus { status: ScrapeStatus; message: string; current_category: string | null; updated_at: string | null }
+
 function DashboardTab() {
   const [stats, setStats] = useState<{
     total: number;
@@ -285,7 +288,11 @@ function DashboardTab() {
     top_deals: Array<{ title: string; platform: string; discount: number; price: string; link: string }>;
   } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [scrapeStatuses, setScrapeStatuses] = useState<Record<string, PlatformStatus>>({});
+  const [globalStatus, setGlobalStatus] = useState<{ status: string; message: string; updated_at: string } | null>(null);
+  const [startingAll, setStartingAll] = useState(false);
 
+  // Stats — bir defa
   useEffect(() => {
     (async () => {
       try {
@@ -303,6 +310,51 @@ function DashboardTab() {
     })();
   }, []);
 
+  // Scrape status — her 5 saniyede bir poll (tarama varsa)
+  useEffect(() => {
+    const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+    let stopped = false;
+    const fetchStatus = async () => {
+      try {
+        const res = await fetch(`${API}/api/scrape-all-status`);
+        if (!res.ok) return;
+        const json = await res.json();
+        if (stopped) return;
+        const d = json.data || {};
+        const { status, message, updated_at, ...platforms } = d;
+        setGlobalStatus({ status: status || "idle", message: message || "", updated_at: updated_at || "" });
+        setScrapeStatuses(platforms as Record<string, PlatformStatus>);
+      } catch {}
+    };
+    fetchStatus();
+    const interval = setInterval(fetchStatus, 5000);
+    return () => { stopped = true; clearInterval(interval); };
+  }, []);
+
+  const scrapeAll = async () => {
+    if (startingAll) return;
+    if (!confirm("Tüm aktif platformlar için tarama başlatılsın mı? Bu işlem uzun sürebilir.")) return;
+    setStartingAll(true);
+    try {
+      const pw = localStorage.getItem("multiscout_admin_pw");
+      const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const res = await fetch(`${API}/api/scrape-all?platform=all`, {
+        method: "POST",
+        headers: { "X-ADMIN-PASSWORD": pw || "" },
+      });
+      if (res.ok) toast.success("Tüm platformların taraması başlatıldı");
+      else if (res.status === 409) toast.warning("Bir tarama zaten çalışıyor");
+      else toast.error("Tarama başlatılamadı");
+    } finally {
+      setStartingAll(false);
+    }
+  };
+
+  // Running platform sayısı
+  const runningPlatforms = Object.entries(scrapeStatuses).filter(([, v]) => v?.status === "running");
+  const erroredPlatforms = Object.entries(scrapeStatuses).filter(([, v]) => v?.status === "error");
+  const isGlobalRunning = globalStatus?.status === "running" || runningPlatforms.length > 0;
+
   if (loading) return <div className="text-gray-500">Yükleniyor...</div>;
   if (!stats) return <div className="text-gray-500">İstatistik alınamadı.</div>;
 
@@ -312,6 +364,54 @@ function DashboardTab() {
 
   return (
     <div className="space-y-6">
+      {/* Canlı tarama durumu */}
+      <section className={`rounded-xl border p-4 ${
+        isGlobalRunning
+          ? "bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-700/50"
+          : erroredPlatforms.length > 0
+          ? "bg-rose-50 dark:bg-rose-900/20 border-rose-300 dark:border-rose-700/50"
+          : "bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700"
+      }`}>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className={`w-3 h-3 rounded-full ${
+              isGlobalRunning ? "bg-blue-500 animate-pulse" : erroredPlatforms.length > 0 ? "bg-rose-500" : "bg-green-500"
+            }`} />
+            <div>
+              <div className="font-bold text-sm">
+                {isGlobalRunning ? `${runningPlatforms.length} platform taranıyor` : erroredPlatforms.length > 0 ? `${erroredPlatforms.length} platformda hata` : "Tarama yapılmıyor"}
+              </div>
+              {globalStatus?.updated_at && (
+                <div className="text-xs text-gray-500 dark:text-gray-400">
+                  Son güncelleme: {new Date(globalStatus.updated_at).toLocaleString("tr-TR")}
+                </div>
+              )}
+            </div>
+          </div>
+          <button
+            onClick={scrapeAll}
+            disabled={startingAll || isGlobalRunning}
+            className="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm font-bold shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {startingAll ? "Başlatılıyor..." : isGlobalRunning ? "Çalışıyor..." : "🚀 Hepsini Tara"}
+          </button>
+        </div>
+        {runningPlatforms.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {runningPlatforms.slice(0, 12).map(([p]) => (
+              <span key={p} className="text-[10px] px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-medium">
+                {STORE_LABELS[p] || p}
+              </span>
+            ))}
+            {runningPlatforms.length > 12 && (
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 font-medium">
+                +{runningPlatforms.length - 12}
+              </span>
+            )}
+          </div>
+        )}
+      </section>
+
       <h2 className="text-lg font-bold">İstatistikler</h2>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Stat label="Toplam Fırsat" value={stats.total} accent="from-blue-500 to-blue-600" />
@@ -321,17 +421,35 @@ function DashboardTab() {
       </div>
 
       <section>
-        <h3 className="text-sm font-bold mb-2">Platform Dağılımı</h3>
+        <div className="flex items-baseline justify-between mb-2">
+          <h3 className="text-sm font-bold">Platform Dağılımı</h3>
+          <span className="text-[10px] text-gray-500 dark:text-gray-400">
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse mr-1" />tarıyor
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-500 ml-2 mr-1" />tamamlandı
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-rose-500 ml-2 mr-1" />hata
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-gray-400 ml-2 mr-1" />beklemede
+          </span>
+        </div>
         <div className="space-y-1.5">
-          {Object.entries(stats.by_platform).sort((a, b) => b[1] - a[1]).map(([p, c]) => (
-            <div key={p} className="flex items-center gap-2">
-              <span className="w-24 text-xs text-gray-600 dark:text-gray-400">{p}</span>
-              <div className="flex-1 h-5 bg-gray-100 dark:bg-gray-800 rounded overflow-hidden">
-                <motion.div initial={{ width: 0 }} animate={{ width: `${(c / maxPlatformCount) * 100}%` }} transition={{ duration: 0.6 }} className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded" />
+          {Object.entries(stats.by_platform).sort((a, b) => b[1] - a[1]).map(([p, c]) => {
+            const ps = scrapeStatuses[p];
+            const statusColor = ps?.status === "running" ? "bg-blue-500 animate-pulse"
+              : ps?.status === "completed" ? "bg-green-500"
+              : ps?.status === "error" ? "bg-rose-500"
+              : ps?.status === "disabled" ? "bg-gray-300" : "bg-gray-400";
+            const lastUpdate = ps?.updated_at ? new Date(ps.updated_at).toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" }) : "";
+            return (
+              <div key={p} className="flex items-center gap-2" title={ps?.message || ""}>
+                <span className={`w-2 h-2 rounded-full shrink-0 ${statusColor}`} />
+                <span className="w-24 text-xs text-gray-600 dark:text-gray-400 truncate">{STORE_LABELS[p] || p}</span>
+                <div className="flex-1 h-5 bg-gray-100 dark:bg-gray-800 rounded overflow-hidden">
+                  <motion.div initial={{ width: 0 }} animate={{ width: `${(c / maxPlatformCount) * 100}%` }} transition={{ duration: 0.6 }} className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded" />
+                </div>
+                <span className="w-10 text-right text-[10px] text-gray-400 hidden sm:inline">{lastUpdate}</span>
+                <span className="w-12 text-right text-xs font-mono">{c}</span>
               </div>
-              <span className="w-12 text-right text-xs font-mono">{c}</span>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 
