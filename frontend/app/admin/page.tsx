@@ -49,6 +49,31 @@ const STORE_LABELS: Record<string, string> = {
   reebok: "Reebok", sarar: "Sarar", huawei: "Huawei", lego: "Lego",
 };
 
+// Mağaza kategori grupları — 64 platformu vertical bazlı toparlar
+const STORE_CATEGORIES: { id: string; label: string; icon: string; stores: string[] }[] = [
+  { id: "marketplace", label: "Marketplace", icon: "🛒", stores: ["amazon", "trendyol", "n11", "hepsiburada", "pazarama", "ciceksepeti", "pttavm"] },
+  { id: "fashion", label: "Moda", icon: "👗", stores: ["lcwaikiki", "koton", "mavi", "defacto", "boyner", "penti", "watsons", "mudo", "network", "yargici", "ramsey", "sarar", "reebok"] },
+  { id: "cosmetics", label: "Kozmetik", icon: "💄", stores: ["gratis", "mac"] },
+  { id: "home", label: "Ev / Dekorasyon", icon: "🏠", stores: ["karaca", "madamecoco", "vivense", "tepehome", "evidea", "englishhome", "pasabahce"] },
+  { id: "electronics", label: "Elektronik & Tech", icon: "💻", stores: ["vatan", "teknosa", "mediamarkt", "beko", "arcelik", "vestel", "apple", "huawei"] },
+  { id: "books", label: "Kitap", icon: "📚", stores: ["dr", "idefix", "kitapyurdu"] },
+  { id: "toys", label: "Oyuncak", icon: "🧸", stores: ["toyzz", "lego"] },
+  { id: "sports", label: "Spor", icon: "⚽", stores: ["decathlon", "skechers", "newbalance", "sportive", "hummel", "flo"] },
+  { id: "outdoor", label: "Outdoor", icon: "⛰️", stores: ["northface"] },
+  { id: "market", label: "Market (Gıda)", icon: "🛍️", stores: ["a101", "bim", "sok", "migros", "carrefoursa", "tarimkredi", "hakmarexpress", "macrocenter", "bizimtoptan", "tchibo"] },
+  { id: "niche", label: "Mücevher & Saat", icon: "💎", stores: ["altinbas", "atasay", "saatvesaat"] },
+  { id: "comparison", label: "Fiyat Karşılaştırma", icon: "📊", stores: ["akakce"] },
+  { id: "games", label: "Oyun", icon: "🎮", stores: ["steam"] },
+];
+
+// Tüm kategorize edilmemiş mağazaları "Diğer" altında topla
+function getStoreCategory(storeKey: string): string {
+  for (const cat of STORE_CATEGORIES) {
+    if (cat.stores.includes(storeKey)) return cat.id;
+  }
+  return "other";
+}
+
 const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: "dashboard", label: "Dashboard", icon: "📊" },
   { id: "stores", label: "Mağazalar", icon: "🏪" },
@@ -463,26 +488,172 @@ function BoycottTab() {
 
 function StoresTab({ settings, onSave, busy }: TabProps) {
   const [stores, setStores] = useState(settings.stores);
+  const [query, setQuery] = useState("");
+  const [productCounts, setProductCounts] = useState<Record<string, number>>({});
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  const [scrapingFor, setScrapingFor] = useState<string | null>(null);
+
+  // Stats endpoint'ten her platform için ürün sayısını al
+  useEffect(() => {
+    (async () => {
+      try {
+        const pw = typeof window !== "undefined" ? localStorage.getItem("multiscout_admin_pw") : null;
+        if (!pw) return;
+        const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+        const res = await fetch(`${API}/api/admin/stats`, { headers: { "X-ADMIN-PASSWORD": pw } });
+        if (res.ok) {
+          const data = await res.json();
+          setProductCounts(data.data?.by_platform || {});
+        }
+      } catch {}
+    })();
+  }, []);
+
   const toggle = (k: string) => setStores({ ...stores, [k]: !stores[k] });
+  const setAll = (val: boolean) => setStores(Object.fromEntries(Object.keys(stores).map(k => [k, val])));
+  const setCategory = (catId: string, val: boolean) => {
+    const cat = STORE_CATEGORIES.find(c => c.id === catId);
+    if (!cat) return;
+    setStores({ ...stores, ...Object.fromEntries(cat.stores.filter(s => s in stores).map(s => [s, val])) });
+  };
   const save = () => onSave(stores);
   const enabledCount = Object.values(stores).filter(Boolean).length;
+  const totalCount = Object.keys(stores).length;
+
+  const scrapeNow = async (platform: string) => {
+    setScrapingFor(platform);
+    try {
+      const pw = localStorage.getItem("multiscout_admin_pw");
+      const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const res = await fetch(`${API}/api/scrape-all?platform=${platform}`, {
+        method: "POST",
+        headers: { "X-ADMIN-PASSWORD": pw || "" },
+      });
+      if (res.ok) toast.success(`${STORE_LABELS[platform] || platform} taraması başlatıldı`);
+      else if (res.status === 409) toast.warning("Bir tarama zaten çalışıyor");
+      else toast.error("Tarama başlatılamadı");
+    } finally {
+      setScrapingFor(null);
+    }
+  };
+
+  // Filter stores by query
+  const q = query.trim().toLowerCase();
+  const filteredKeys = Object.keys(stores).filter(k => {
+    if (!q) return true;
+    const label = (STORE_LABELS[k] || k).toLowerCase();
+    return label.includes(q) || k.toLowerCase().includes(q);
+  });
+
+  // Group stores by category
+  const grouped: Record<string, string[]> = {};
+  STORE_CATEGORIES.forEach(c => { grouped[c.id] = []; });
+  grouped.other = [];
+  filteredKeys.forEach(k => {
+    const catId = getStoreCategory(k);
+    if (!(catId in grouped)) grouped[catId] = [];
+    grouped[catId].push(k);
+  });
+  const visibleCategories = [...STORE_CATEGORIES, { id: "other", label: "Diğer", icon: "📦", stores: [] }]
+    .filter(c => grouped[c.id]?.length > 0);
+
   return (
     <div className="space-y-4">
-      <div>
-        <h2 className="text-lg font-bold">Mağaza Açık / Kapalı</h2>
-        <p className="text-sm text-gray-500 dark:text-gray-400">Kapatılan mağazalar kullanıcılara görünmez ve otomatik taramaya alınmaz. {enabledCount}/{Object.keys(stores).length} aktif.</p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-bold">Mağaza Açık / Kapalı</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            {enabledCount}/{totalCount} aktif. Kapalı mağazalar kullanıcılara görünmez ve otomatik taramaya alınmaz.
+          </p>
+        </div>
+        <div className="flex gap-2 flex-wrap">
+          <button onClick={() => setAll(true)} className="px-3 py-1.5 rounded-lg bg-green-500 text-white text-xs font-medium hover:bg-green-600">Hepsini Aç</button>
+          <button onClick={() => setAll(false)} className="px-3 py-1.5 rounded-lg bg-gray-500 text-white text-xs font-medium hover:bg-gray-600">Hepsini Kapat</button>
+          <button onClick={save} disabled={busy} className="px-4 py-1.5 rounded-lg bg-blue-500 text-white text-sm font-semibold disabled:opacity-50">
+            {busy ? "Kaydediliyor..." : "Kaydet"}
+          </button>
+        </div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        {Object.entries(stores).map(([k, v]) => (
-          <label key={k} className={`flex items-center justify-between px-4 py-3 rounded-lg border cursor-pointer transition ${
-            v ? "bg-green-50 dark:bg-green-900/20 border-green-300 dark:border-green-700/50" : "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700"
-          }`}>
-            <span className="text-sm font-medium">{STORE_LABELS[k] || k}</span>
-            <input type="checkbox" checked={v} onChange={() => toggle(k)} className="w-5 h-5 accent-green-600" />
-          </label>
-        ))}
+
+      {/* Search bar */}
+      <div className="relative">
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Mağaza ara… (örn: koton, market, watsons)"
+          className="w-full pl-9 pr-3 py-2 rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">🔍</span>
+        {query && (
+          <button onClick={() => setQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">×</button>
+        )}
       </div>
-      <button onClick={save} disabled={busy} className="px-4 py-2 rounded-lg bg-blue-500 text-white font-semibold disabled:opacity-50">{busy ? "Kaydediliyor..." : "Kaydet"}</button>
+
+      {/* Category groups */}
+      <div className="space-y-3">
+        {visibleCategories.map((cat) => {
+          const catStores = grouped[cat.id];
+          const catEnabled = catStores.filter(k => stores[k]).length;
+          const isCollapsed = collapsed[cat.id] === true;
+          return (
+            <div key={cat.id} className="border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
+              <div className="flex items-center justify-between px-3 py-2 bg-gray-50 dark:bg-gray-800/50">
+                <button
+                  onClick={() => setCollapsed({ ...collapsed, [cat.id]: !isCollapsed })}
+                  className="flex items-center gap-2 text-sm font-semibold flex-1 text-left"
+                >
+                  <span>{isCollapsed ? "▶" : "▼"}</span>
+                  <span>{cat.icon}</span>
+                  <span>{cat.label}</span>
+                  <span className="text-xs text-gray-500 font-normal">({catEnabled}/{catStores.length})</span>
+                </button>
+                <div className="flex gap-1">
+                  <button onClick={() => setCategory(cat.id, true)} className="px-2 py-0.5 rounded text-[10px] bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300 hover:bg-green-200">Aç</button>
+                  <button onClick={() => setCategory(cat.id, false)} className="px-2 py-0.5 rounded text-[10px] bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-300">Kapat</button>
+                </div>
+              </div>
+              {!isCollapsed && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-2">
+                  {catStores.map((k) => {
+                    const v = stores[k];
+                    const cnt = productCounts[k];
+                    const isScraping = scrapingFor === k;
+                    return (
+                      <div key={k} className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition ${
+                        v ? "bg-green-50/50 dark:bg-green-900/10 border-green-200 dark:border-green-700/30" : "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+                      }`}>
+                        <label className="flex items-center gap-2 flex-1 cursor-pointer min-w-0">
+                          <input type="checkbox" checked={v} onChange={() => toggle(k)} className="w-4 h-4 accent-green-600 shrink-0" />
+                          <span className="text-sm font-medium truncate">{STORE_LABELS[k] || k}</span>
+                          {cnt !== undefined && cnt > 0 && (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-mono shrink-0">
+                              {cnt}
+                            </span>
+                          )}
+                        </label>
+                        <button
+                          onClick={() => scrapeNow(k)}
+                          disabled={isScraping || !v}
+                          title={!v ? "Önce mağazayı aç" : isScraping ? "Tarama başlatılıyor..." : "Şimdi tara"}
+                          className="text-[10px] px-2 py-1 rounded-full bg-blue-500 text-white hover:bg-blue-600 disabled:bg-gray-300 dark:disabled:bg-gray-600 disabled:cursor-not-allowed shrink-0"
+                        >
+                          {isScraping ? "..." : "Tara"}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })}
+        {visibleCategories.length === 0 && (
+          <div className="text-center text-sm text-gray-500 dark:text-gray-400 py-8">
+            "{query}" için sonuç bulunamadı.
+          </div>
+        )}
+      </div>
     </div>
   );
 }
