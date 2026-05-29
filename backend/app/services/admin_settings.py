@@ -22,6 +22,7 @@ DEFAULTS: dict[str, Any] = {
         "karaca": True, "englishhome": False, "idefix": True, "tchibo": True,
         "mudo": True, "madamecoco": True, "vivense": True,
         "tepehome": True, "skechers": True,
+        "toyzz": True, "yargici": True, "kitapyurdu": True,
     },
     "theme": {
         "primary": "#f97316",

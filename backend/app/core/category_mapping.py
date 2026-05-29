@@ -388,6 +388,45 @@ SKECHERS_CATEGORY_URLS = {
     "indirim":         "https://www.skechers.com.tr/arama?q=indirim",
 }
 
+TOYZZ_CATEGORY_URLS = {
+    "oyuncak":         "https://www.toyzzshop.com/oyuncak",
+    "lego":            "https://www.toyzzshop.com/lego",
+    "bebek-oyuncak":   "https://www.toyzzshop.com/bebek-oyuncaklari",
+    "erkek-cocuk":     "https://www.toyzzshop.com/erkek-cocuk-oyuncaklari",
+    "kiz-cocuk":       "https://www.toyzzshop.com/kiz-cocuk-oyuncaklari",
+    "egitici":         "https://www.toyzzshop.com/egitici-oyuncaklar",
+    "hot-wheels":      "https://www.toyzzshop.com/arama?q=hot+wheels",
+    "fisher-price":    "https://www.toyzzshop.com/arama?q=fisher+price",
+    "barbie":          "https://www.toyzzshop.com/arama?q=barbie",
+    "puzzle":          "https://www.toyzzshop.com/arama?q=puzzle",
+}
+
+YARGICI_CATEGORY_URLS = {
+    "kadin":          "https://www.yargici.com.tr/kadin",
+    "erkek":          "https://www.yargici.com.tr/erkek",
+    "kadin-elbise":   "https://www.yargici.com.tr/arama?q=elbise",
+    "kadin-pantolon": "https://www.yargici.com.tr/arama?q=pantolon",
+    "kadin-bluz":     "https://www.yargici.com.tr/arama?q=bluz",
+    "kadin-etek":     "https://www.yargici.com.tr/arama?q=etek",
+    "kadin-mont":     "https://www.yargici.com.tr/arama?q=mont",
+    "erkek-gomlek":   "https://www.yargici.com.tr/arama?q=g%C3%B6mlek",
+    "erkek-pantolon": "https://www.yargici.com.tr/arama?q=erkek+pantolon",
+    "aksesuar":       "https://www.yargici.com.tr/arama?q=aksesuar",
+}
+
+KITAPYURDU_CATEGORY_URLS = {
+    "kitap":             "https://www.kitapyurdu.com/kategori/kitap/1.html",
+    "edebiyat":          "https://www.kitapyurdu.com/kategori/edebiyat/2.html",
+    "kisisel-gelisim":   "https://www.kitapyurdu.com/kategori/kisisel-gelisim/16.html",
+    "cocuk-kitap":       "https://www.kitapyurdu.com/kategori/cocuk-ve-genclik/3.html",
+    "yabanci-dil":       "https://www.kitapyurdu.com/kategori/yabanci-dilde-kitap/13.html",
+    "egitim-sinav":      "https://www.kitapyurdu.com/kategori/egitim-sinav/4.html",
+    "tarih":             "https://www.kitapyurdu.com/kategori/tarih/7.html",
+    "felsefe":           "https://www.kitapyurdu.com/kategori/felsefe/6.html",
+    "akademik":          "https://www.kitapyurdu.com/kategori/akademik/12.html",
+    "bilim-arastirma":   "https://www.kitapyurdu.com/kategori/bilim-arastirma/15.html",
+}
+
 DR_CATEGORY_URLS = {
     "kitap":             "https://www.dr.com.tr/kategori/kitap",
     "egitim-kitaplari":  "https://www.dr.com.tr/kategori/egitim-kitaplari",

@@ -43,6 +43,9 @@ PLATFORM_FILES = {
     "vivense": "data/deals_vivense.json",
     "tepehome": "data/deals_tepehome.json",
     "skechers": "data/deals_skechers.json",
+    "toyzz": "data/deals_toyzz.json",
+    "yargici": "data/deals_yargici.json",
+    "kitapyurdu": "data/deals_kitapyurdu.json",
 }
 
 
