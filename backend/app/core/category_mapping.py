@@ -682,6 +682,32 @@ ATASAY_CATEGORY_URLS = {
     "zincir":         "https://www.atasay.com/zincir",
 }
 
+REEBOK_CATEGORY_URLS = {
+    "kadin":           "https://www.reebok.com.tr/kadin",
+    "erkek":           "https://www.reebok.com.tr/erkek",
+    "cocuk":           "https://www.reebok.com.tr/cocuk",
+    "kadin-ayakkabi":  "https://www.reebok.com.tr/kadin-ayakkabi",
+    "erkek-ayakkabi":  "https://www.reebok.com.tr/erkek-ayakkabi",
+    "kadin-giyim":     "https://www.reebok.com.tr/kadin-giyim",
+    "erkek-giyim":     "https://www.reebok.com.tr/erkek-giyim",
+    "outlet":          "https://www.reebok.com.tr/outlet",
+    "yeni":            "https://www.reebok.com.tr/yeni-gelenler",
+    "indirim":         "https://www.reebok.com.tr/indirimli",
+}
+
+SARAR_CATEGORY_URLS = {
+    "erkek":           "https://www.sarar.com/erkek",
+    "takim-elbise":    "https://www.sarar.com/takim-elbise",
+    "ceket":           "https://www.sarar.com/ceket",
+    "gomlek":          "https://www.sarar.com/gomlek",
+    "pantolon":        "https://www.sarar.com/pantolon",
+    "tisort":          "https://www.sarar.com/tisort",
+    "ayakkabi":        "https://www.sarar.com/ayakkabi",
+    "kazak":           "https://www.sarar.com/kazak",
+    "mont":            "https://www.sarar.com/mont",
+    "aksesuar":        "https://www.sarar.com/aksesuar",
+}
+
 DR_CATEGORY_URLS = {
     "kitap":             "https://www.dr.com.tr/kategori/kitap",
     "egitim-kitaplari":  "https://www.dr.com.tr/kategori/egitim-kitaplari",
