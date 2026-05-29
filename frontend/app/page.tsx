@@ -60,7 +60,7 @@ type PlatformKey =
   | "network" | "northface"
   | "mac" | "apple"
   | "saatvesaat" | "altinbas" | "pasabahce"
-  | "akakce";
+  | "akakce" | "ramsey" | "atasay";
 type BoycottMode = "highlight" | "hide" | "show";
 
 const PLATFORM_LABELS: Record<PlatformKey, string> = {
@@ -123,6 +123,8 @@ const PLATFORM_LABELS: Record<PlatformKey, string> = {
   altinbas: "Altınbaş",
   pasabahce: "Paşabahçe",
   akakce: "Akakçe",
+  ramsey: "Ramsey",
+  atasay: "Atasay",
 };
 
 const ALL_PLATFORM_KEYS: PlatformKey[] = [
@@ -142,7 +144,7 @@ const ALL_PLATFORM_KEYS: PlatformKey[] = [
   "network", "northface",
   "mac", "apple",
   "saatvesaat", "altinbas", "pasabahce",
-  "akakce",
+  "akakce", "ramsey", "atasay",
 ];
 
 const BOYCOTT_MODES: { key: BoycottMode; tKey: string; icon: string }[] = [

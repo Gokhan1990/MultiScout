@@ -651,6 +651,32 @@ AKAKCE_CATEGORY_URLS = {
     "kulaklik":        "https://www.akakce.com/arama?q=kulakl%C4%B1k",
 }
 
+RAMSEY_CATEGORY_URLS = {
+    "gomlek":         "https://www.ramsey.com.tr/arama?q=g%C3%B6mlek",
+    "tisort":         "https://www.ramsey.com.tr/arama?q=ti%C5%9F%C3%B6rt",
+    "pantolon":       "https://www.ramsey.com.tr/arama?q=pantolon",
+    "ceket":          "https://www.ramsey.com.tr/arama?q=ceket",
+    "takim-elbise":   "https://www.ramsey.com.tr/arama?q=tak%C4%B1m+elbise",
+    "mont":           "https://www.ramsey.com.tr/arama?q=mont",
+    "sweat":          "https://www.ramsey.com.tr/arama?q=sweat",
+    "polo":           "https://www.ramsey.com.tr/arama?q=polo",
+    "ayakkabi":       "https://www.ramsey.com.tr/arama?q=ayakkab%C4%B1",
+    "aksesuar":       "https://www.ramsey.com.tr/arama?q=aksesuar",
+}
+
+ATASAY_CATEGORY_URLS = {
+    "kolye":          "https://www.atasay.com/kolye",
+    "yuzuk":          "https://www.atasay.com/yuzuk",
+    "kupe":           "https://www.atasay.com/kupe",
+    "bilezik":        "https://www.atasay.com/bilezik",
+    "bileklik":       "https://www.atasay.com/bileklik",
+    "altin":          "https://www.atasay.com/altin",
+    "pirlanta":       "https://www.atasay.com/pirlanta",
+    "erkek":          "https://www.atasay.com/erkek",
+    "cocuk":          "https://www.atasay.com/cocuk",
+    "zincir":         "https://www.atasay.com/zincir",
+}
+
 DR_CATEGORY_URLS = {
     "kitap":             "https://www.dr.com.tr/kategori/kitap",
     "egitim-kitaplari":  "https://www.dr.com.tr/kategori/egitim-kitaplari",

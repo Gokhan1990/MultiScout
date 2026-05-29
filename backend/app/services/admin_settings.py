@@ -29,7 +29,7 @@ DEFAULTS: dict[str, Any] = {
         "network": True, "northface": True,
         "mac": True, "apple": True,
         "saatvesaat": True, "altinbas": True, "pasabahce": True,
-        "akakce": True,
+        "akakce": True, "ramsey": True, "atasay": True,
     },
     "theme": {
         "primary": "#f97316",

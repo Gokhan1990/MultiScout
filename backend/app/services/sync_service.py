@@ -63,6 +63,8 @@ PLATFORM_FILES = {
     "altinbas": "data/deals_altinbas.json",
     "pasabahce": "data/deals_pasabahce.json",
     "akakce": "data/deals_akakce.json",
+    "ramsey": "data/deals_ramsey.json",
+    "atasay": "data/deals_atasay.json",
 }
 
 
