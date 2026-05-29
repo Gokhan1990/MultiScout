@@ -53,7 +53,8 @@ type PlatformKey =
   | "karaca" | "englishhome" | "idefix" | "tchibo"
   | "mudo" | "madamecoco" | "vivense"
   | "tepehome" | "skechers"
-  | "toyzz" | "yargici" | "kitapyurdu";
+  | "toyzz" | "yargici" | "kitapyurdu"
+  | "pttavm" | "sportive" | "newbalance";
 type BoycottMode = "highlight" | "hide" | "show";
 
 const PLATFORM_LABELS: Record<PlatformKey, string> = {
@@ -99,6 +100,9 @@ const PLATFORM_LABELS: Record<PlatformKey, string> = {
   toyzz: "Toyzz Shop",
   yargici: "Yargıcı",
   kitapyurdu: "Kitapyurdu",
+  pttavm: "PttAVM",
+  sportive: "Sportive",
+  newbalance: "New Balance",
 };
 
 const ALL_PLATFORM_KEYS: PlatformKey[] = [
@@ -112,6 +116,7 @@ const ALL_PLATFORM_KEYS: PlatformKey[] = [
   "mudo", "madamecoco", "vivense",
   "tepehome", "skechers",
   "toyzz", "yargici", "kitapyurdu",
+  "pttavm", "sportive", "newbalance",
 ];
 
 const BOYCOTT_MODES: { key: BoycottMode; tKey: string; icon: string }[] = [

@@ -46,6 +46,9 @@ PLATFORM_FILES = {
     "toyzz": "data/deals_toyzz.json",
     "yargici": "data/deals_yargici.json",
     "kitapyurdu": "data/deals_kitapyurdu.json",
+    "pttavm": "data/deals_pttavm.json",
+    "sportive": "data/deals_sportive.json",
+    "newbalance": "data/deals_newbalance.json",
 }
 
 

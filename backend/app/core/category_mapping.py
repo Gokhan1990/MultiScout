@@ -427,6 +427,45 @@ KITAPYURDU_CATEGORY_URLS = {
     "bilim-arastirma":   "https://www.kitapyurdu.com/kategori/bilim-arastirma/15.html",
 }
 
+PTTAVM_CATEGORY_URLS = {
+    "elektronik":    "https://www.pttavm.com/arama?q=elektronik",
+    "telefon":       "https://www.pttavm.com/arama?q=telefon",
+    "bilgisayar":    "https://www.pttavm.com/arama?q=bilgisayar",
+    "tv":            "https://www.pttavm.com/arama?q=televizyon",
+    "beyaz-esya":    "https://www.pttavm.com/arama?q=beyaz+e%C5%9Fya",
+    "giyim":         "https://www.pttavm.com/arama?q=giyim",
+    "ayakkabi":      "https://www.pttavm.com/arama?q=ayakkab%C4%B1",
+    "kitap":         "https://www.pttavm.com/arama?q=kitap",
+    "oyuncak":       "https://www.pttavm.com/arama?q=oyuncak",
+    "gida":          "https://www.pttavm.com/arama?q=g%C4%B1da",
+}
+
+SPORTIVE_CATEGORY_URLS = {
+    "erkek":           "https://www.sportive.com.tr/erkek",
+    "kadin":           "https://www.sportive.com.tr/kadin",
+    "cocuk":           "https://www.sportive.com.tr/cocuk",
+    "ayakkabi":        "https://www.sportive.com.tr/ayakkabi",
+    "tisort":          "https://www.sportive.com.tr/tisort",
+    "esofman":         "https://www.sportive.com.tr/esofman",
+    "krampon":         "https://www.sportive.com.tr/krampon",
+    "spor-ayakkabi":   "https://www.sportive.com.tr/spor-ayakkabi",
+    "nike":            "https://www.sportive.com.tr/nike",
+    "adidas":          "https://www.sportive.com.tr/adidas",
+}
+
+NEWBALANCE_CATEGORY_URLS = {
+    "ayakkabi":      "https://www.newbalance.com.tr/arama?q=ayakkab%C4%B1",
+    "erkek":         "https://www.newbalance.com.tr/arama?q=erkek",
+    "kadin":         "https://www.newbalance.com.tr/arama?q=kad%C4%B1n",
+    "cocuk":         "https://www.newbalance.com.tr/arama?q=%C3%A7ocuk",
+    "kosu":          "https://www.newbalance.com.tr/arama?q=ko%C5%9Fu",
+    "lifestyle":     "https://www.newbalance.com.tr/arama?q=lifestyle",
+    "tisort":        "https://www.newbalance.com.tr/arama?q=ti%C5%9F%C3%B6rt",
+    "esofman":       "https://www.newbalance.com.tr/arama?q=e%C5%9Fofman",
+    "sweatshirt":    "https://www.newbalance.com.tr/arama?q=sweatshirt",
+    "574":           "https://www.newbalance.com.tr/arama?q=574",
+}
+
 DR_CATEGORY_URLS = {
     "kitap":             "https://www.dr.com.tr/kategori/kitap",
     "egitim-kitaplari":  "https://www.dr.com.tr/kategori/egitim-kitaplari",

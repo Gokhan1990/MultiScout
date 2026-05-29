@@ -47,6 +47,9 @@ SCRAPE_ALL_STATUS = {
     "toyzz": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
     "yargici": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
     "kitapyurdu": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "pttavm": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "sportive": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "newbalance": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
 }
 
 # marketfiyati API ile beslenen marketler — tek API call ile 6 market beraber çıkar
@@ -110,6 +113,9 @@ async def run_platform_scrape(platform: str, min_discount: int):
     from app.scrapers.toyzz_scraper import scrape_toyzz_deals
     from app.scrapers.yargici_scraper import scrape_yargici_deals
     from app.scrapers.kitapyurdu_scraper import scrape_kitapyurdu_deals
+    from app.scrapers.pttavm_scraper import scrape_pttavm_deals
+    from app.scrapers.sportive_scraper import scrape_sportive_deals
+    from app.scrapers.newbalance_scraper import scrape_newbalance_deals
     from app.core.category_mapping import (
         TRENDYOL_CATEGORY_URLS, HEPSIBURADA_CATEGORY_URLS, N11_CATEGORY_URLS,
         PAZARAMA_CATEGORY_URLS, CICEKSEPETI_CATEGORY_URLS,
@@ -123,6 +129,7 @@ async def run_platform_scrape(platform: str, min_discount: int):
         MUDO_CATEGORY_URLS, MADAMECOCO_CATEGORY_URLS, VIVENSE_CATEGORY_URLS,
         TEPEHOME_CATEGORY_URLS, SKECHERS_CATEGORY_URLS,
         TOYZZ_CATEGORY_URLS, YARGICI_CATEGORY_URLS, KITAPYURDU_CATEGORY_URLS,
+        PTTAVM_CATEGORY_URLS, SPORTIVE_CATEGORY_URLS, NEWBALANCE_CATEGORY_URLS,
     )
     from app.services.sync_service import sync_json_to_db, PLATFORM_FILES
     from app.models.database import get_db
@@ -532,6 +539,45 @@ async def run_platform_scrape(platform: str, min_discount: int):
                     )
                     for cat in batch
                 ], return_exceptions=True)
+        elif platform == "pttavm":
+            categories = list(PTTAVM_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_pttavm_deals(
+                        PLATFORM_FILES["pttavm"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=PTTAVM_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "sportive":
+            categories = list(SPORTIVE_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_sportive_deals(
+                        PLATFORM_FILES["sportive"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=SPORTIVE_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "newbalance":
+            categories = list(NEWBALANCE_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_newbalance_deals(
+                        PLATFORM_FILES["newbalance"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=NEWBALANCE_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
         elif platform in MARKETFIYATI_PLATFORMS:
             # Tek API call ile 7 market — diğer 6'sının statüsünü de güncelle
             out_files = {mk: PLATFORM_FILES[mk] for mk in MF_KEYS}
@@ -595,6 +641,7 @@ async def run_scrape_all_job(min_discount: int, platform: str = "all"):
             "mudo","madamecoco","vivense",
             "tepehome","skechers",
             "toyzz","yargici","kitapyurdu",
+            "pttavm","sportive","newbalance",
         ]
         tasks = []
         # marketfiyati platformları içinde herhangi biri açıksa tek bir tarama yeter

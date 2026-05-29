@@ -23,6 +23,7 @@ DEFAULTS: dict[str, Any] = {
         "mudo": True, "madamecoco": True, "vivense": True,
         "tepehome": True, "skechers": True,
         "toyzz": True, "yargici": True, "kitapyurdu": True,
+        "pttavm": True, "sportive": True, "newbalance": True,
     },
     "theme": {
         "primary": "#f97316",
