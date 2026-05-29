@@ -42,6 +42,7 @@ const STORE_LABELS: Record<string, string> = {
   pttavm: "PttAVM", sportive: "Sportive", newbalance: "New Balance",
   flo: "FLO", hummel: "Hummel", evidea: "Evidea",
   beko: "Beko", arcelik: "Arçelik", vestel: "Vestel",
+  network: "Network", northface: "The North Face",
 };
 
 const TABS: { id: Tab; label: string; icon: string }[] = [

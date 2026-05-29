@@ -544,6 +544,32 @@ VESTEL_CATEGORY_URLS = {
     "telefon":           "https://www.vestel.com.tr/telefon",
 }
 
+NETWORK_CATEGORY_URLS = {
+    "kadin":            "https://www.network.com.tr/kadin",
+    "erkek":            "https://www.network.com.tr/erkek",
+    "outlet":           "https://www.network.com.tr/outlet",
+    "yeni-gelenler":    "https://www.network.com.tr/yeni-gelenler",
+    "kadin-elbise":     "https://www.network.com.tr/kadin-elbise-modelleri-699",
+    "kadin-yaz":        "https://www.network.com.tr/network-kadin-yaz-sezonu-1410",
+    "kadin-pantolon":   "https://www.network.com.tr/kadin-pantolon",
+    "kadin-bluz":       "https://www.network.com.tr/kadin-bluz-gomlek",
+    "erkek-gomlek":     "https://www.network.com.tr/erkek-gomlek",
+    "erkek-pantolon":   "https://www.network.com.tr/erkek-pantolon",
+}
+
+NORTHFACE_CATEGORY_URLS = {
+    "kadin-dis-giyim":  "https://www.thenorthface.com.tr/kadin/dis-giyim",
+    "kadin-ust-giyim":  "https://www.thenorthface.com.tr/kadin/ust-giyim",
+    "kadin-alt-giyim":  "https://www.thenorthface.com.tr/kadin/alt-giyim",
+    "kadin-ayakkabi":   "https://www.thenorthface.com.tr/kadin/ayakkabilar",
+    "kadin-aksesuar":   "https://www.thenorthface.com.tr/kadin/aksesuarlar",
+    "erkek-dis-giyim":  "https://www.thenorthface.com.tr/erkek/dis-giyim",
+    "erkek-ust-giyim":  "https://www.thenorthface.com.tr/erkek/ust-giyim",
+    "erkek-alt-giyim":  "https://www.thenorthface.com.tr/erkek/alt-giyim",
+    "erkek-ayakkabi":   "https://www.thenorthface.com.tr/erkek/ayakkabilar",
+    "erkek-aksesuar":   "https://www.thenorthface.com.tr/erkek/aksesuarlar",
+}
+
 DR_CATEGORY_URLS = {
     "kitap":             "https://www.dr.com.tr/kategori/kitap",
     "egitim-kitaplari":  "https://www.dr.com.tr/kategori/egitim-kitaplari",

@@ -55,6 +55,8 @@ PLATFORM_FILES = {
     "beko": "data/deals_beko.json",
     "arcelik": "data/deals_arcelik.json",
     "vestel": "data/deals_vestel.json",
+    "network": "data/deals_network.json",
+    "northface": "data/deals_northface.json",
 }
 
 

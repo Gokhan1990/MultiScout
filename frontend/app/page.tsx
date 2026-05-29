@@ -56,7 +56,8 @@ type PlatformKey =
   | "toyzz" | "yargici" | "kitapyurdu"
   | "pttavm" | "sportive" | "newbalance"
   | "flo" | "hummel" | "evidea"
-  | "beko" | "arcelik" | "vestel";
+  | "beko" | "arcelik" | "vestel"
+  | "network" | "northface";
 type BoycottMode = "highlight" | "hide" | "show";
 
 const PLATFORM_LABELS: Record<PlatformKey, string> = {
@@ -111,6 +112,8 @@ const PLATFORM_LABELS: Record<PlatformKey, string> = {
   beko: "Beko",
   arcelik: "Arçelik",
   vestel: "Vestel",
+  network: "Network",
+  northface: "The North Face",
 };
 
 const ALL_PLATFORM_KEYS: PlatformKey[] = [
@@ -127,6 +130,7 @@ const ALL_PLATFORM_KEYS: PlatformKey[] = [
   "pttavm", "sportive", "newbalance",
   "flo", "hummel", "evidea",
   "beko", "arcelik", "vestel",
+  "network", "northface",
 ];
 
 const BOYCOTT_MODES: { key: BoycottMode; tKey: string; icon: string }[] = [
