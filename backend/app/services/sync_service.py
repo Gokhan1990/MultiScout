@@ -49,6 +49,9 @@ PLATFORM_FILES = {
     "pttavm": "data/deals_pttavm.json",
     "sportive": "data/deals_sportive.json",
     "newbalance": "data/deals_newbalance.json",
+    "flo": "data/deals_flo.json",
+    "hummel": "data/deals_hummel.json",
+    "evidea": "data/deals_evidea.json",
 }
 
 

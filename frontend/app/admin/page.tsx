@@ -40,6 +40,7 @@ const STORE_LABELS: Record<string, string> = {
   tepehome: "Tepe Home", skechers: "Skechers",
   toyzz: "Toyzz Shop", yargici: "Yargıcı", kitapyurdu: "Kitapyurdu",
   pttavm: "PttAVM", sportive: "Sportive", newbalance: "New Balance",
+  flo: "FLO", hummel: "Hummel", evidea: "Evidea",
 };
 
 const TABS: { id: Tab; label: string; icon: string }[] = [

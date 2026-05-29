@@ -24,6 +24,7 @@ DEFAULTS: dict[str, Any] = {
         "tepehome": True, "skechers": True,
         "toyzz": True, "yargici": True, "kitapyurdu": True,
         "pttavm": True, "sportive": True, "newbalance": True,
+        "flo": True, "hummel": True, "evidea": True,
     },
     "theme": {
         "primary": "#f97316",

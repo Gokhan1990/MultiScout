@@ -466,6 +466,45 @@ NEWBALANCE_CATEGORY_URLS = {
     "574":           "https://www.newbalance.com.tr/arama?q=574",
 }
 
+FLO_CATEGORY_URLS = {
+    "erkek":           "https://www.flo.com.tr/erkek",
+    "kadin":           "https://www.flo.com.tr/kadin",
+    "cocuk":           "https://www.flo.com.tr/cocuk",
+    "erkek-ayakkabi":  "https://www.flo.com.tr/erkek-ayakkabi",
+    "kadin-ayakkabi":  "https://www.flo.com.tr/kadin-ayakkabi",
+    "spor-ayakkabi":   "https://www.flo.com.tr/spor-ayakkabi",
+    "bot":             "https://www.flo.com.tr/bot",
+    "sandalet":        "https://www.flo.com.tr/sandalet",
+    "terlik":          "https://www.flo.com.tr/terlik",
+    "outlet":          "https://www.flo.com.tr/outlet",
+}
+
+HUMMEL_CATEGORY_URLS = {
+    "erkek":           "https://www.hummel.com.tr/erkek",
+    "kadin":           "https://www.hummel.com.tr/kadin",
+    "cocuk":           "https://www.hummel.com.tr/cocuk",
+    "outlet":          "https://www.hummel.com.tr/outlet",
+    "milli-takim":     "https://www.hummel.com.tr/milli-takim-formalari",
+    "erkek-ayakkabi":  "https://www.hummel.com.tr/erkek/ayakkabi",
+    "kadin-ayakkabi":  "https://www.hummel.com.tr/kadin/ayakkabi",
+    "erkek-giyim":     "https://www.hummel.com.tr/erkek/giyim",
+    "kadin-giyim":     "https://www.hummel.com.tr/kadin/giyim",
+    "cocuk-ayakkabi":  "https://www.hummel.com.tr/cocuk/ayakkabi",
+}
+
+EVIDEA_CATEGORY_URLS = {
+    "koltuk":         "https://www.evidea.com/arama?q=koltuk",
+    "kanepe":         "https://www.evidea.com/arama?q=kanepe",
+    "yatak":          "https://www.evidea.com/arama?q=yatak",
+    "yatak-odasi":    "https://www.evidea.com/arama?q=yatak+odasi",
+    "yemek-masasi":   "https://www.evidea.com/arama?q=yemek+masasi",
+    "sandalye":       "https://www.evidea.com/arama?q=sandalye",
+    "gardrop":        "https://www.evidea.com/arama?q=gardrop",
+    "tv-unitesi":     "https://www.evidea.com/arama?q=tv+%C3%BCnitesi",
+    "calisma-masasi": "https://www.evidea.com/arama?q=%C3%A7al%C4%B1%C5%9Fma+masas%C4%B1",
+    "berjer":         "https://www.evidea.com/arama?q=berjer",
+}
+
 DR_CATEGORY_URLS = {
     "kitap":             "https://www.dr.com.tr/kategori/kitap",
     "egitim-kitaplari":  "https://www.dr.com.tr/kategori/egitim-kitaplari",

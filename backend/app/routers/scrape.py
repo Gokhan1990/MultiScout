@@ -50,6 +50,9 @@ SCRAPE_ALL_STATUS = {
     "pttavm": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
     "sportive": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
     "newbalance": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "flo": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "hummel": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "evidea": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
 }
 
 # marketfiyati API ile beslenen marketler — tek API call ile 6 market beraber çıkar
@@ -116,6 +119,9 @@ async def run_platform_scrape(platform: str, min_discount: int):
     from app.scrapers.pttavm_scraper import scrape_pttavm_deals
     from app.scrapers.sportive_scraper import scrape_sportive_deals
     from app.scrapers.newbalance_scraper import scrape_newbalance_deals
+    from app.scrapers.flo_scraper import scrape_flo_deals
+    from app.scrapers.hummel_scraper import scrape_hummel_deals
+    from app.scrapers.evidea_scraper import scrape_evidea_deals
     from app.core.category_mapping import (
         TRENDYOL_CATEGORY_URLS, HEPSIBURADA_CATEGORY_URLS, N11_CATEGORY_URLS,
         PAZARAMA_CATEGORY_URLS, CICEKSEPETI_CATEGORY_URLS,
@@ -130,6 +136,7 @@ async def run_platform_scrape(platform: str, min_discount: int):
         TEPEHOME_CATEGORY_URLS, SKECHERS_CATEGORY_URLS,
         TOYZZ_CATEGORY_URLS, YARGICI_CATEGORY_URLS, KITAPYURDU_CATEGORY_URLS,
         PTTAVM_CATEGORY_URLS, SPORTIVE_CATEGORY_URLS, NEWBALANCE_CATEGORY_URLS,
+        FLO_CATEGORY_URLS, HUMMEL_CATEGORY_URLS, EVIDEA_CATEGORY_URLS,
     )
     from app.services.sync_service import sync_json_to_db, PLATFORM_FILES
     from app.models.database import get_db
@@ -578,6 +585,45 @@ async def run_platform_scrape(platform: str, min_discount: int):
                     )
                     for cat in batch
                 ], return_exceptions=True)
+        elif platform == "flo":
+            categories = list(FLO_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_flo_deals(
+                        PLATFORM_FILES["flo"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=FLO_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "hummel":
+            categories = list(HUMMEL_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_hummel_deals(
+                        PLATFORM_FILES["hummel"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=HUMMEL_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "evidea":
+            categories = list(EVIDEA_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_evidea_deals(
+                        PLATFORM_FILES["evidea"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=EVIDEA_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
         elif platform in MARKETFIYATI_PLATFORMS:
             # Tek API call ile 7 market — diğer 6'sının statüsünü de güncelle
             out_files = {mk: PLATFORM_FILES[mk] for mk in MF_KEYS}
@@ -642,6 +688,7 @@ async def run_scrape_all_job(min_discount: int, platform: str = "all"):
             "tepehome","skechers",
             "toyzz","yargici","kitapyurdu",
             "pttavm","sportive","newbalance",
+            "flo","hummel","evidea",
         ]
         tasks = []
         # marketfiyati platformları içinde herhangi biri açıksa tek bir tarama yeter
