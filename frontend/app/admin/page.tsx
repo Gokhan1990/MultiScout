@@ -34,6 +34,7 @@ const STORE_LABELS: Record<string, string> = {
   carrefoursa: "CarrefourSA", tarimkredi: "Tarım Kredi",
   hakmarexpress: "Hakmar Express", macrocenter: "Macrocenter", bizimtoptan: "Bizim Toptan",
   lcwaikiki: "LC Waikiki", koton: "Koton", mavi: "Mavi",
+  boyner: "Boyner", penti: "Penti", watsons: "Watsons", dr: "D&R",
 };
 
 const TABS: { id: Tab; label: string; icon: string }[] = [

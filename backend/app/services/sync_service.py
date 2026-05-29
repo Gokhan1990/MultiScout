@@ -30,6 +30,10 @@ PLATFORM_FILES = {
     "lcwaikiki": "data/deals_lcwaikiki.json",
     "koton": "data/deals_koton.json",
     "mavi": "data/deals_mavi.json",
+    "boyner": "data/deals_boyner.json",
+    "penti": "data/deals_penti.json",
+    "watsons": "data/deals_watsons.json",
+    "dr": "data/deals_dr.json",
 }
 
 

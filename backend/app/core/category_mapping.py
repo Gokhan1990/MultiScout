@@ -231,6 +231,59 @@ MAVI_CATEGORY_URLS = {
     "kadin-mont":    "https://www.mavi.com/search?text=kad%C4%B1n+mont",
 }
 
+BOYNER_CATEGORY_URLS = {
+    "kadin": "https://www.boyner.com.tr/kadin-c-2",
+    "erkek": "https://www.boyner.com.tr/erkek-c-3",
+    "kadin-elbise":   "https://www.boyner.com.tr/search?q=kad%C4%B1n+elbise",
+    "kadin-pantolon": "https://www.boyner.com.tr/search?q=kad%C4%B1n+pantolon",
+    "kadin-ayakkabi": "https://www.boyner.com.tr/search?q=kad%C4%B1n+ayakkab%C4%B1",
+    "kadin-canta":    "https://www.boyner.com.tr/search?q=kad%C4%B1n+%C3%A7anta",
+    "erkek-tisort":   "https://www.boyner.com.tr/search?q=erkek+ti%C5%9F%C3%B6rt",
+    "erkek-ayakkabi": "https://www.boyner.com.tr/search?q=erkek+ayakkab%C4%B1",
+    "parfum":         "https://www.boyner.com.tr/search?q=parf%C3%BCm",
+    "kozmetik":       "https://www.boyner.com.tr/search?q=kozmetik",
+}
+
+PENTI_CATEGORY_URLS = {
+    "sutyen":     "https://www.penti.com/arama?q=s%C3%BCtyen",
+    "kulot":      "https://www.penti.com/arama?q=k%C3%BClot",
+    "pijama":     "https://www.penti.com/arama?q=pijama",
+    "gecelik":    "https://www.penti.com/arama?q=gecelik",
+    "corap":      "https://www.penti.com/arama?q=%C3%A7orap",
+    "mayo":       "https://www.penti.com/arama?q=mayo",
+    "bikini":     "https://www.penti.com/arama?q=bikini",
+    "tayt":       "https://www.penti.com/arama?q=tayt",
+    "spor-sutyen":"https://www.penti.com/arama?q=spor+s%C3%BCtyen",
+}
+
+WATSONS_CATEGORY_URLS = {
+    "parfum":       "https://www.watsons.com.tr/search/parfum",
+    "makyaj":       "https://www.watsons.com.tr/search/makyaj",
+    "ruj":          "https://www.watsons.com.tr/search/ruj",
+    "maskara":      "https://www.watsons.com.tr/search/maskara",
+    "fondoten":     "https://www.watsons.com.tr/search/fondoten",
+    "cilt-bakim":   "https://www.watsons.com.tr/search/cilt+bakim",
+    "yuz-kremi":    "https://www.watsons.com.tr/search/yuz+kremi",
+    "gunes-kremi":  "https://www.watsons.com.tr/search/gunes+kremi",
+    "sac-bakim":    "https://www.watsons.com.tr/search/sac+bakim",
+    "sampuan":      "https://www.watsons.com.tr/search/sampuan",
+    "erkek-bakim":  "https://www.watsons.com.tr/search/erkek+bakim",
+    "anne-bebek":   "https://www.watsons.com.tr/search/bebek",
+    "vitamin":      "https://www.watsons.com.tr/search/vitamin",
+}
+
+DR_CATEGORY_URLS = {
+    "kitap":             "https://www.dr.com.tr/kategori/kitap",
+    "egitim-kitaplari":  "https://www.dr.com.tr/kategori/egitim-kitaplari",
+    "cocuk-kitaplari":   "https://www.dr.com.tr/kategori/cocuk-kitaplari",
+    "yabanci-dilde":     "https://www.dr.com.tr/kategori/yabanci-dilde-kitaplar",
+    "elektronik":        "https://www.dr.com.tr/kategori/elektronik",
+    "hobi-oyuncak":      "https://www.dr.com.tr/kategori/hobi-oyuncak",
+    "kirtasiye":         "https://www.dr.com.tr/kategori/ofis-kirtasiye",
+    "muzik-film":        "https://www.dr.com.tr/kategori/muzik-film",
+    "hediyelik":         "https://www.dr.com.tr/kategori/hediyelik",
+}
+
 N11_CATEGORY_URLS = {
     "gida": "https://www.n11.com/arama?q=gida",
     "elektronik": "https://www.n11.com/arama?q=elektronik",

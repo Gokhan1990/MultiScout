@@ -31,6 +31,10 @@ SCRAPE_ALL_STATUS = {
     "lcwaikiki": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
     "koton": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
     "mavi": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "boyner": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "penti": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "watsons": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "dr": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
 }
 
 # marketfiyati API ile beslenen marketler — tek API call ile 6 market beraber çıkar
@@ -78,6 +82,10 @@ async def run_platform_scrape(platform: str, min_discount: int):
     from app.scrapers.lcwaikiki_scraper import scrape_lcwaikiki_deals
     from app.scrapers.koton_scraper import scrape_koton_deals
     from app.scrapers.mavi_scraper import scrape_mavi_deals
+    from app.scrapers.boyner_scraper import scrape_boyner_deals
+    from app.scrapers.penti_scraper import scrape_penti_deals
+    from app.scrapers.watsons_scraper import scrape_watsons_deals
+    from app.scrapers.dr_scraper import scrape_dr_deals
     from app.core.category_mapping import (
         TRENDYOL_CATEGORY_URLS, HEPSIBURADA_CATEGORY_URLS, N11_CATEGORY_URLS,
         PAZARAMA_CATEGORY_URLS, CICEKSEPETI_CATEGORY_URLS,
@@ -86,6 +94,7 @@ async def run_platform_scrape(platform: str, min_discount: int):
         MARKETFIYATI_CATEGORIES,
         HAKMAREXPRESS_CATEGORY_URLS, MACROCENTER_CATEGORY_URLS, BIZIMTOPTAN_CATEGORY_URLS,
         LCWAIKIKI_CATEGORY_URLS, KOTON_CATEGORY_URLS, MAVI_CATEGORY_URLS,
+        BOYNER_CATEGORY_URLS, PENTI_CATEGORY_URLS, WATSONS_CATEGORY_URLS, DR_CATEGORY_URLS,
     )
     from app.services.sync_service import sync_json_to_db, PLATFORM_FILES
     from app.models.database import get_db
@@ -287,6 +296,58 @@ async def run_platform_scrape(platform: str, min_discount: int):
                     )
                     for cat in batch
                 ], return_exceptions=True)
+        elif platform == "boyner":
+            categories = list(BOYNER_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_boyner_deals(
+                        PLATFORM_FILES["boyner"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=BOYNER_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "penti":
+            categories = list(PENTI_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_penti_deals(
+                        PLATFORM_FILES["penti"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=PENTI_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "watsons":
+            categories = list(WATSONS_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_watsons_deals(
+                        PLATFORM_FILES["watsons"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=WATSONS_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "dr":
+            categories = list(DR_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_dr_deals(
+                        PLATFORM_FILES["dr"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=DR_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
         elif platform in MARKETFIYATI_PLATFORMS:
             # Tek API call ile 7 market — diğer 6'sının statüsünü de güncelle
             out_files = {mk: PLATFORM_FILES[mk] for mk in MF_KEYS}
@@ -345,6 +406,7 @@ async def run_scrape_all_job(min_discount: int, platform: str = "all"):
             "a101","bim","sok","migros","carrefoursa","tarimkredi",
             "hakmarexpress","macrocenter","bizimtoptan",
             "lcwaikiki","koton","mavi",
+            "boyner","penti","watsons","dr",
         ]
         tasks = []
         # marketfiyati platformları içinde herhangi biri açıksa tek bir tarama yeter

@@ -18,6 +18,7 @@ DEFAULTS: dict[str, Any] = {
         "carrefoursa": True, "tarimkredi": True,
         "hakmarexpress": True, "macrocenter": True, "bizimtoptan": True,
         "lcwaikiki": True, "koton": True, "mavi": True,
+        "boyner": True, "penti": True, "watsons": True, "dr": True,
     },
     "theme": {
         "primary": "#f97316",
