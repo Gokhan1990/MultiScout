@@ -47,6 +47,7 @@ const STORE_LABELS: Record<string, string> = {
   saatvesaat: "Saat ve Saat", altinbas: "Altınbaş", pasabahce: "Paşabahçe",
   akakce: "Akakçe", ramsey: "Ramsey", atasay: "Atasay",
   reebok: "Reebok", sarar: "Sarar", huawei: "Huawei", lego: "Lego",
+  casper: "Casper", monster: "Monster",
 };
 
 // Mağaza kategori grupları — 64 platformu vertical bazlı toparlar
@@ -55,7 +56,7 @@ const STORE_CATEGORIES: { id: string; label: string; icon: string; stores: strin
   { id: "fashion", label: "Moda", icon: "👗", stores: ["lcwaikiki", "koton", "mavi", "defacto", "boyner", "penti", "watsons", "mudo", "network", "yargici", "ramsey", "sarar", "reebok"] },
   { id: "cosmetics", label: "Kozmetik", icon: "💄", stores: ["gratis", "mac"] },
   { id: "home", label: "Ev / Dekorasyon", icon: "🏠", stores: ["karaca", "madamecoco", "vivense", "tepehome", "evidea", "englishhome", "pasabahce"] },
-  { id: "electronics", label: "Elektronik & Tech", icon: "💻", stores: ["vatan", "teknosa", "mediamarkt", "beko", "arcelik", "vestel", "apple", "huawei"] },
+  { id: "electronics", label: "Elektronik & Tech", icon: "💻", stores: ["vatan", "teknosa", "mediamarkt", "beko", "arcelik", "vestel", "apple", "huawei", "casper", "monster"] },
   { id: "books", label: "Kitap", icon: "📚", stores: ["dr", "idefix", "kitapyurdu"] },
   { id: "toys", label: "Oyuncak", icon: "🧸", stores: ["toyzz", "lego"] },
   { id: "sports", label: "Spor", icon: "⚽", stores: ["decathlon", "skechers", "newbalance", "sportive", "hummel", "flo"] },

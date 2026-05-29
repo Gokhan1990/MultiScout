@@ -734,6 +734,32 @@ LEGO_CATEGORY_URLS = {
     "creator":        "https://www.lego.com/tr-tr/themes/creator-3-in-1",
 }
 
+CASPER_CATEGORY_URLS = {
+    "nirvana":         "https://www.casper.com.tr/arama?q=nirvana",
+    "excalibur":       "https://www.casper.com.tr/arama?q=excalibur",
+    "via":             "https://www.casper.com.tr/arama?q=via",
+    "monoblock":       "https://www.casper.com.tr/arama?q=monoblock",
+    "nirvana-x":       "https://www.casper.com.tr/arama?q=nirvana+x",
+    "gaming":          "https://www.casper.com.tr/arama?q=gaming",
+    "monitor":         "https://www.casper.com.tr/arama?q=monitor",
+    "telefon":         "https://www.casper.com.tr/arama?q=telefon",
+    "tablet":          "https://www.casper.com.tr/arama?q=tablet",
+    "yazici":          "https://www.casper.com.tr/arama?q=yaz%C4%B1c%C4%B1",
+}
+
+MONSTER_CATEGORY_URLS = {
+    "tulpar":          "https://www.monsternotebook.com.tr/arama?q=tulpar",
+    "abra":            "https://www.monsternotebook.com.tr/arama?q=abra",
+    "huma":            "https://www.monsternotebook.com.tr/arama?q=huma",
+    "gaming-laptop":   "https://www.monsternotebook.com.tr/arama?q=gaming",
+    "is-laptop":       "https://www.monsternotebook.com.tr/arama?q=is+laptop",
+    "ofis-laptop":     "https://www.monsternotebook.com.tr/arama?q=ofis",
+    "rtx-4060":        "https://www.monsternotebook.com.tr/arama?q=rtx+4060",
+    "rtx-4070":        "https://www.monsternotebook.com.tr/arama?q=rtx+4070",
+    "i9":              "https://www.monsternotebook.com.tr/arama?q=i9",
+    "intel-ultra":     "https://www.monsternotebook.com.tr/arama?q=intel+ultra",
+}
+
 DR_CATEGORY_URLS = {
     "kitap":             "https://www.dr.com.tr/kategori/kitap",
     "egitim-kitaplari":  "https://www.dr.com.tr/kategori/egitim-kitaplari",

@@ -31,6 +31,7 @@ DEFAULTS: dict[str, Any] = {
         "saatvesaat": True, "altinbas": True, "pasabahce": True,
         "akakce": True, "ramsey": True, "atasay": True,
         "reebok": True, "sarar": True, "huawei": True, "lego": True,
+        "casper": True, "monster": False,
     },
     "theme": {
         "primary": "#f97316",

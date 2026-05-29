@@ -69,6 +69,8 @@ PLATFORM_FILES = {
     "sarar": "data/deals_sarar.json",
     "huawei": "data/deals_huawei.json",
     "lego": "data/deals_lego.json",
+    "casper": "data/deals_casper.json",
+    "monster": "data/deals_monster.json",
 }
 
 
