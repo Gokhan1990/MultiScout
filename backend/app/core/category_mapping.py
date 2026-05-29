@@ -84,12 +84,22 @@ MEDIAMARKT_CATEGORY_URLS = {
 }
 
 DEFACTO_CATEGORY_URLS = {
-    "kadin": "https://www.defacto.com.tr/arama?q=kadin",
-    "erkek": "https://www.defacto.com.tr/arama?q=erkek",
-    "cocuk": "https://www.defacto.com.tr/arama?q=cocuk",
+    # ── kadın ──
+    "kadin-elbise": "https://www.defacto.com.tr/arama?q=kadin+elbise",
+    "kadin-pantolon": "https://www.defacto.com.tr/arama?q=kadin+pantolon",
+    "kadin-bluz": "https://www.defacto.com.tr/arama?q=kadin+bluz",
+    "kadin-tisort": "https://www.defacto.com.tr/arama?q=kadin+tisort",
+    "kadin-mont": "https://www.defacto.com.tr/arama?q=kadin+mont",
+    "kadin-etek": "https://www.defacto.com.tr/arama?q=kadin+etek",
+    # ── erkek ──
+    "erkek-tisort": "https://www.defacto.com.tr/arama?q=erkek+tisort",
+    "erkek-pantolon": "https://www.defacto.com.tr/arama?q=erkek+pantolon",
+    "erkek-gomlek": "https://www.defacto.com.tr/arama?q=erkek+gomlek",
+    "erkek-mont": "https://www.defacto.com.tr/arama?q=erkek+mont",
+    "erkek-sweat": "https://www.defacto.com.tr/arama?q=erkek+sweatshirt",
+    # ── çocuk + iç giyim ──
+    "cocuk-kiyafet": "https://www.defacto.com.tr/arama?q=cocuk",
     "ic-giyim": "https://www.defacto.com.tr/arama?q=ic+giyim",
-    "pantolon": "https://www.defacto.com.tr/arama?q=pantolon",
-    "elbise": "https://www.defacto.com.tr/arama?q=elbise",
 }
 
 # marketfiyati: kategori -> arama anahtar kelimeleri (her birinden ~30 ürün gelir)
@@ -139,14 +149,86 @@ BIZIMTOPTAN_CATEGORY_URLS = {
 }
 
 GRATIS_CATEGORY_URLS = {
-    "parfum": "https://www.gratis.com/search?q=parfum",
+    # ── parfüm & deodorant (cinsiyet × tip) ──
+    "kadin-parfum": "https://www.gratis.com/search?q=kadın+parfüm",
+    "erkek-parfum": "https://www.gratis.com/search?q=erkek+parfüm",
+    "unisex-parfum": "https://www.gratis.com/search?q=unisex+parfüm",
+    "deodorant": "https://www.gratis.com/search?q=deodorant",
+    # ── makyaj (alt kategoriler) ──
     "makyaj": "https://www.gratis.com/makyaj-c-501",
+    "ruj": "https://www.gratis.com/search?q=ruj",
+    "maskara": "https://www.gratis.com/search?q=maskara",
+    "fondoten": "https://www.gratis.com/search?q=fondöten",
+    "far": "https://www.gratis.com/search?q=göz+farı",
+    "oje": "https://www.gratis.com/search?q=oje",
+    # ── cilt bakım (alt kategoriler) ──
     "cilt-bakim": "https://www.gratis.com/cilt-bakim-c-502",
+    "yuz-kremi": "https://www.gratis.com/search?q=yüz+kremi",
+    "gunes-kremi": "https://www.gratis.com/search?q=güneş+kremi",
+    "serum": "https://www.gratis.com/search?q=cilt+serum",
+    # ── saç bakım (alt kategoriler) ──
     "sac-bakim": "https://www.gratis.com/sac-bakim-c-503",
+    "sampuan": "https://www.gratis.com/search?q=şampuan",
+    "sac-boyama": "https://www.gratis.com/search?q=saç+boyası",
+    # ── erkek bakım (alt kategoriler) ──
     "erkek-bakim": "https://www.gratis.com/erkek-bakim-c-505",
+    "tras-kremi": "https://www.gratis.com/search?q=tıraş+kremi",
+    # ── vücut & el bakım ──
+    "el-kremi": "https://www.gratis.com/search?q=el+kremi",
+    "vucut-losyon": "https://www.gratis.com/search?q=vücut+losyon",
+    # ── anne-bebek + elektrikli + hijyen (ana kategoriler) ──
     "anne-bebek": "https://www.gratis.com/anne-bebek-c-507",
     "elektrikli": "https://www.gratis.com/elektrikli-urunler-c-511",
     "hijyen": "https://www.gratis.com/hijyen-bakim-c-515",
+}
+
+LCWAIKIKI_CATEGORY_URLS = {
+    # LCW kategori URL'leri 404 dönüyor → search-tabanlı (LCW search 100+ ürün dönüyor)
+    "kadin-elbise":      "https://www.lcw.com/arama?q=kad%C4%B1n+elbise",
+    "kadin-pantolon":    "https://www.lcw.com/arama?q=kad%C4%B1n+pantolon",
+    "kadin-tisort":      "https://www.lcw.com/arama?q=kad%C4%B1n+ti%C5%9F%C3%B6rt",
+    "kadin-bluz":        "https://www.lcw.com/arama?q=kad%C4%B1n+bluz",
+    "kadin-mont":        "https://www.lcw.com/arama?q=kad%C4%B1n+mont",
+    "kadin-ic-giyim":    "https://www.lcw.com/arama?q=kad%C4%B1n+i%C3%A7+giyim",
+    "erkek-tisort":      "https://www.lcw.com/arama?q=erkek+ti%C5%9F%C3%B6rt",
+    "erkek-pantolon":    "https://www.lcw.com/arama?q=erkek+pantolon",
+    "erkek-gomlek":      "https://www.lcw.com/arama?q=erkek+g%C3%B6mlek",
+    "erkek-mont":        "https://www.lcw.com/arama?q=erkek+mont",
+    "erkek-sweatshirt":  "https://www.lcw.com/arama?q=erkek+sweatshirt",
+    "cocuk-kiyafet":     "https://www.lcw.com/arama?q=%C3%A7ocuk+kiyafet",
+    "bebek-kiyafet":     "https://www.lcw.com/arama?q=bebek+kiyafet",
+}
+
+KOTON_CATEGORY_URLS = {
+    # ── kadın ──
+    "kadin-elbise": "https://www.koton.com/kadin-elbise",
+    "kadin-pantolon": "https://www.koton.com/kadin-pantolon",
+    "kadin-bluz": "https://www.koton.com/kadin-bluz",
+    "kadin-tisort": "https://www.koton.com/kadin-t-shirt",
+    "kadin-mont": "https://www.koton.com/kadin-mont-kaban",
+    "kadin-etek": "https://www.koton.com/kadin-etek",
+    # ── erkek ──
+    "erkek-tisort": "https://www.koton.com/erkek-t-shirt",
+    "erkek-pantolon": "https://www.koton.com/erkek-pantolon",
+    "erkek-gomlek": "https://www.koton.com/erkek-gomlek",
+    "erkek-sweatshirt": "https://www.koton.com/erkek-sweatshirt",
+    "erkek-mont": "https://www.koton.com/erkek-mont-kaban",
+    # ── çocuk ──
+    "cocuk-kiyafet": "https://www.koton.com/cocuk",
+}
+
+MAVI_CATEGORY_URLS = {
+    # Mavi'nin asıl /c/N category page'leri (kot için doğrulandı)
+    "erkek-kot-pantolon": "https://www.mavi.com/erkek/jean/c/2",
+    "kadin-kot-pantolon": "https://www.mavi.com/kadin/jean/c/1",
+    # Diğer kategoriler search-based
+    "erkek-tisort":  "https://www.mavi.com/search?text=erkek+ti%C5%9F%C3%B6rt",
+    "erkek-gomlek":  "https://www.mavi.com/search?text=erkek+g%C3%B6mlek",
+    "kadin-tisort":  "https://www.mavi.com/search?text=kad%C4%B1n+ti%C5%9F%C3%B6rt",
+    "kadin-elbise":  "https://www.mavi.com/search?text=kad%C4%B1n+elbise",
+    "erkek-sweat":   "https://www.mavi.com/search?text=erkek+sweatshirt",
+    "erkek-mont":    "https://www.mavi.com/search?text=erkek+mont",
+    "kadin-mont":    "https://www.mavi.com/search?text=kad%C4%B1n+mont",
 }
 
 N11_CATEGORY_URLS = {

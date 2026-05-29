@@ -47,7 +47,8 @@ type PlatformKey =
   | "hepsi" | "amazon" | "trendyol" | "hepsiburada" | "n11"
   | "pazarama" | "ciceksepeti" | "vatan" | "teknosa" | "decathlon" | "steam" | "mediamarkt" | "defacto" | "gratis"
   | "a101" | "bim" | "sok" | "migros" | "carrefoursa" | "tarimkredi"
-  | "hakmarexpress" | "macrocenter" | "bizimtoptan";
+  | "hakmarexpress" | "macrocenter" | "bizimtoptan"
+  | "lcwaikiki" | "koton" | "mavi";
 type BoycottMode = "highlight" | "hide" | "show";
 
 const PLATFORM_LABELS: Record<PlatformKey, string> = {
@@ -74,6 +75,9 @@ const PLATFORM_LABELS: Record<PlatformKey, string> = {
   hakmarexpress: "Hakmar Express",
   macrocenter: "Macrocenter",
   bizimtoptan: "Bizim Toptan",
+  lcwaikiki: "LC Waikiki",
+  koton: "Koton",
+  mavi: "Mavi",
 };
 
 const ALL_PLATFORM_KEYS: PlatformKey[] = [
@@ -81,6 +85,7 @@ const ALL_PLATFORM_KEYS: PlatformKey[] = [
   "pazarama", "ciceksepeti", "vatan", "teknosa", "decathlon", "steam", "mediamarkt", "defacto", "gratis",
   "a101", "bim", "sok", "migros", "carrefoursa", "tarimkredi",
   "hakmarexpress", "macrocenter", "bizimtoptan",
+  "lcwaikiki", "koton", "mavi",
 ];
 
 const BOYCOTT_MODES: { key: BoycottMode; tKey: string; icon: string }[] = [
