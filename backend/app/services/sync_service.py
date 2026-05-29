@@ -62,6 +62,7 @@ PLATFORM_FILES = {
     "saatvesaat": "data/deals_saatvesaat.json",
     "altinbas": "data/deals_altinbas.json",
     "pasabahce": "data/deals_pasabahce.json",
+    "akakce": "data/deals_akakce.json",
 }
 
 

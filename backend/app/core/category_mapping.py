@@ -638,6 +638,19 @@ PASABAHCE_CATEGORY_URLS = {
     "yeni":           "https://www.pasabahce.com.tr/yeni-urunler",
 }
 
+AKAKCE_CATEGORY_URLS = {
+    "iphone":          "https://www.akakce.com/arama?q=iphone",
+    "samsung-galaxy":  "https://www.akakce.com/arama?q=samsung+galaxy",
+    "macbook":         "https://www.akakce.com/arama?q=macbook",
+    "buzdolabi":       "https://www.akakce.com/arama?q=buzdolab%C4%B1",
+    "camasir-makinesi":"https://www.akakce.com/arama?q=%C3%A7ama%C5%9F%C4%B1r+makinesi",
+    "televizyon":      "https://www.akakce.com/arama?q=televizyon",
+    "klima":           "https://www.akakce.com/arama?q=klima",
+    "elektrik-supurge":"https://www.akakce.com/arama?q=elektrik+s%C3%BCpurge",
+    "kahve-makinesi":  "https://www.akakce.com/arama?q=kahve+makinesi",
+    "kulaklik":        "https://www.akakce.com/arama?q=kulakl%C4%B1k",
+}
+
 DR_CATEGORY_URLS = {
     "kitap":             "https://www.dr.com.tr/kategori/kitap",
     "egitim-kitaplari":  "https://www.dr.com.tr/kategori/egitim-kitaplari",
