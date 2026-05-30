@@ -341,14 +341,28 @@ export default function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deals.length, totalDeals, loadingMore, selectedCategory, selectedPlatform, selectedSort]);
 
+  // Platform değişince kategori ağacını yeniden çek (platforma özel kategoriler dönsün)
   useEffect(() => {
-    fetch(`${API_URL}/api/category-tree`)
+    fetch(`${API_URL}/api/category-tree?platform=${selectedPlatform}`)
       .then((res) => res.json())
       .then((data) => {
-        if (data.status === "success") setCategoryTree(data.data);
+        if (data.status === "success") {
+          setCategoryTree(data.data);
+          // Mevcut seçili kategori bu platformda yoksa ilkine düş
+          const flat: string[] = Array.isArray(data.categories) ? data.categories : [];
+          if (flat.length && !flat.includes(selectedCategory)) {
+            const next = flat[0];
+            setSelectedCategory(next);
+            setDeals([]); setTotalDeals(0);
+            fetchDeals(next, selectedPlatform, true, selectedSort);
+          }
+        }
       })
       .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedPlatform]);
 
+  useEffect(() => {
     refreshBoycottList(false).then(() => setBoycottMeta(getBoycottMeta()));
 
     getPublicStoresStatus().then((s) => {
