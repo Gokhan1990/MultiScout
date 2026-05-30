@@ -11,6 +11,8 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "**.trendyolcdn.com" },
       { protocol: "https", hostname: "**.n11.com" },
       { protocol: "https", hostname: "**.n11scdn.com" },
+      // N11'in gercek CDN'i: n11scdn.akamaized.net — akamaihd.net DEGIL akamaized.net
+      { protocol: "https", hostname: "**.akamaized.net" },
       { protocol: "https", hostname: "**.hepsiburada.com" },
       { protocol: "https", hostname: "**.hepsiburadan.com" },
       { protocol: "https", hostname: "**.mncdn.com" },
