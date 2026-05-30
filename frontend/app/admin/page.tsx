@@ -521,29 +521,80 @@ function BoycottTab() {
   const [data, setData] = useState<BoycottRaw | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [activeCat, setActiveCat] = useState<string>("");
   const [newBrand, setNewBrand] = useState("");
   const [excludedText, setExcludedText] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
+
+  const load = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const pw = typeof window !== "undefined" ? localStorage.getItem("multiscout_admin_pw") : null;
+      if (!pw) {
+        setError("Admin oturumu bulunamadı. Sayfayı yenileyip tekrar giriş yap.");
+        return;
+      }
+      const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      let res: Response;
+      try {
+        res = await fetch(`${API}/api/admin/boycott-raw`, { headers: { "X-ADMIN-PASSWORD": pw } });
+      } catch (netErr) {
+        setError(`Backend'e ulaşılamadı (${API}). Sebep: ${(netErr as Error).message}`);
+        return;
+      }
+      if (res.status === 401) {
+        setError("Şifre reddedildi (401). Çıkış yapıp yeniden giriş yap.");
+        return;
+      }
+      if (!res.ok) {
+        const body = await res.text().catch(() => "");
+        setError(`Backend hata döndü: HTTP ${res.status}. ${body.slice(0, 200)}`);
+        return;
+      }
+      let r: { status?: string; data?: BoycottRaw };
+      try {
+        r = await res.json();
+      } catch {
+        setError("Cevap JSON olarak ayrıştırılamadı.");
+        return;
+      }
+      if (!r.data || typeof r.data !== "object" || !r.data.categories) {
+        setError("Cevap geldi ama beklenen veri formatında değil (categories eksik).");
+        return;
+      }
+      setData(r.data);
+      const keys = Object.keys(r.data.categories);
+      if (keys.length) setActiveCat(keys[0]);
+      setExcludedText((r.data.excluded_keywords || []).join("\n"));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    (async () => {
-      try {
-        const pw = typeof window !== "undefined" ? localStorage.getItem("multiscout_admin_pw") : null;
-        if (!pw) return;
-        const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-        const res = await fetch(`${API}/api/admin/boycott-raw`, { headers: { "X-ADMIN-PASSWORD": pw } });
-        if (res.ok) {
-          const r = await res.json();
-          setData(r.data);
-          const keys = Object.keys(r.data.categories || {});
-          if (keys.length) setActiveCat(keys[0]);
-          setExcludedText((r.data.excluded_keywords || []).join("\n"));
-        }
-      } finally {
-        setLoading(false);
-      }
-    })();
+    void load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const refetchFromSource = async () => {
+    setRefreshing(true);
+    try {
+      const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const r = await fetch(`${API}/api/boycott-brands?refresh=true`);
+      if (r.ok) {
+        toast.success("Kaynaktan yenilendi");
+        await load();
+      } else {
+        toast.error(`Kaynak yenilenemedi (HTTP ${r.status})`);
+      }
+    } catch (e) {
+      toast.error(`Yenileme hatası: ${(e as Error).message}`);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   const save = async () => {
     if (!data) return;
@@ -551,10 +602,16 @@ function BoycottTab() {
     const payload = { ...data, excluded_keywords: excludedText.split("\n").map((s) => s.trim()).filter(Boolean) };
     const pw = localStorage.getItem("multiscout_admin_pw");
     const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-    const res = await fetch(`${API}/api/admin/boycott-raw`, { method: "PUT", headers: { "Content-Type": "application/json", "X-ADMIN-PASSWORD": pw || "" }, body: JSON.stringify(payload) });
-    setSaving(false);
-    if (res.ok) toast.success("Boykot listesi kaydedildi");
-    else toast.error("Kaydedilemedi");
+    try {
+      const res = await fetch(`${API}/api/admin/boycott-raw`, { method: "PUT", headers: { "Content-Type": "application/json", "X-ADMIN-PASSWORD": pw || "" }, body: JSON.stringify(payload) });
+      if (res.ok) toast.success("Boykot listesi kaydedildi");
+      else if (res.status === 401) toast.error("Şifre reddedildi (401)");
+      else toast.error(`Kaydedilemedi: HTTP ${res.status}`);
+    } catch (e) {
+      toast.error(`Network hatası: ${(e as Error).message}`);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const addBrand = () => {
@@ -575,8 +632,40 @@ function BoycottTab() {
     setData(next);
   };
 
-  if (loading) return <div className="text-gray-500">Yükleniyor...</div>;
-  if (!data) return <div className="text-gray-500">Liste alınamadı.</div>;
+  if (loading) {
+    return (
+      <div className="space-y-3">
+        <div className="h-6 w-48 bg-gray-100 dark:bg-gray-800 rounded animate-pulse" />
+        <div className="h-4 w-72 bg-gray-100 dark:bg-gray-800 rounded animate-pulse" />
+        <div className="flex gap-2 flex-wrap mt-3">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="h-7 w-24 bg-gray-100 dark:bg-gray-800 rounded-full animate-pulse" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+  if (error || !data) {
+    return (
+      <div className="rounded-lg border border-rose-200 dark:border-rose-900/50 bg-rose-50 dark:bg-rose-950/30 p-4">
+        <div className="flex items-start gap-3">
+          <span className="text-xl">⚠️</span>
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-rose-700 dark:text-rose-300">Boykot listesi yüklenemedi</p>
+            <p className="text-sm text-rose-600 dark:text-rose-400 mt-1 break-words">{error || "Bilinmeyen hata."}</p>
+            <div className="flex gap-2 mt-3">
+              <button onClick={load} className="px-3 py-1.5 rounded-lg bg-rose-500 text-white text-sm font-medium hover:bg-rose-600">
+                ↻ Yeniden Dene
+              </button>
+              <button onClick={refetchFromSource} disabled={refreshing} className="px-3 py-1.5 rounded-lg bg-white dark:bg-gray-900 border border-rose-200 dark:border-rose-900/50 text-sm">
+                {refreshing ? "Kaynaktan çekiliyor..." : "Kaynaktan Yenile"}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const totalBrands = Object.values(data.categories).reduce((s, c) => s + c.brands.length, 0);
 
@@ -587,7 +676,12 @@ function BoycottTab() {
           <h2 className="text-lg font-bold">Boykot Listesi</h2>
           <p className="text-sm text-gray-500 dark:text-gray-400">Toplam {totalBrands} marka, {Object.keys(data.categories).length} kategori. Sürüm: {data.version}.</p>
         </div>
-        <button onClick={save} disabled={saving} className="px-4 py-2 rounded-lg bg-blue-500 text-white font-semibold disabled:opacity-50">{saving ? "Kaydediliyor..." : "Tümünü Kaydet"}</button>
+        <div className="flex gap-2">
+          <button onClick={refetchFromSource} disabled={refreshing} className="px-3 py-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm font-medium disabled:opacity-50">
+            {refreshing ? "Yenileniyor..." : "↻ Kaynaktan Yenile"}
+          </button>
+          <button onClick={save} disabled={saving} className="px-4 py-2 rounded-lg bg-blue-500 text-white font-semibold disabled:opacity-50">{saving ? "Kaydediliyor..." : "Tümünü Kaydet"}</button>
+        </div>
       </div>
 
       <div className="flex gap-2 flex-wrap">

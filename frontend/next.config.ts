@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Sadece dev/test icin — production'da etkisi yok.
+  // Next 16 Turbopack varsayilan olarak dev kaynaklarini ayni origin disindan
+  // engelliyor; container icindeki Playwright testleri host.docker.internal
+  // uzerinden erisirken HMR/dev paketleri bloke oluyor.
+  allowedDevOrigins: ["host.docker.internal", "localhost"],
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "**.amazon.com" },
