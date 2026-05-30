@@ -2,30 +2,13 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    remotePatterns: [
-      { protocol: "https", hostname: "**.amazon.com" },
-      { protocol: "https", hostname: "**.amazon.com.tr" },
-      { protocol: "https", hostname: "**.media-amazon.com" },
-      { protocol: "https", hostname: "**.ssl-images-amazon.com" },
-      { protocol: "https", hostname: "**.trendyol.com" },
-      { protocol: "https", hostname: "**.trendyolcdn.com" },
-      { protocol: "https", hostname: "**.n11.com" },
-      { protocol: "https", hostname: "**.n11scdn.com" },
-      { protocol: "https", hostname: "**.hepsiburada.com" },
-      { protocol: "https", hostname: "**.hepsiburadan.com" },
-      { protocol: "https", hostname: "**.mncdn.com" },
-      { protocol: "https", hostname: "**.teknosa.com" },
-      { protocol: "https", hostname: "**.vatanbilgisayar.com" },
-      { protocol: "https", hostname: "**.pazarama.com" },
-      { protocol: "https", hostname: "**.pzrcdn.com" },
-      { protocol: "https", hostname: "**.ciceksepeti.com" },
-      { protocol: "https", hostname: "**.cscdn.net" },
-      { protocol: "https", hostname: "**.decathlon.com.tr" },
-      { protocol: "https", hostname: "**.decathlon.media" },
-      { protocol: "https", hostname: "**.steamstatic.com" },
-      { protocol: "https", hostname: "**.akamaihd.net" },
-      { protocol: "https", hostname: "**.cloudinary.com" },
-    ],
+    // MultiScout 66+ farkli e-ticaret sitesinden gorsel ceker.
+    // Her birinin CDN'ini whitelist'e eklemek surdurulebilir degil
+    // (Next 16 max 50 remotePatterns) + yeni platform eklendikce eksikler
+    // "broken image" olarak gozukur. Bu yuzden Next image optimizasyonunu
+    // kapatip <img>-vari direkt yukleme yapiyoruz. Tradeoff: WebP/AVIF
+    // donusumu yok, ama tum CDN'ler garanti calisir.
+    unoptimized: true,
   },
 };
 
