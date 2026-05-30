@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Header, HTTPException, Body
+from fastapi import APIRouter, Header, HTTPException, Body, UploadFile, File, Query
+from fastapi.responses import Response
 from app.services.admin_settings import (
     load_settings, save_settings, update_section, verify_admin, enabled_stores,
 )
@@ -91,6 +92,75 @@ def admin_stats(x_admin_password: str | None = Header(default=None, alias="X-ADM
         }
     finally:
         db.close()
+
+
+@router.get("/admin/health")
+def admin_health(x_admin_password: str | None = Header(default=None, alias="X-ADMIN-PASSWORD")):
+    """Sağlık raporu — DB, scheduler, Playwright, disk, memory, son tarama zamanı."""
+    _require_admin(x_admin_password)
+    from app.services.health import get_health_report
+    return {"status": "success", "data": get_health_report()}
+
+
+@router.post("/admin/test-webhook")
+def admin_test_webhook(
+    kind: str = Query(..., description="discord veya slack"),
+    x_admin_password: str | None = Header(default=None, alias="X-ADMIN-PASSWORD"),
+):
+    """Discord/Slack webhook test mesajı gönder."""
+    _require_admin(x_admin_password)
+    from app.services.webhooks import test_webhook
+    return test_webhook(kind)
+
+
+@router.get("/admin/backup")
+def admin_backup(x_admin_password: str | None = Header(default=None, alias="X-ADMIN-PASSWORD")):
+    """Settings + boycott zip backup — browser indirsin."""
+    _require_admin(x_admin_password)
+    from app.services.backup import create_backup
+    blob, fname = create_backup()
+    return Response(
+        content=blob,
+        media_type="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="{fname}"'},
+    )
+
+
+@router.post("/admin/restore")
+async def admin_restore(
+    file: UploadFile = File(...),
+    restore_settings: bool = Query(True),
+    restore_boycott: bool = Query(True),
+    x_admin_password: str | None = Header(default=None, alias="X-ADMIN-PASSWORD"),
+):
+    """Yüklenen backup ZIP'den settings ve/veya boycott geri yükle."""
+    _require_admin(x_admin_password)
+    from app.services.backup import restore_backup
+    data = await file.read()
+    return restore_backup(data, restore_settings=restore_settings, restore_boycott=restore_boycott)
+
+
+@router.post("/admin/scheduler/restart")
+def admin_scheduler_restart(x_admin_password: str | None = Header(default=None, alias="X-ADMIN-PASSWORD")):
+    """Scheduler'ı durdur + güncel settings ile yeniden başlat (tier config değişikliği sonrası)."""
+    _require_admin(x_admin_password)
+    from app.services.scheduler import restart_scheduler
+    restart_scheduler()
+    return {"status": "success", "message": "Scheduler yeniden başlatıldı"}
+
+
+@router.get("/admin/logs")
+def admin_logs(
+    lines: int = 200,
+    platform: str | None = None,
+    x_admin_password: str | None = Header(default=None, alias="X-ADMIN-PASSWORD"),
+):
+    """Backend container stdout/stderr son N satır. Docker logs üzerinden değil,
+    backend kendi log akışını basit bir in-memory ring buffer'da tutuyor."""
+    _require_admin(x_admin_password)
+    from app.services.log_buffer import get_log_lines
+    rows = get_log_lines(limit=min(max(lines, 10), 2000), platform_filter=platform)
+    return {"status": "success", "data": {"lines": rows, "count": len(rows)}}
 
 
 @router.get("/stores-status")

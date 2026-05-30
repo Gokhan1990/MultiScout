@@ -48,7 +48,20 @@ type PlatformKey =
   | "pazarama" | "ciceksepeti" | "vatan" | "teknosa" | "decathlon" | "steam" | "mediamarkt" | "defacto" | "gratis"
   | "a101" | "bim" | "sok" | "migros" | "carrefoursa" | "tarimkredi"
   | "hakmarexpress" | "macrocenter" | "bizimtoptan"
-  | "lcwaikiki" | "koton" | "mavi";
+  | "lcwaikiki" | "koton" | "mavi"
+  | "boyner" | "penti" | "watsons" | "dr"
+  | "karaca" | "englishhome" | "idefix" | "tchibo"
+  | "mudo" | "madamecoco" | "vivense"
+  | "tepehome" | "skechers"
+  | "toyzz" | "yargici" | "kitapyurdu"
+  | "pttavm" | "sportive" | "newbalance"
+  | "flo" | "hummel" | "evidea"
+  | "beko" | "arcelik" | "vestel"
+  | "network" | "northface"
+  | "mac" | "apple"
+  | "saatvesaat" | "altinbas" | "pasabahce"
+  | "akakce" | "ramsey" | "atasay" | "reebok" | "sarar" | "huawei" | "lego"
+  | "casper" | "monster";
 type BoycottMode = "highlight" | "hide" | "show";
 
 const PLATFORM_LABELS: Record<PlatformKey, string> = {
@@ -78,6 +91,47 @@ const PLATFORM_LABELS: Record<PlatformKey, string> = {
   lcwaikiki: "LC Waikiki",
   koton: "Koton",
   mavi: "Mavi",
+  boyner: "Boyner",
+  penti: "Penti",
+  watsons: "Watsons",
+  dr: "D&R",
+  karaca: "Karaca",
+  englishhome: "English Home",
+  idefix: "Idefix",
+  tchibo: "Tchibo",
+  mudo: "Mudo",
+  madamecoco: "Madame Coco",
+  vivense: "Vivense",
+  tepehome: "Tepe Home",
+  skechers: "Skechers",
+  toyzz: "Toyzz Shop",
+  yargici: "Yargıcı",
+  kitapyurdu: "Kitapyurdu",
+  pttavm: "PttAVM",
+  sportive: "Sportive",
+  newbalance: "New Balance",
+  flo: "FLO",
+  hummel: "Hummel",
+  evidea: "Evidea",
+  beko: "Beko",
+  arcelik: "Arçelik",
+  vestel: "Vestel",
+  network: "Network",
+  northface: "The North Face",
+  mac: "MAC Cosmetics",
+  apple: "Apple",
+  saatvesaat: "Saat ve Saat",
+  altinbas: "Altınbaş",
+  pasabahce: "Paşabahçe",
+  akakce: "Akakçe",
+  ramsey: "Ramsey",
+  atasay: "Atasay",
+  reebok: "Reebok",
+  sarar: "Sarar",
+  huawei: "Huawei",
+  lego: "Lego",
+  casper: "Casper",
+  monster: "Monster",
 };
 
 const ALL_PLATFORM_KEYS: PlatformKey[] = [
@@ -86,6 +140,19 @@ const ALL_PLATFORM_KEYS: PlatformKey[] = [
   "a101", "bim", "sok", "migros", "carrefoursa", "tarimkredi",
   "hakmarexpress", "macrocenter", "bizimtoptan",
   "lcwaikiki", "koton", "mavi",
+  "boyner", "penti", "watsons", "dr",
+  "karaca", "englishhome", "idefix", "tchibo",
+  "mudo", "madamecoco", "vivense",
+  "tepehome", "skechers",
+  "toyzz", "yargici", "kitapyurdu",
+  "pttavm", "sportive", "newbalance",
+  "flo", "hummel", "evidea",
+  "beko", "arcelik", "vestel",
+  "network", "northface",
+  "mac", "apple",
+  "saatvesaat", "altinbas", "pasabahce",
+  "akakce", "ramsey", "atasay", "reebok", "sarar", "huawei", "lego",
+  "casper", "monster",
 ];
 
 const BOYCOTT_MODES: { key: BoycottMode; tKey: string; icon: string }[] = [

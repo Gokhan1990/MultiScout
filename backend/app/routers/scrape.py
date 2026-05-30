@@ -31,6 +31,47 @@ SCRAPE_ALL_STATUS = {
     "lcwaikiki": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
     "koton": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
     "mavi": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "boyner": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "penti": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "watsons": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "dr": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "karaca": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "englishhome": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "idefix": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "tchibo": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "mudo": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "madamecoco": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "vivense": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "tepehome": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "skechers": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "toyzz": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "yargici": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "kitapyurdu": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "pttavm": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "sportive": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "newbalance": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "flo": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "hummel": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "evidea": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "beko": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "arcelik": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "vestel": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "network": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "northface": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "mac": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "apple": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "saatvesaat": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "altinbas": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "pasabahce": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "akakce": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "ramsey": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "atasay": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "reebok": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "sarar": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "huawei": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "lego": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "casper": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
+    "monster": {"status": "idle", "message": "", "current_category": None, "updated_at": None},
 }
 
 # marketfiyati API ile beslenen marketler — tek API call ile 6 market beraber çıkar
@@ -78,6 +119,47 @@ async def run_platform_scrape(platform: str, min_discount: int):
     from app.scrapers.lcwaikiki_scraper import scrape_lcwaikiki_deals
     from app.scrapers.koton_scraper import scrape_koton_deals
     from app.scrapers.mavi_scraper import scrape_mavi_deals
+    from app.scrapers.boyner_scraper import scrape_boyner_deals
+    from app.scrapers.penti_scraper import scrape_penti_deals
+    from app.scrapers.watsons_scraper import scrape_watsons_deals
+    from app.scrapers.dr_scraper import scrape_dr_deals
+    from app.scrapers.karaca_scraper import scrape_karaca_deals
+    from app.scrapers.englishhome_scraper import scrape_englishhome_deals
+    from app.scrapers.idefix_scraper import scrape_idefix_deals
+    from app.scrapers.tchibo_scraper import scrape_tchibo_deals
+    from app.scrapers.mudo_scraper import scrape_mudo_deals
+    from app.scrapers.madamecoco_scraper import scrape_madamecoco_deals
+    from app.scrapers.vivense_scraper import scrape_vivense_deals
+    from app.scrapers.tepehome_scraper import scrape_tepehome_deals
+    from app.scrapers.skechers_scraper import scrape_skechers_deals
+    from app.scrapers.toyzz_scraper import scrape_toyzz_deals
+    from app.scrapers.yargici_scraper import scrape_yargici_deals
+    from app.scrapers.kitapyurdu_scraper import scrape_kitapyurdu_deals
+    from app.scrapers.pttavm_scraper import scrape_pttavm_deals
+    from app.scrapers.sportive_scraper import scrape_sportive_deals
+    from app.scrapers.newbalance_scraper import scrape_newbalance_deals
+    from app.scrapers.flo_scraper import scrape_flo_deals
+    from app.scrapers.hummel_scraper import scrape_hummel_deals
+    from app.scrapers.evidea_scraper import scrape_evidea_deals
+    from app.scrapers.beko_scraper import scrape_beko_deals
+    from app.scrapers.arcelik_scraper import scrape_arcelik_deals
+    from app.scrapers.vestel_scraper import scrape_vestel_deals
+    from app.scrapers.network_scraper import scrape_network_deals
+    from app.scrapers.northface_scraper import scrape_northface_deals
+    from app.scrapers.mac_scraper import scrape_mac_deals
+    from app.scrapers.apple_scraper import scrape_apple_deals
+    from app.scrapers.saatvesaat_scraper import scrape_saatvesaat_deals
+    from app.scrapers.altinbas_scraper import scrape_altinbas_deals
+    from app.scrapers.pasabahce_scraper import scrape_pasabahce_deals
+    from app.scrapers.akakce_scraper import scrape_akakce_deals
+    from app.scrapers.ramsey_scraper import scrape_ramsey_deals
+    from app.scrapers.atasay_scraper import scrape_atasay_deals
+    from app.scrapers.reebok_scraper import scrape_reebok_deals
+    from app.scrapers.sarar_scraper import scrape_sarar_deals
+    from app.scrapers.huawei_scraper import scrape_huawei_deals
+    from app.scrapers.lego_scraper import scrape_lego_deals
+    from app.scrapers.casper_scraper import scrape_casper_deals
+    from app.scrapers.monster_scraper import scrape_monster_deals
     from app.core.category_mapping import (
         TRENDYOL_CATEGORY_URLS, HEPSIBURADA_CATEGORY_URLS, N11_CATEGORY_URLS,
         PAZARAMA_CATEGORY_URLS, CICEKSEPETI_CATEGORY_URLS,
@@ -86,6 +168,20 @@ async def run_platform_scrape(platform: str, min_discount: int):
         MARKETFIYATI_CATEGORIES,
         HAKMAREXPRESS_CATEGORY_URLS, MACROCENTER_CATEGORY_URLS, BIZIMTOPTAN_CATEGORY_URLS,
         LCWAIKIKI_CATEGORY_URLS, KOTON_CATEGORY_URLS, MAVI_CATEGORY_URLS,
+        BOYNER_CATEGORY_URLS, PENTI_CATEGORY_URLS, WATSONS_CATEGORY_URLS, DR_CATEGORY_URLS,
+        KARACA_CATEGORY_URLS, ENGLISHHOME_CATEGORY_URLS, IDEFIX_CATEGORY_URLS, TCHIBO_CATEGORY_URLS,
+        MUDO_CATEGORY_URLS, MADAMECOCO_CATEGORY_URLS, VIVENSE_CATEGORY_URLS,
+        TEPEHOME_CATEGORY_URLS, SKECHERS_CATEGORY_URLS,
+        TOYZZ_CATEGORY_URLS, YARGICI_CATEGORY_URLS, KITAPYURDU_CATEGORY_URLS,
+        PTTAVM_CATEGORY_URLS, SPORTIVE_CATEGORY_URLS, NEWBALANCE_CATEGORY_URLS,
+        FLO_CATEGORY_URLS, HUMMEL_CATEGORY_URLS, EVIDEA_CATEGORY_URLS,
+        BEKO_CATEGORY_URLS, ARCELIK_CATEGORY_URLS, VESTEL_CATEGORY_URLS,
+        NETWORK_CATEGORY_URLS, NORTHFACE_CATEGORY_URLS,
+        MAC_CATEGORY_URLS, APPLE_CATEGORY_URLS,
+        SAATVESAAT_CATEGORY_URLS, ALTINBAS_CATEGORY_URLS, PASABAHCE_CATEGORY_URLS,
+        AKAKCE_CATEGORY_URLS, RAMSEY_CATEGORY_URLS, ATASAY_CATEGORY_URLS,
+        REEBOK_CATEGORY_URLS, SARAR_CATEGORY_URLS, HUAWEI_CATEGORY_URLS, LEGO_CATEGORY_URLS,
+        CASPER_CATEGORY_URLS, MONSTER_CATEGORY_URLS,
     )
     from app.services.sync_service import sync_json_to_db, PLATFORM_FILES
     from app.models.database import get_db
@@ -287,6 +383,539 @@ async def run_platform_scrape(platform: str, min_discount: int):
                     )
                     for cat in batch
                 ], return_exceptions=True)
+        elif platform == "boyner":
+            categories = list(BOYNER_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_boyner_deals(
+                        PLATFORM_FILES["boyner"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=BOYNER_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "penti":
+            categories = list(PENTI_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_penti_deals(
+                        PLATFORM_FILES["penti"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=PENTI_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "watsons":
+            categories = list(WATSONS_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_watsons_deals(
+                        PLATFORM_FILES["watsons"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=WATSONS_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "dr":
+            categories = list(DR_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_dr_deals(
+                        PLATFORM_FILES["dr"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=DR_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "karaca":
+            categories = list(KARACA_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_karaca_deals(
+                        PLATFORM_FILES["karaca"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=KARACA_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "englishhome":
+            categories = list(ENGLISHHOME_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_englishhome_deals(
+                        PLATFORM_FILES["englishhome"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=ENGLISHHOME_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "idefix":
+            categories = list(IDEFIX_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_idefix_deals(
+                        PLATFORM_FILES["idefix"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=IDEFIX_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "tchibo":
+            categories = list(TCHIBO_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_tchibo_deals(
+                        PLATFORM_FILES["tchibo"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=TCHIBO_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "mudo":
+            categories = list(MUDO_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_mudo_deals(
+                        PLATFORM_FILES["mudo"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=MUDO_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "madamecoco":
+            categories = list(MADAMECOCO_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_madamecoco_deals(
+                        PLATFORM_FILES["madamecoco"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=MADAMECOCO_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "vivense":
+            categories = list(VIVENSE_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_vivense_deals(
+                        PLATFORM_FILES["vivense"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=VIVENSE_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "tepehome":
+            categories = list(TEPEHOME_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_tepehome_deals(
+                        PLATFORM_FILES["tepehome"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=TEPEHOME_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "skechers":
+            categories = list(SKECHERS_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_skechers_deals(
+                        PLATFORM_FILES["skechers"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=SKECHERS_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "toyzz":
+            categories = list(TOYZZ_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_toyzz_deals(
+                        PLATFORM_FILES["toyzz"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=TOYZZ_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "yargici":
+            categories = list(YARGICI_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_yargici_deals(
+                        PLATFORM_FILES["yargici"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=YARGICI_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "kitapyurdu":
+            categories = list(KITAPYURDU_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_kitapyurdu_deals(
+                        PLATFORM_FILES["kitapyurdu"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=KITAPYURDU_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "pttavm":
+            categories = list(PTTAVM_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_pttavm_deals(
+                        PLATFORM_FILES["pttavm"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=PTTAVM_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "sportive":
+            categories = list(SPORTIVE_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_sportive_deals(
+                        PLATFORM_FILES["sportive"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=SPORTIVE_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "newbalance":
+            categories = list(NEWBALANCE_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_newbalance_deals(
+                        PLATFORM_FILES["newbalance"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=NEWBALANCE_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "flo":
+            categories = list(FLO_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_flo_deals(
+                        PLATFORM_FILES["flo"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=FLO_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "hummel":
+            categories = list(HUMMEL_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_hummel_deals(
+                        PLATFORM_FILES["hummel"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=HUMMEL_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "evidea":
+            categories = list(EVIDEA_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_evidea_deals(
+                        PLATFORM_FILES["evidea"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=EVIDEA_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "beko":
+            categories = list(BEKO_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_beko_deals(
+                        PLATFORM_FILES["beko"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=BEKO_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "arcelik":
+            categories = list(ARCELIK_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_arcelik_deals(
+                        PLATFORM_FILES["arcelik"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=ARCELIK_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "vestel":
+            categories = list(VESTEL_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_vestel_deals(
+                        PLATFORM_FILES["vestel"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=VESTEL_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "network":
+            categories = list(NETWORK_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_network_deals(
+                        PLATFORM_FILES["network"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=NETWORK_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "northface":
+            categories = list(NORTHFACE_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_northface_deals(
+                        PLATFORM_FILES["northface"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=NORTHFACE_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "mac":
+            categories = list(MAC_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_mac_deals(
+                        PLATFORM_FILES["mac"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=MAC_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "apple":
+            categories = list(APPLE_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_apple_deals(
+                        PLATFORM_FILES["apple"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=APPLE_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "saatvesaat":
+            categories = list(SAATVESAAT_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_saatvesaat_deals(
+                        PLATFORM_FILES["saatvesaat"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=SAATVESAAT_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "altinbas":
+            categories = list(ALTINBAS_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_altinbas_deals(
+                        PLATFORM_FILES["altinbas"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=ALTINBAS_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "pasabahce":
+            categories = list(PASABAHCE_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_pasabahce_deals(
+                        PLATFORM_FILES["pasabahce"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=PASABAHCE_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "akakce":
+            categories = list(AKAKCE_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_akakce_deals(
+                        PLATFORM_FILES["akakce"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=AKAKCE_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "ramsey":
+            categories = list(RAMSEY_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_ramsey_deals(
+                        PLATFORM_FILES["ramsey"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=RAMSEY_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "atasay":
+            categories = list(ATASAY_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_atasay_deals(
+                        PLATFORM_FILES["atasay"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=ATASAY_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "reebok":
+            categories = list(REEBOK_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_reebok_deals(
+                        PLATFORM_FILES["reebok"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=REEBOK_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "sarar":
+            categories = list(SARAR_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_sarar_deals(
+                        PLATFORM_FILES["sarar"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=SARAR_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "huawei":
+            categories = list(HUAWEI_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_huawei_deals(
+                        PLATFORM_FILES["huawei"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=HUAWEI_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "lego":
+            categories = list(LEGO_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_lego_deals(
+                        PLATFORM_FILES["lego"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=LEGO_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "casper":
+            categories = list(CASPER_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_casper_deals(
+                        PLATFORM_FILES["casper"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=CASPER_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
+        elif platform == "monster":
+            categories = list(MONSTER_CATEGORY_URLS.keys())
+            for index in range(0, len(categories), CONCURRENT_SCRAPES):
+                batch = categories[index:index + CONCURRENT_SCRAPES]
+                await asyncio.gather(*[
+                    scrape_monster_deals(
+                        PLATFORM_FILES["monster"],
+                        category=cat,
+                        min_discount=min_discount,
+                        category_url=MONSTER_CATEGORY_URLS[cat],
+                    )
+                    for cat in batch
+                ], return_exceptions=True)
         elif platform in MARKETFIYATI_PLATFORMS:
             # Tek API call ile 7 market — diğer 6'sının statüsünü de güncelle
             out_files = {mk: PLATFORM_FILES[mk] for mk in MF_KEYS}
@@ -345,6 +974,18 @@ async def run_scrape_all_job(min_discount: int, platform: str = "all"):
             "a101","bim","sok","migros","carrefoursa","tarimkredi",
             "hakmarexpress","macrocenter","bizimtoptan",
             "lcwaikiki","koton","mavi",
+            "boyner","penti","watsons","dr",
+            "karaca","englishhome","idefix","tchibo",
+            "mudo","madamecoco","vivense",
+            "tepehome","skechers",
+            "toyzz","yargici","kitapyurdu",
+            "pttavm","sportive","newbalance",
+            "flo","hummel","evidea",
+            "beko","arcelik","vestel",
+            "network","northface",
+            "mac","apple",
+            "saatvesaat","altinbas","pasabahce",
+            "akakce","ramsey","atasay","reebok","sarar","huawei","lego","casper","monster",
         ]
         tasks = []
         # marketfiyati platformları içinde herhangi biri açıksa tek bir tarama yeter

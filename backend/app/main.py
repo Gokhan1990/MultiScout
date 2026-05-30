@@ -4,6 +4,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.models.database import init_db
 from app.routers import deals, scrape, compare, boycott, admin, ai
 from app.services.scheduler import start_scheduler, stop_scheduler
+from app.services.log_buffer import install_log_capture
+
+# Print çıktılarını admin Loglar sekmesi için ring buffer'a yansıt
+install_log_capture()
 
 app = FastAPI(title="MultiScout API")
 
