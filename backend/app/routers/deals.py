@@ -208,6 +208,26 @@ def get_category_tree(platform: str | None = Query(None), db: Session = Depends(
     return {"status": "success", "data": _build_category_tree(cats), "categories": cats}
 
 
+@router.get("/category-counts")
+def get_category_counts(platform: str | None = Query(None), db: Session = Depends(get_db)):
+    """Her kategori için ürün sayısı. Sidebar badge'leri ve toplam göstergesi için."""
+    from sqlalchemy import func
+    from app.services.admin_settings import enabled_stores
+
+    q = db.query(Deal.category, func.count(Deal.id))
+    if platform and platform.lower() != "hepsi":
+        q = q.filter(Deal.platform == platform.lower())
+    else:
+        en = enabled_stores()
+        if en:
+            q = q.filter(Deal.platform.in_(en))
+
+    rows = q.group_by(Deal.category).all()
+    counts = {c: n for c, n in rows if c}
+    total = sum(counts.values())
+    return {"status": "success", "data": counts, "total": total}
+
+
 @router.get("/deals")
 def get_deals(platform: str = Query("amazon"), category: str = Query(None), min_discount: int = Query(0), skip: int = Query(0), limit: int = Query(30), sort_by: str = Query("last_updated"), db: Session = Depends(get_db)):
     try:

@@ -209,7 +209,10 @@ export default function Home() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [manualScraping, setManualScraping] = useState(false);
   const [categoryTree, setCategoryTree] = useState<{ [key: string]: CategoryNode } | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState("gida");
+  const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
+  const [categoryTotal, setCategoryTotal] = useState(0);
+  const [categoryQuery, setCategoryQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedPlatform, setSelectedPlatform] = useState<PlatformKey>("hepsi");
   const [selectedSort, setSelectedSort] = useState("last_updated");
   const [scrolled, setScrolled] = useState(false);
@@ -257,7 +260,7 @@ export default function Home() {
     if (!urlInitialized || typeof window === "undefined") return;
     const params = new URLSearchParams();
     if (selectedPlatform !== "hepsi") params.set("platform", selectedPlatform);
-    if (selectedCategory !== "gida") params.set("category", selectedCategory);
+    if (selectedCategory) params.set("category", selectedCategory);
     if (selectedSort !== "last_updated") params.set("sort", selectedSort);
     if (searchQuery) params.set("q", searchQuery);
     if (boycottMode !== "highlight") params.set("boycott", boycottMode);
@@ -341,21 +344,26 @@ export default function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deals.length, totalDeals, loadingMore, selectedCategory, selectedPlatform, selectedSort]);
 
-  // Platform değişince kategori ağacını yeniden çek (platforma özel kategoriler dönsün)
+  // Platform değişince kategori ağacını + sayıları yeniden çek
   useEffect(() => {
-    fetch(`${API_URL}/api/category-tree?platform=${selectedPlatform}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.status === "success") {
-          setCategoryTree(data.data);
-          // Mevcut seçili kategori bu platformda yoksa ilkine düş
-          const flat: string[] = Array.isArray(data.categories) ? data.categories : [];
-          if (flat.length && !flat.includes(selectedCategory)) {
+    Promise.all([
+      fetch(`${API_URL}/api/category-tree?platform=${selectedPlatform}`).then((r) => r.json()),
+      fetch(`${API_URL}/api/category-counts?platform=${selectedPlatform}`).then((r) => r.json()),
+    ])
+      .then(([tree, counts]) => {
+        if (tree?.status === "success") {
+          setCategoryTree(tree.data);
+          const flat: string[] = Array.isArray(tree.categories) ? tree.categories : [];
+          if (flat.length && selectedCategory && !flat.includes(selectedCategory)) {
             const next = flat[0];
             setSelectedCategory(next);
             setDeals([]); setTotalDeals(0);
             fetchDeals(next, selectedPlatform, true, selectedSort);
           }
+        }
+        if (counts?.status === "success") {
+          setCategoryCounts(counts.data || {});
+          setCategoryTotal(counts.total || 0);
         }
       })
       .catch(() => {});
@@ -585,12 +593,73 @@ export default function Home() {
   );
 
   const categoryPanel = (
-    <div>
-      {categoryTree ? Object.entries(categoryTree).map(([key, value]) => (
-        <SidebarItem key={key} name={key} data={value} onSelect={selectCategory} selected={selectedCategory} />
-      )) : (
-        <div className="space-y-2">{[...Array(5)].map((_, i) => <div key={i} className="h-4 bg-gray-100 dark:bg-gray-800 rounded animate-pulse" style={{ width: `${60 + i * 8}%` }} />)}</div>
-      )}
+    <div className="space-y-3">
+      {/* Arama */}
+      <div className="relative">
+        <input
+          type="text"
+          value={categoryQuery}
+          onChange={(e) => setCategoryQuery(e.target.value)}
+          placeholder="Kategori ara…"
+          className="w-full pl-8 pr-7 py-1.5 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/40 focus:border-orange-400"
+        />
+        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-400">🔍</span>
+        {categoryQuery && (
+          <button
+            type="button"
+            onClick={() => setCategoryQuery("")}
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-xs"
+            aria-label="Aramayı temizle"
+          >
+            ✕
+          </button>
+        )}
+      </div>
+
+      {/* Tümü + Toplam */}
+      <button
+        onClick={() => selectCategory("")}
+        className={`flex items-center gap-2 w-full px-3 py-2 text-sm rounded-lg transition-all ${
+          selectedCategory === ""
+            ? "bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md shadow-orange-500/20"
+            : "bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-orange-50 dark:hover:bg-orange-900/20"
+        }`}
+      >
+        <span>🗂️</span>
+        <span className="flex-1 text-left font-semibold">Tümü</span>
+        {categoryTotal > 0 && (
+          <span
+            className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
+              selectedCategory === "" ? "bg-white/25 text-white" : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
+            }`}
+          >
+            {categoryTotal >= 1000 ? `${(categoryTotal / 1000).toFixed(1)}k` : categoryTotal}
+          </span>
+        )}
+      </button>
+
+      {/* Ağaç */}
+      <div>
+        {categoryTree ? (
+          Object.entries(categoryTree).map(([key, value]) => (
+            <SidebarItem
+              key={key}
+              name={key}
+              data={value}
+              onSelect={selectCategory}
+              selected={selectedCategory}
+              counts={categoryCounts}
+              query={categoryQuery}
+            />
+          ))
+        ) : (
+          <div className="space-y-2">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="h-4 bg-gray-100 dark:bg-gray-800 rounded animate-pulse" style={{ width: `${60 + i * 8}%` }} />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 
